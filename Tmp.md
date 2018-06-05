@@ -17,7 +17,7 @@ stunnel，PPTP，tcpcopy
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh 下的 ISCSI 多路径HA
 flume，ffmpeg
 VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
-Python3 开发，算法，flask
+Python3 开发、Django、flask
 收藏的书、视频、笔记
 研究三个命令：pstack/strace/ipcs
 完...
