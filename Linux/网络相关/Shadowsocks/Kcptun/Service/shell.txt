@@ -1,1 +1,8 @@
-/root/kcptun/server_linux_amd64 -l :27210 -t XX.XX.XX.XX:<SS-port> -key password -mtu 1400 -sndwnd 2048 -rcvwnd 2048 -mode fast2 > kcptun.log 2>&1 &
+/root/kcptun/server_linux_amd64 -l :27210 -t XX.XX.XX.XX:<SS-port> \
+-key password -mtu 1400 -sndwnd 2048 -rcvwnd 2048 -mode fast2 > kcptun.log 2>&1 &
+
+
+# -l 表示 Kcptun 的服务端监听端口，用于接收外部请求和发送数据，默认 29900
+# -t 表示要加速的地址，我这里设置的是我服务器的 Shadowsocks 端口
+# -key 是 Kcptun 的验证密钥，服务端和本地必须一致才能通过验证，请自行设置
+# -mode 为加速模式，默认 fast，这里使用 fast2
