@@ -1,0 +1,1 @@
+/root/kcptun/server_linux_amd64 -l :27210 -t XX.XX.XX.XX:<SS-port> -key password -mtu 1400 -sndwnd 2048 -rcvwnd 2048 -mode fast2 > kcptun.log 2>&1 &
