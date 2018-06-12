@@ -1,14 +1,14 @@
 #### 备忘
 ```txt
-kafka是分布式、支持分区、多副本的，是一个基于zookeeper进行协调的分布式消息系统
-其消息能够被持久化到磁盘并且支持数据的备份防止丢失，能支持上千个客户端的同时读写
+kafka是分布式、支持分区、多副本的，是基于Zookeeper进行协调的分布式消息系统
+其消息能被持久化到磁盘并支持数据的备份防止丢失，能支持上千客户端同时读写
 Kafka只是分为一个或多个分区的主题的集合，Kafka分区是消息的线性有序序列，其中每个消息由它们的索引 (称为偏移) 来标识
-集群中的所有数据都是不相连的分区联合。传入消息写在分区末尾，消息由消费者顺序读取，通过将消息复制到不同的代理提供持久性
+集群中的所有数据都是不相连的分区联合。传入消息写在分区末尾（消息由消费者顺序读取）通过将消息复制到不同的代理提供持久性
 
 Zookeeper在kafka中的作用：
-    无论kafka集群还是producer和consumer，都依赖于zookeeper来保证系统可用性集群保存一些meta信息
-    Kafka使用zookeeper作为其分布式协调框架，很好的将消息生产、消息存储、消息消费的过程结合在一起
-    借助ZK，能将生产、消费者和broker在内的组件在无状态情况下建立起生产/消费者的订阅关系，并实现生产与消费的负载均衡
+    无论kafka集群还是producer和consumer，都依赖于zk来保证系统可用性集群保存一些meta信息
+    Kafka使用zookeeper作为其分布式协调框架，很好的将消息的生产、存储、消费的过程结合在一起
+    借助zk能将生产、消费者和broker在内的组件在无状态情况下建立起生产/消费者的订阅关系，并实现生产与消费的负载均衡
     Kafka采用zookeeper作为管理，记录了producer到broker的信息以及consumer与broker中partition的对应关系
     Broker通过ZK进行leader-->followers的选举，消费者通过ZK保存读取的位置Offset以及读取的topic的partition信息
 
@@ -18,15 +18,15 @@ Zookeeper在kafka中的作用：
     4. Consumer若要消费数据，会先通过ZK找对应的broker，然后消费。
     
 replication（副本）、partition（分区）: 
-    一个topic能有非常多个副本，如果服务器配置足够好，可以配很多个
-    副本的数量决定了有多少个broker来存放写入的数据；简单说副本是以partition为单位的
-    存放副本也可以这样简单的理解，其用于备份若干partition、但仅有一个partition被选为Leader用于读写
-    kafka中的producer能直接发送消息到Leader的partition，而producer能来实现将消息推送到哪些partition
-    kafka中同一group的consumer不可同时消费同一partition，在同一topic中同一partition同时只能由一个Consumer消费
-    对同一个group的consumer，kafka就可认为是一个队列消息服务，各个consumer均衡的消费相应partition中的数据
+    1个Topic能有若干副本，若服务器配置足够好，可配多个
+    副本数决定了有多少个Broker来存放写入的数据! 简单说副本是以Partition为单位进行复制的
+    存放副本也可以这样简单的理解，其用于备份若干Partition、但仅有1个Partition被选为Leader用于读写
+    kafka中的producer能直接发送消息到对应partition的Leader处，而Producer能来实现将消息推送到哪些Partition
+    kafka中相同group的consumer不可同时消费同一partition，在同一topic中同一partition同时只能由一个Consumer消费
+    对相同group的consumer来说kafka可被其认为是一个队列消息服务，各consumer均衡的消费相应partition中的数据
 
-由于Broker采用了主题topic-->分区的思想，使得某个分区内部的顺序可保证有序性，但分区间的数据不保证有序性...
-消费者可以以分区为单位自定义读取的位置-->offset
+由于Broker采用了主题topic --> 分区的思想，使得某个分区内部的顺序可保证有序性，但分区间的数据不保证有序性!!!...
+消费者能够以分区为单位自定义读取的位置 --> offset
 
 分区被分布到集群中的多个服务器上，每个服务器处理它分到的分区，根据配置每个分区还可复制到其它服务器作为备份容错。 
 每个分区有一个leader零或多个follower。Leader处理此分区的所有的读写请求而follower被动的复制数据
