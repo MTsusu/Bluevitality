@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 #-------------------------------------
 #  获取某个catalina日志中caused by的数目 ( 检查当天catalina.out日志中，Caused by日志统计和排序 )
-#  Author: liujianqiao@huawei.com
-#  Passed test on zyzx test env
 #-------------------------------------
 
 if [ $# -eq 0 ]; then
