@@ -56,6 +56,10 @@ curl -XGET 'localhost:9200/logstash-2015.12.23/_search?q=response=404&pretty'
 #查来自Buffalo的
 curl -XGET 'localhost:9200/logstash-2015.12.23/_search?q=geoip.city_name:Buffalo&pretty'
 
+#查看节点状态
+#get _nodes/hot_threads
+#get _nodes/node-1/hot_threads
+
 #查看集群负载相关信息
 [root@node3 elasticsearch]# curl -X GET http://localhost:9200/_cat/nodes?v      
 host        ip          heap.percent ram.percent load node.role master name 
