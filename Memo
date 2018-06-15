@@ -137,7 +137,8 @@
 │   ├── 日志及监控
 │   │   ├── Elasticsearch
 │   │   │   ├── Plugins
-│   │   │   └── Template
+│   │   │   ├── Template
+│   │   │   └── 资料
 │   │   ├── ELK Stack - 2016
 │   │   │   └── 资料
 │   │   ├── Kibana
@@ -223,6 +224,7 @@
 ├── Python
 │   ├── 3.6 Version
 │   │   └── Python 3.6
+│   ├── Ansible API
 │   ├── BeautifulSoup
 │   │   └── BeautifulSoup 4 文档翻译
 │   │       ├── _build
@@ -300,4 +302,4 @@
     │   └── Improve
     └── Tools
 
-300 directories
+302 directories
