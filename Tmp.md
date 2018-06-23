@@ -11,7 +11,7 @@
 #### 2018.4.22~2019.12.12学习规划
 ```txt
 kubernetes
-Hadoop：hive、Hbase、spark、Yarn、HDFS高可用、rabbitmq、dubbo
+Hadoop：hive、Hbase、spark、Yarn、HDFS高可用、rabbitmq、dubbo、jenkins的maven仓库配置
 ceph
 stunnel，PPTP，tcpcopy
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh 下的 ISCSI 多路径HA
