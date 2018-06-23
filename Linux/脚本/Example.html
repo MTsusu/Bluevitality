@@ -178,6 +178,14 @@ HTML最基本的语法是: <标记符>内容</标记符>（浏览器打开html�
     <audio controls> <source src="horse.mp3" type="audio/mpeg"> </audio> <!-- 播放音频并加入控制选项 -->
     <canvas id="myCanvas" width="200" height="100"></canvas> <!-- 指定画布及其大小，JS通过ID进行定位绘图 -->
 
+    <!-- 图片指定区域形状内点击跳转 -->
+    <img src="planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap">
+    <map name="planetmap">
+      <area shape="rect" coords="0,0,82,126" alt="Sun" href="sun.htm">
+      <area shape="circle" coords="90,58,3" alt="Mercury" href="mercur.htm">
+      <area shape="circle" coords="124,58,8" alt="Venus" href="venus.htm">
+    </map>
+        
     </body>
 </html>
 
