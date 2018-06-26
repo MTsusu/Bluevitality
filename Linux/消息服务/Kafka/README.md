@@ -108,7 +108,7 @@ bin/kafka-server-stop.sh
 
 #创建主题（保存时长：delete.retentin.ms）
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
---config delete.retentin.ms=86400000    #1天
+--config delete.retention.ms=86400000    #1天
 
 #删除主题
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --delete --topic ES
