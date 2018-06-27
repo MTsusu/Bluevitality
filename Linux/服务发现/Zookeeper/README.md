@@ -29,11 +29,11 @@ dist-maven  LICENSE.txt      src
 [root@localhost zookeeper-3.4.10]# echo '<本节点ID>' > data/myid
 
 #设置环境变量（此处略过JAVA的安装及JAVA_HOME的配置）
-[root@localhost zookeeper-3.4.10]# cat > /etc/profile.d/zookeeper.sh <<eof
+[root@localhost zookeeper-3.4.10]# cat > /etc/profile.d/zookeeper.sh <<'eof' 或： cat >> ~/.bash_profile <<'eof'
 export ZOOKEEPER_HOME=/usr/local/zookeeper-3.4.10/
 export PATH=$ZOOKEEPER_HOME/bin:$PATH
 eof
-[root@localhost zookeeper-3.4.10]# source /etc/profile
+[root@localhost zookeeper-3.4.10]# source ~/.bash_profile
 
 #配置ZK，为避免编码问题不要使用中文注释，ZooKeeper集群中每个节点的配置文件都一样，可直接同步配置文件而不做任何修改!
 [root@localhost zookeeper-3.4.10]# cd conf
