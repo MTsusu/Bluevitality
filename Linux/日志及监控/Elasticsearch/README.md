@@ -83,10 +83,10 @@ http.port: 9200                     #使用9200接收用户请求（路由地址
 http.cors.enabled: true             #由HEAD插件使用
 http.cors.allow-origin: "*"         #由HEAD插件使用
 node.master: true                   #非Master节点应设为false
-#node.data: false                   #若Master节点不存储数据时
-discovery.zen.ping.timeout: 200s
-discovery.zen.ping.unicast.hosts: ["10.0.0.3:19300",...........]     #所有Master组成的列表
-discovery.zen.ping.multicast.enabled: false
+node.data: false                    #若Master节点不存储数据时
+#discovery.zen.ping.timeout: 200s
+discovery.zen.ping.unicast.hosts: 10.0.0.3:19300",.....,......     #所有Master组成的列表
+#discovery.zen.ping.multicast.enabled: false
 #index.number_of_shards:5           #以下3行配置建议在HEAD插件中指定
 #index.number_of_replicas:0         #
 #index.refresh_interval:120s        #
