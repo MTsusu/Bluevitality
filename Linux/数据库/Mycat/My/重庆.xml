@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+        <schema name="fupinsns_qa" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn1">
+        </schema>
+        
+        <schema name="fupinans_qa" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn2">
+        </schema>
+        
+        <dataNode name="dn1" dataHost="localhost1" database="fupinsns_qa" />
+        <dataNode name="dn2" dataHost="localhost2" database="fupinans_qa" />
+        
+        <dataHost name="localhost1" maxCon="1000" minCon="10" balance="0" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+                <heartbeat>select user()</heartbeat>
+                <writeHost host="vip2mysql" url="192.168.1.19:20901" user="fupinsns_qa" password="qA20(01">
+                        <readHost host="vip2mysql2" url="192.168.1.19:20901" user="fupinsns_qa" password="qA20(01" />
+                </writeHost>
+        </dataHost>
+
+        <dataHost name="localhost2" maxCon="1000" minCon="10" balance="0" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+                <heartbeat>select user()</heartbeat>
+                <writeHost host="vip2mysql" url="192.168.1.19:20901" user="fupinans_qa" password="qA20(01">
+                        <readHost host="vip2mysql2" url="192.168.1.19:20901" user="fupinans_qa" password="qA20(01" />
+                </writeHost>
+        </dataHost>        
+        
+</mycat:schema>
+
+------------------
+        <user name="cq-fupin">
+                <property name="password">1qaz@WSX</property>
+                <property name="schemas">fupinsns_qa,fupinans_qa</property>
+                <property name="readOnly">false</property>
+        </user>
+        
