@@ -1,0 +1,51 @@
+[root@fpbdc-nginx-02 ~]# cat /etc/keepalived/keepalived.conf
+vrrp_script check_run {
+    script "/etc/keepalived/scripts/keepalived_check_nginx.sh"
+    interval 30
+    weight -2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    nopreempt
+    interface eth0  
+    virtual_router_id 3
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1112
+    }
+    virtual_ipaddress {
+        192.168.1.2/24 dev eth0
+    }
+    track_script {
+        check_run
+    }
+  }
+  
+  [root@fpbdc-nginx-01 fpbdc]# cat /etc/keepalived/keepalived.conf 
+vrrp_script check_run {
+    script "/etc/keepalived/scripts/keepalived_check_nginx.sh"
+    interval 30
+    weight -2
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    nopreempt
+    interface eth0  
+    virtual_router_id 3
+    priority 130
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1112
+    }
+    virtual_ipaddress {
+        192.168.1.2/24 dev eth0
+    }
+    track_script {
+        check_run
+    }
+  }
