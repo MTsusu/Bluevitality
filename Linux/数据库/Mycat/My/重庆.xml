@@ -34,4 +34,42 @@
                 <property name="schemas">fupinsns_qa,fupinans_qa</property>
                 <property name="readOnly">false</property>
         </user>
-        
+
+------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mycat:server SYSTEM "server.dtd">
+<mycat:server xmlns:mycat="http://org.opencloudb/">
+        <system>
+        <property name="defaultSqlParser">druidparser</property>
+        <property name="serverPort">20901</property>
+        <property name="managerPort">20912</property>
+        <property name="txIsolation">2</property>
+        <!--<property name="sequnceHandleType">1</property>-->
+        <!-- <property name="processorBufferChunk">40960</property> -->
+        <!--
+        <property name="processors">1</property>
+        <property name="processorExecutor">32</property>
+         -->
+
+        </system>
+
+        <!--生产数据库-->
+        <user name="DB10085">
+                <property name="password">JtwmY=5</property>
+                <property name="schemas">10085DB</property>
+        </user>
+        <!--report
+        <user name="report">
+                <property name="password">report</property>
+                <property name="schemas">10085REPORT</property>
+                <property name="readOnly">true</property>
+        </user>
+         -->
+        <!--全库只读-->
+        <user name="dbselect">
+                <property name="password">dbselect</property>
+                <property name="schemas">10085DB</property>
+                <property name="readOnly">true</property>
+        </user>
+
+</mycat:server>
