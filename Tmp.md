@@ -12,7 +12,7 @@
 ```txt
 kubernetes
 Hadoop：hive、Hbase、spark、Yarn、HDFS高可用、rabbitmq、dubbo、jenkins的maven仓库配置
-ceph
+HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
 stunnel，PPTP，tcpcopy
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh 下的 ISCSI 多路径HA
 flume，ffmpeg
