@@ -13,9 +13,9 @@
 kubernetes
 Hadoop：hive、Hbase、spark、Yarn、HDFS高可用、rabbitmq、dubbo、jenkins的maven仓库配置
 HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
-stunnel，PPTP，tcpcopy
+stunnel，tcpcopy
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh 下的 ISCSI 多路径HA
-flume，ffmpeg
+ELK、flume、ffmpeg
 VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 Python3 开发、Django、flask
 收藏的书、视频、笔记
