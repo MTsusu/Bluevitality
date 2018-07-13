@@ -111,62 +111,7 @@ curl -XPOST 'http://192.168.80.10:9200/_aliases' -d '
     ]
 }'
 
-
-
-
-
-#万能Mapping
-{
-	"mappings": {
-		"testinfo_type": {
-			"properties": {
-				"id": {
-					"type": "long"
-				},
-				"title": {
-					"type": "keyword"
-				},
-				"content": {
-					"analyzer": "ik_max_word",
-					"type": "text",
-					"fields": {
-						"keyword": {
-							"ignore_above": 256,
-							"type": "keyword"
-						},
-						"available": {
-							"type": "boolean"
-						},
-						"review": {
-							"type": "nested",
-							"properties": {
-								"nickname": {
-									"type": "text"
-								},
-								"text": {
-									"type": "text"
-								},
-								"stars": {
-									"type": "integer"
-								}
-							}
-						},
-						"publish_time": {
-							"type": "date",
-							"format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-						},
-						"expected_attendees": {
-							"type": "integer_range"
-						},
-						"ip_addr": {
-							"type": "ip"
-						},
-						"suggest": {
-							"type": "completion"
-						}
-					}
-				}
-			}
-		}
-	}
-}
+#索引统计
+GET my_index/_stats
+GET my_index,another_index/_stats
+GET _all/_stats
