@@ -1,0 +1,33 @@
+
+#注意！同时需要在logstash中添加对ES的用户认证
+#ES添加认证(默认：elastic:changeme)
+添加新用户
+curl -XPOST -u "elastic:changeme" '192.168.44.128:9200/_xpack/security/user/wangyu?pretty' -d'
+{
+  "password" : "123456",
+  "roles" : [ "admin", "other_role1" ], #可以指定用户的role角色
+  "full_name" : "Jack Nicholson",
+  "email" : "wangyu@example.com",
+  "metadata" : {
+    "intelligence" : 7
+  },
+  "enabled": true
+}'
+删除用户
+curl -XDELETE '192.168.44.128:9200/_xpack/security/user/wangyu?pretty'
+修改密码
+curl -XPUT '192.168.44.128:9200/_xpack/security/user/kibana/_password?pretty' -d'
+{
+  "password": "kibanapassword"
+}'
+查询所有Roles：
+curl -XGET -u elastic '192.168.44.128:9200/_xpack/security/role'
+增加Roles：
+curl -XPOST -u elastic '192.168.44.128:9200/_xpack/security/role/clicks_admin' -d '{   "indices" : [     {       "names" : [ "events*" ],       "privileges" : [ "all" ]     },     {       "names" : [ ".kibana*" ],       "privileges" : [ "manage", "read", "index" ]     }   ] }'
+查询具体Roles：
+curl -XGET -u elastic '192.168.44.128:9200/_xpack/security/role/clicks_admin'
+删除具体Roles：
+curl -XDELETE -u elastic '192.168.44.128:9200/_xpack/security/role/clicks_admin'
+
+
+登录到Kibana会发现 elastic是一个最高级别的user，拥有所有权限，其角色是superuser。当然在这里我们也可以添加自定义的用户，并为其分配角色，不同的角色对应不同的功能。
