@@ -1,3 +1,7 @@
+#kibana 权限控制
+#修改kibana密码：修改之前需要在kibana.yml中配置elasticsearch的用户名和密码后才能需改密码，否则会报错。
+elasticsearch.username: "elastic"
+elasticsearch.password: "your password"
 
 #注意！同时需要在logstash中添加对ES的用户认证
 #ES添加认证(默认：elastic:changeme)
@@ -16,8 +20,8 @@ curl -XPOST -u "elastic:changeme" '192.168.44.128:9200/_xpack/security/user/wang
 删除用户
 curl -XDELETE '192.168.44.128:9200/_xpack/security/user/wangyu?pretty'
 修改密码
-curl -XPUT '192.168.44.128:9200/_xpack/security/user/kibana/_password?pretty' -d'
-{
+curl -XPUT '192.168.44.128:9200/_xpack/security/user/elastic/_password?pretty' -d' { "password": "elasticpassword" }'
+curl -XPUT '192.168.44.128:9200/_xpack/security/user/kibana/_password?pretty' -d '{
   "password": "kibanapassword"
 }'
 查询所有Roles：
@@ -31,3 +35,14 @@ curl -XDELETE -u elastic '192.168.44.128:9200/_xpack/security/role/clicks_admin'
 
 
 登录到Kibana会发现 elastic是一个最高级别的user，拥有所有权限，其角色是superuser。当然在这里我们也可以添加自定义的用户，并为其分配角色，不同的角色对应不同的功能。
+
+
+#如果无法从传入请求中提取身份验证令牌，则认为传入请求是匿名的。 默认情况下，拒绝匿名请求并返回身份验证错误（状态代码401）。
+#要启用匿名访问，请在elasticsearch.yml配置文件中为匿名用户分配一个或多个角色。 例如，以下配置分配匿名用户role1和role2：
+xpack.security.authc:
+  anonymous:
+    username: anonymous_user 
+    roles: role1, role2 
+    authz_exception: true 
+#匿名用户的用户名/主体。 如果未指定，则默认为_es_anonymous_user。
+#与匿名用户关联的角色。 如果未指定角色，则禁用匿名访问 - 将拒绝匿名请求并返回身份验证错误。
