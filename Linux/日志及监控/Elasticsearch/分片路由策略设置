@@ -1,3 +1,4 @@
+集群级别
 PUT _cluster/settings
 {
   "persistent": {
@@ -16,4 +17,11 @@ PUT _cluster/settings
       }
     }
   }
+}
+
+
+索引级别
+PUT log4x_interface_2018_08_20/_settings
+{
+  "index.routing.allocation.total_shards_per_node" : 3    #一个es-data节点上最多分3个分片
 }
