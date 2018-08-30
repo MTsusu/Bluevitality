@@ -22,6 +22,12 @@
     until: result.stdout.find("all systems go") != -1   #Until
     retries: 5
     delay: 10
+
+   - name: zk port
+     set_fact: zkport="{{item.value}}"  #该模块允许设置新变量。变量按主机设置，就像安装模块发现的事实一样
+     with_dict:  '{{zk_port}}'      #这里调用了上面定义的 "zk_port" 字典变量
+     when: item.key == app_group
+
   - name: Example of looping over a command result      #循环命令的执行结果
     shell: touch /$HOME/{{ item }}    #with_lines的命令永远在controller的主机运行，仅shell模块在目标运行（遍历命令的输出）
     with_lines: /usr/bin/cat  /home/fg/test
@@ -80,7 +86,12 @@
     group={{ ansible_ssh_user }} recurse=yes
   - name: transport cronolog
     copy: src=cronolog dest=/home/{{ ansible_ssh_user }}/bin/cronolog mode=0770
-
+    
+  - shell: cat .bash_profile
+    register: profile
+  - name: "cat .bash_profile"
+    debug: msg="{{ profile.stdout }}"
+    
   - name: check service
     shell: /home/{{ ansible_ssh_user }}/shell/echo_service_list.sh {{ app_name }} tomcat{{ item }} \
     {{ inventory_hostname }} {{ port_num }}{{ app_num }}1{{ item }}
