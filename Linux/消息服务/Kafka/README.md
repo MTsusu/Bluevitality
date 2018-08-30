@@ -1,4 +1,3 @@
-#### 备忘
 ```txt
 kafka是分布式、支持分区、多副本的，是基于Zookeeper进行协调的分布式消息系统
 其消息能被持久化到磁盘并支持数据的备份防止丢失，能支持上千客户端同时读写
@@ -141,4 +140,10 @@ bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 ./kafka-consumer-groups.sh --group logstash --describe --zookeeper 127.0.0.1:2181
 输出：
 GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
+
+#重平衡
+./kafka-preferred-replica-election.sh --zookeeper 192.168.52.130:2181
+
+#查看所有kafka节点
+在zookeeper的bin目录执行 ./zkCli.sh 然后执行 ls /brokers/ids 就可以看到zk中存的所有的 broker id list
 ```
