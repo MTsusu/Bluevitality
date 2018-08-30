@@ -74,9 +74,16 @@
     when: result|failed               #第一条命令失败时（result为failed时）才执行第二条命令
   - command: /bin/something_else  
     when: result|success              #result为success时才执行
-    
+
+  - name: ensure ~/bin
+    file: path=/home/{{ ansible_ssh_user }}/bin/ state=directory owner={{ ansible_ssh_user }} \
+    group={{ ansible_ssh_user }} recurse=yes
+  - name: transport cronolog
+    copy: src=cronolog dest=/home/{{ ansible_ssh_user }}/bin/cronolog mode=0770
+
   - name: check service
-    shell: /home/{{ ansible_ssh_user }}/shell/echo_service_list.sh {{ app_name }} tomcat{{ item }} {{ inventory_hostname }} {{ port_num }}{{ app_num }}1{{ item }}
+    shell: /home/{{ ansible_ssh_user }}/shell/echo_service_list.sh {{ app_name }} tomcat{{ item }} \
+    {{ inventory_hostname }} {{ port_num }}{{ app_num }}1{{ item }}
     with_sequence: start=1 end={{ node_num }}
     register: tomcats
   - name: echo service status
