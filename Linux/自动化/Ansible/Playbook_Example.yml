@@ -5,6 +5,12 @@
     - http_port: 80           
     - max_clients: 200  
     - foo: test
+    - zk_port: 
+       a: 10211
+       b: 10311
+       c: 10411
+       d: 10511
+       x: 10611
   vars_files:
     - /home/root/ansible_vars.yml
   remote_user: root                   #远端执行权限
@@ -68,6 +74,30 @@
     when: result|failed               #第一条命令失败时（result为failed时）才执行第二条命令
   - command: /bin/something_else  
     when: result|success              #result为success时才执行
+    
+  - name: check service
+    shell: /home/{{ ansible_ssh_user }}/shell/echo_service_list.sh {{ app_name }} tomcat{{ item }} {{ inventory_hostname }} {{ port_num }}{{ app_num }}1{{ item }}
+    with_sequence: start=1 end={{ node_num }}
+    register: tomcats
+  - name: echo service status
+    debug: msg="{{ item.stdout }}"
+    with_items: "{{ tomcats.results }}"
+
+  - name: 'deleting files'
+    shell: "if [[ -d ${HOME}/{{ prj_name }} ]]; then rm -rf ${HOME}/{{ prj_name }};else echo FAILED;fi"
+    register: result
+  - fail: msg="There is no tomcat on {{ inventory_hostname }}"
+    when: '"FAILED" in result.stdout'
+
+  - name: transport upstream.d files
+    copy: src={{ item }} dest=/home/{{ ansible_ssh_user }}/nginx/conf/upstream.d/ force=yes
+    with_fileglob:
+        - upstream.d/*
+  - name: transport map.conf files
+    lineinfile: line="{{ item }}"  dest=/home/{{ ansible_ssh_user }}/nginx/conf/map.conf
+    with_lines:
+        - cat ${WORKSPACE}/roles/add_to_upstream/files/map.conf
+
   - command: /bin/still/something_else
     when: result|skipped              #skipped：已经执行过跳过执行
   - name: crontab example             #Crontab...
