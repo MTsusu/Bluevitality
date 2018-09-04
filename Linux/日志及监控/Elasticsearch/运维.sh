@@ -129,7 +129,7 @@ GET my_index,another_index/_stats
 GET _all/_stats
 
 #Create a logstash_writer role that has the manage_index_templates and monitor cluster privileges, and the write, delete, and 
-#create_index privileges for the Logstash indices. You can create roles from the Management > Roles UI in Kibana or through the role API:
+#create_index privileges for the Logstash indices. You can create roles from the Management > Roles UI in Kibana or through the role API
 #ES 6.4版本： 在对应的manage_index_templates、monitor的2个集群对logstash-*开头的索引创建对应的权限，权限ROLE名为：logstash_writer
 POST _xpack/security/role/logstash_writer
 {
