@@ -9,11 +9,11 @@
 
 #### 2018.4.22~2019.12.12学习规划
 ```txt
+Kafka、Logstash、Elasticsearch、Kibana、ffmpeg
 kubernetes
 Hadoop：hive、Hbase、spark、Yarn、HDFS-HA、dubbo
 HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh、stunnel
-ELK、flume、ffmpeg
 VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 收藏的书、视频、笔记
 研究三个命令：pstack/strace/ipcs
