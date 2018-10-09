@@ -16,5 +16,6 @@ VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 前端+开发：HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
 收藏的书、视频、笔记
 
-研究3个命令：pstack/strace/ipcs
+----------------------------------
+将来：Python Develop、TensorFlow
 ```
