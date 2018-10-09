@@ -1,9 +1,9 @@
 
 # Memo
 
-- [ ] SHELL、Python 完善
+- [ ] SHELL、Python 重复理解&学习巩固
 - [ ] VIM的IDE
-- [ ] 项目的README与sh的不断完善、增删、优化...
+- [ ] 项目的README与sh的不断完善、增删、优化
 - [ ] heartbeatV3 安装部分不完善，研究
 - [ ] demo（模板改用新版本形式：https://www.cnblogs.com/itcomputer/p/6241421.html ） Rsyslog调用日志并使用模板处理
 
@@ -17,5 +17,5 @@ VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 收藏的书、视频、笔记
 
 ----------------------------------
-将来：Python Develop、TensorFlow
+将来：BASH Develop、Python Develop、TensorFlow
 ```
