@@ -141,6 +141,24 @@ curl -XPOST 'http://192.168.80.10:9200/_aliases' -d '
     ]
 }'
 
+#创建索引并指定其分配和副本、映射关系
+PUT twitter
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 3, 
+            "number_of_replicas" : 2 
+        }
+    },
+   "mappings" : {
+        "type1" : {
+            "properties" : {
+                "field1" : { "type" : "text" }
+            }
+        }
+    }
+}
+
 #索引统计
 GET my_index/_stats
 GET my_index,another_index/_stats
