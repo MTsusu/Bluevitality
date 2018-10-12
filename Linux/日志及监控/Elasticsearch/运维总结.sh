@@ -112,7 +112,7 @@ GET http://localhost:9200/_cluster/pending_tasks
 某些情况下节点很快将重新启动，因此不需要此I/O，可以通过在关闭节点之前禁用分配来避免时钟竞争：
 PUT _cluster/settings
 {
-  "persistent": {
+  "persistent": {     //persistent ---> 即永久生效，重启仍可用
     "cluster.routing.allocation.enable": "none"
   }
 }
