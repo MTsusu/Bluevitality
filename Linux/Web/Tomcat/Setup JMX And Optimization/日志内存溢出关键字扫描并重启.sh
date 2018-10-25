@@ -33,7 +33,7 @@ function server_start() {
 
 for log in $LOGS
 {
-    NODE_NAME=`echo $log | grep -oP '.*(?=/logs)' | awk -F'/' '{print $NF}'`    #从日志路径截取出节点名部分    #替换了旧的：| awk -F"[_/]" '{print $7"_"$8}'
+    NODE_NAME=`echo $log | grep -oP '.*(?=/logs)' | awk -F'/' '{print $NF}'`    #从日志路径截取出节点名部分
     [[ -f $COUNT_LOG_PATH/${NODE_NAME}.log-${DATE} ]] || echo 1 > $COUNT_LOG_PATH/${NODE_NAME}.log-${DATE} 
     
     LINE_NUM=`cat $COUNT_LOG_PATH/${NODE_NAME}.log-${DATE}`   #取出扫描的上次结束行位置
