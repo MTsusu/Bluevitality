@@ -3,6 +3,8 @@
 #所属工程名称
 product=$1
 
+echo -e "IP,PORT,PRODUCT,REDIS_VERSION,CLUSTER_STATE,CLUSTER_NODES,NODE_PING,UPTIME_DAYS,CONNECT_CLIENTS,BLOCKED_CLIENTS,REJECTED_CONNECT,CPU_USE,USED_CPU_SYS,USED_CPU_USER,MEM_USE,MEM_RETIO,OPS_PER_SEC,SYNC_FULL,SYNC_PARTIAL_ERR,DB0_KEYS,KEY_HITS_NUMBER,KEY_MISS_NUMBER,SLOWLOG_NUMBER,GET_CMD_COUNTS,SET_CMD_COUNTS,DEL_CMD_COUNTS,AVERAGE_GET_USETIME,AVERAGE_SET_USETIME,AVERAGE_DEL_USETIME" > /tmp/redis.csv
+
 ps -ef |grep redis-server | grep -v grep| grep -v check_redis.sh | while read line
 do
 IP=$(echo $line | grep -oE "[[:digit:]]{2,}\.[[:digit:]]{1,}\.[[:digit:]]{1,}\.[[:digit:]]{1,}" )
@@ -61,22 +63,22 @@ echo -e "
 \033[31mPORT: \033[0m              $PORT
 \033[31mPRODUCT:\033[0m            ${product:="null"}
 \033[31mREDIS_VERSION:\033[0m      $version
-\033[31mcluster_state:\033[0m      $cstat 
-\033[31mcluster_nodes:\033[0m      $nodes
+\033[31mCLUSTER_STATE:\033[0m      $cstat 
+\033[31mCLUSTER_NODES:\033[0m      $nodes
 \033[31mNODE_PING:\033[0m          $pong
 \033[31mUPTIME_DAYS:\033[0m        $updata
 \033[31mCONNECT_CLIENTS:\033[0m    $con
 \033[31mBLOCKED_CLIENTS:\033[0m    $bolck
 \033[31mREJECTED_CONNECT:\033[0m   $reject     #连接数达到maxclients的限制值之后拒绝新连接的个数
 \033[31mCPU_USE:\033[0m            $cpuuse
-\033[31mUSED_CPU_SYS:\033[0m      $cpusy
+\033[31mUSED_CPU_SYS:\033[0m       $cpusy
 \033[31mUSED_CPU_USER:\033[0m      $cpuuser
 \033[31mMEM_USE:\033[0m            $mem
 \033[31mMEM_RETIO:\033[0m          $ratio
 \033[31mOPS_PER_SEC:\033[0m        $persec
 \033[31mSYNC_FULL:\033[0m          $syncfull
 \033[31mSYNC_PARTIAL_ERR:\033[0m   $parerr
-\033[31mDB0_KEYS:\033[0m            $keys
+\033[31mDB0_KEYS:\033[0m           $keys
 \033[31mKEY_HITS_NUMBER:\033[0m    $hits
 \033[31mKEY_MISS_NUMBER:\033[0m    $miss
 \033[31mSLOWLOG_NUMBER:\033[0m     $slowlogc
@@ -87,6 +89,10 @@ echo -e "
 \033[31mAVERAGE_SET_USETIME:\033[0m ${set_cmd_pertime}ms
 \033[31mAVERAGE_DEL_USETIME:\033[0m ${del_cmd_pertime}ms
 "
+
+echo "${IP},$PORT,${product:=null},$version,$cstat,$nodes,$pong,$updata,$con,$bolck,$reject,$cpuuse,$cpusy,$cpuuser,$mem,$ratio,$persec,$syncfull,$parerr,$keys,$hits,$miss,$slowlogc,$get_cmd_counts,$set_cmd_counts,$del_cmd_counts,${get_cmd_pertime}ms,${set_cmd_pertime}ms,${del_cmd_pertime}ms" >> /tmp/redis.csv
 done
+
 echo "------------------ cluster nodes: ------------------"
 awk '{print $2,$3}' /tmp/cluster_nodes.info | sed 's/myself,//g'
+echo -e "\n\n\033[31mredis巡检表格报告路径：\033[0m  /tmp/redis.csv"
