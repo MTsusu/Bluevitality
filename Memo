@@ -62,7 +62,6 @@
 │   │   │   └── 资料
 │   │   ├── CGI
 │   │   ├── Nginx
-│   │   │   ├── Compile 1.12.1
 │   │   │   ├── Compile 1.12.2
 │   │   │   ├── Configs
 │   │   │   ├── Setup 1.12.1
@@ -144,6 +143,7 @@
 │   │   ├── ELK Stack - 2016
 │   │   │   └── 资料
 │   │   ├── Kibana
+│   │   │   ├── 软件
 │   │   │   └── 资料
 │   │   ├── Logrotate
 │   │   ├── Logstash
