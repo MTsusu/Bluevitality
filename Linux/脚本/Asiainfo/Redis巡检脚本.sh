@@ -12,7 +12,7 @@ PORT=$(echo $line | awk '{print $(NF-1)}' | grep -oP "(?<=[[:digit:]]:).*" )
 
 #获取Redis-cli客户端
 BIN_BASE=$(pwdx $(ps -ef|grep -F 'redis-server'|awk '!/grep/{print $2}'|tail -n 1)|awk '{print $NF}')
-REDISCLI=$(echo ${BIN_BASE}/redis-cli)
+REDISCLI=$(locate  -w +${BIN_BASE} redis-cli | grep -E "redis-cli$" | head -n 1)
 
 #创建临时文件保存数据
 REDIS_INFO=`mktemp`
