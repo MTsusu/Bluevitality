@@ -36,7 +36,7 @@ function START_STOP() {
     
     sh $HOME/sbin/Node_stop.sh >> $HOME/sbin/node_pullup.log ; sleep 2
     nohup sh $HOME/sbin/Node_start.sh &> /dev/null &
-    echo "${DATATIME_NOW} $i 节点不存在，正在启动" >> $HOME/sbin/node_pullup.log
+    echo "${DATATIME_NOW} $i 节点不存在，正在启动" >> $HOME/sbin/node_pullup.log ; sleep 3
     rm $HOME/sbin/Node_start.sh $HOME/sbin/Node_stop.sh
 }
 
