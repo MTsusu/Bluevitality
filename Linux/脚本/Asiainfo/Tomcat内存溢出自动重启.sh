@@ -9,6 +9,8 @@ PROJECTNAME="ecpcore_new"                                   #此处替换为工�
 LOGS=`find $HOME/${PROJECTNAME}/ -name "*$DATE.out"`        #搜索指定路径下以日期结尾的的日志文件
 COUNT_LOG_PATH="$HOME/gc_record/monitor_gc"                 #此目录用于记录上次执行的状态
 GC_ERROR='GC overhead limit exceeded'                       #内存溢出关键字（当GC为释放很小空间占用大量时间时抛出）
+JMAP_CMD="$HOME/jdk/bin/jmap"
+
 
 [[ -d $COUNT_LOG_PATH ]] || mkdir -p $COUNT_LOG_PATH
 echo $LOGS
@@ -46,7 +48,7 @@ for log in $LOGS
     if [ $GC_COUNT -gt 0 ]; then
         echo "restart $NODE_NAME"
         ECPCORE_NEW_PID=`ps aux | grep /$NODE_NAME/ | egrep -v "grep|tail" | awk '{print $2}'`
-        $HOME/jdk7/bin/jmap -dump:format=b,file=$COUNT_LOG_PATH/${NODE_NAME}_$(date "+%F_%H%M%S")_hprof  $ECPCORE_NEW_PID
+        ${JMAP_CMD} -dump:format=b,file=$COUNT_LOG_PATH/${NODE_NAME}_$(date "+%F_%H%M%S")_hprof  $ECPCORE_NEW_PID
         server_stop $NODE_NAME
         server_start $NODE_NAME
     fi
