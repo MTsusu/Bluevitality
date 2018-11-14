@@ -13,7 +13,7 @@ TOMCAT_HOME="/home/$(whoami)/${PROJECT_NAME}/${NODE_NAME}"
 
 for i in `eval echo "{1..$NODE_NUMBERS}"`
 {
-    sh ${TOMCAT_HOME}${i}/bin/startup.sh
+    cd ${TOMCAT_HOME}${i}/bin && sh ./startup.sh
     [ $? -eq 0 ] && echo "${TOMCAT_HOME}${i} is running ..."
     sleep 2
 }
