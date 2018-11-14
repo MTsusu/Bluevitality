@@ -4,6 +4,7 @@ source ~/.bash_profile
 #定义用于保存线程状态信息的路径
 MONITOR_CPU_PATH=${HOME}/shell/monitor/cpu
 MONITOR_RESULT_PATH=${HOME}/shell/monitor/cpu/result
+JSTACK_CMD="${HOME}/jdk/bin/jstack"
 
 [ ! -d ${MONITOR_CPU_PATH} ] && mkdir -p ${MONITOR_CPU_PATH}
 [ ! -d ${MONITOR_RESULT_PATH} ] && mkdir -p ${MONITOR_RESULT_PATH}
@@ -15,7 +16,7 @@ do
     #获取此进程的TOMCAT节点路径
     INSTANCE=$(ps -ef | grep ${i} | grep -oP "(?<=catalina.base=).*?(?= )" | awk -F'/' '{print $NF}')
     if [ "${INSTANCE}" != "" ];then
-        P_CPU_INT=${ps -o pcpu ${i} | awk 'NR==2{print int($1)}'}
+        P_CPU_INT=$(ps -o pcpu ${i} | awk 'NR==2{print int($1)}')
         if [ ${P_CPU_INT} -gt 300 ];then
             DATE_TIME=`date +%Y%m%d%H%M%S`
             #保存此进程的CPU使用率
@@ -23,7 +24,7 @@ do
             #保存此进程的线程状态
             ps -mp ${i} -o THREAD,tid,time > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_tid_${DATE_TIME}
             #保存进程现场状态
-            jstack ${i} > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_jstack_${DATE_TIME}
+            ${JSTACK_CMD} ${i} > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_jstack_${DATE_TIME}
             #获取此PID下CPU使用率最高的TID号
             P_TID=`sed 1,2d ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_tid_${DATE_TIME} | sort -k 2 -rn | sed -n '1p;1q' | awk '{print $8}'`
             #获取此PID下TID的最高CPU使用率
