@@ -141,6 +141,12 @@ bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 输出：
 GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
 
+#查看TOPIC消费和积压情况
+kafka-run-class.sh kafka.tools.ConsumerOffsetChecker --group ***  --topic **** --zookeeper [IP]:2181,[IP]:2181,[IP]:2181/kafka
+结果：
+GROUP     TOPIC     PID       OFFSET             LOGSIZE   LAG
+消费者组  话题id    分区id    当前已消费的条数   总条数    未消费的条数
+
 #重平衡
 ./kafka-preferred-replica-election.sh --zookeeper 192.168.52.130:2181
 
