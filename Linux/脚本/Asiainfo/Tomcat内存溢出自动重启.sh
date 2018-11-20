@@ -16,15 +16,15 @@ JMAP_CMD="$HOME/jdk/bin/jmap"
 echo $LOGS
 
 function server_stop() {
-    ECPCORE_NEW_PID=`ps aux | grep /$1/ | egrep -v "grep|tail" | awk '{print$2}'`
+    PID=`ps aux | grep /$1/ | egrep -v "grep|tail" | awk '{print$2}'`
     echo "tomcat:  $1 Stop  Running!"
     sleep 0.5
-    kill -9 $ECPCORE_NEW_PID                    #通过节点名执行Kill
+    kill -9 $PID                    #通过节点名执行Kill
 }
 
 function server_start() {
     #export LANG=zh_CN.UTF-8
-    echo "tomcat:  $1 Start Running!"
+    echo "tomcat: $1 Start Running!"
     cd $HOME/${PROJECTNAME}/$1/bin/             #此处注意工程名和节点名的替换...
     ./startup.sh
     if [ $? = 0 ];then
@@ -47,9 +47,10 @@ for log in $LOGS
     
     if [ $GC_COUNT -gt 0 ]; then
         echo "restart $NODE_NAME"
-        ECPCORE_NEW_PID=`ps aux | grep /$NODE_NAME/ | egrep -v "grep|tail" | awk '{print $2}'`
-        ${JMAP_CMD} -dump:format=b,file=$COUNT_LOG_PATH/${NODE_NAME}_$(date "+%F_%H%M%S")_hprof  $ECPCORE_NEW_PID
-        server_stop $NODE_NAME
+        PID=`ps aux | grep /$NODE_NAME/ | egrep -v "grep|tail" | awk '{print $2}'`
+        ${JMAP_CMD} -dump:format=b,file=$COUNT_LOG_PATH/${NODE_NAME}_$(date "+%F_%H%M%S")_hprof  $PID
+        server_stop  $NODE_NAME
+        sleep 0.5
         server_start $NODE_NAME
     fi
 } 

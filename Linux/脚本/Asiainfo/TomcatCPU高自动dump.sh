@@ -22,13 +22,13 @@ do
             #保存此进程的CPU使用率
             echo "${DATE_TIME} ${INSTANCE} ${P_CPU_INT}" >> ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu.txt
             #保存此进程的线程状态
-            ps -mp ${i} -o THREAD,tid,time > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_tid_${DATE_TIME}
+            ps -mp ${i} -o THREAD,tid,time > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_ThreadID_${DATE_TIME}
             #保存进程现场状态
             ${JSTACK_CMD} ${i} > ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_jstack_${DATE_TIME}
             #获取此PID下CPU使用率最高的TID号
-            P_TID=`sed 1,2d ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_tid_${DATE_TIME} | sort -k 2 -rn | sed -n '1p;1q' | awk '{print $8}'`
+            P_TID=`sed 1,2d ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_ThreadID_${DATE_TIME} | sort -k 2 -rn | sed -n '1p;1q' | awk '{print $8}'`
             #获取此PID下TID的最高CPU使用率
-            P_TID_CPU=`sed 1,2d ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_tid_${DATE_TIME} | sort -k 2 -rn | sed -n '1p;1q' | awk '{print $2}'`
+            P_TID_CPU=`sed 1,2d ${MONITOR_CPU_PATH}/${INSTANCE}_${i}_cpu_${P_CPU_INT}_ThreadID_${DATE_TIME} | sort -k 2 -rn | sed -n '1p;1q' | awk '{print $2}'`
             #获取此PID下CPU使用率最高的TID的16进制字符
             P_NID=`printf "%x\n" ${P_TID}`
             #记录：时间 节点名称 使用率最高的TID号  16进制形式的TID号 TID的使用率
