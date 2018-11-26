@@ -15,18 +15,20 @@ ansible -i /tmp/${CLUSTER}-temp.hosts -u ${NODE_USER} all -m shell -a 'iostat -m
 | awk 'NR==1{printf $1"  IOWAIT:"};NR==2{print $4}' > /tmp/elasticsearch-${CLUSTER}-hosts.IOinfo
 
 #取集群节点所有CPU核心数量
-ansible -i /tmp/${CLUSTER}-temp.hosts -u ${NODE_USER} all -m shell -a 'lscpu' | grep SUCCESS -A 4 \
+ansible -i /tmp/${CLUSTER}-temp.hosts -u ${NODE_USER} all -m shell -a 'lscpu' \
+| grep SUCCESS -A 4 \
 | sed -nE '/^[[:digit:]]{2,}/p;n;n;n;n;p' \
 | awk 'NR==1{printf $1"  CPU_NUMBER:"};NR==2{print $2}' > /tmp/elasticsearch-${CLUSTER}-hosts.cpuinfo
+
 ansible -i /tmp/${CLUSTER}-temp.hosts -u ${NODE_USER} all -m ping | grep -o .*UNREACHABLE \
 | tee  /tmp/elasticsearch-${CLUSTER}-hosts.cpuinfo \
 >> /tmp/elasticsearch-${CLUSTER}-hosts.IOinfo
 
 #集群节点数
-curl -s "$IP_PORT/_cat/nodes" | wc -l 
+#curl -s "$IP_PORT/_cat/nodes" | wc -l 
 
 #PID，地址，端口信息，剩余磁盘使用量，HEAP用量，内存，CPU和负载信息等....
-curl -s "$IP_PORT/_cat/nodes?v&h=name,pid,ip,port,http_address,disk.avail,heap.current,heap.max,heap.percent,ram.current,ram.percent,ram.max,cpu,load_1m,load_5m,load_15m" > /tmp/elasticsearch-${CLUSTER}-${TIME}
+# curl -s "$IP_PORT/_cat/nodes?v&h=name,pid,ip,port,http_address,disk.avail,heap.current,heap.max,heap.percent,ram.current,ram.percent,ram.max,cpu,load_1m,load_5m,load_15m" > /tmp/elasticsearch-${CLUSTER}-${TIME}
 
 #索引信息
 curl -s "$IP_PORT/_cat/indices?v" \
