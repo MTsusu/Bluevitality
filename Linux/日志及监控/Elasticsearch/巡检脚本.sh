@@ -28,7 +28,7 @@ ansible -i /tmp/${CLUSTER}-temp.hosts -u ${NODE_USER} all -m ping | grep -o .*UN
 #curl -s "$IP_PORT/_cat/nodes" | wc -l 
 
 #PID，地址，端口信息，剩余磁盘使用量，HEAP用量，内存，CPU和负载信息等....
-#curl -s "$IP_PORT/_cat/nodes?v&h=name,pid,ip,port,http_address,disk.avail,heap.current,heap.max,heap.percent,ram.current,ram.percent,ram.max,cpu,load_1m,load_5m,load_15m" > /tmp/elasticsearch-${CLUSTER}-${TIME}
+curl -s "$IP_PORT/_cat/nodes?v&h=name,pid,ip,port,http_address,disk.avail,heap.current,heap.max,heap.percent,ram.current,ram.percent,ram.max,cpu,load_1m,load_5m,load_15m" > /tmp/elasticsearch-${CLUSTER}-${TIME}
 
 #索引信息
 curl -s "$IP_PORT/_cat/indices?v" \
