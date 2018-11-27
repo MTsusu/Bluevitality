@@ -164,6 +164,30 @@ GET my_index/_stats
 GET my_index,another_index/_stats
 GET _all/_stats
 
+移动分片：（当本机存储不够用，负载高时）
+$curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
+    "commands":[{
+        "move":{
+            "index":"filebeat-ali-hk-fd-tss1",
+            "shard":1,
+            "from_node":"ali-hk-ops-elk1",
+            "to_node":"ali-hk-ops-elk2"
+        }
+    }]
+}'
+
+
+分配分片：( 如down机后启动时本机分片未加入索引中的情况 )
+$curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
+    "commands":[{
+            "allocate":{
+            "index":"filebeat-ali-hk-fd-tss1",
+            "shard":1,
+            "node":"ali-hk-ops-elk1"
+        }
+    }]
+}'
+
 #Create a logstash_writer role that has the manage_index_templates and monitor cluster privileges, and the write, delete, and 
 #create_index privileges for the Logstash indices. You can create roles from the Management > Roles UI in Kibana or through the role API
 #ES 6.4版本： 在对应的manage_index_templates、monitor的2个集群对logstash-*开头的索引创建对应的权限，权限ROLE名为：logstash_writer
