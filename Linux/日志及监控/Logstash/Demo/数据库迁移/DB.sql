@@ -3,5 +3,5 @@ SELECT
 FROM 
     t_log_interfacelog_201802
 WHERE
-    CRT_TIME > :sql_last_value limit 66666
+    CRT_TIME > :sql_last_value
 
