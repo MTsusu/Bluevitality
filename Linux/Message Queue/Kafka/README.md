@@ -161,3 +161,17 @@ console-consumer-28542         test_find1     2          303713          303713 
 #查看所有kafka节点
 在zookeeper的bin目录执行 ./zkCli.sh 然后执行 ls /brokers/ids 就可以看到zk中存的所有的 broker id list
 ```
+#### 数据存储结构
+```bash
+log.dirs：/data/kafka           #配置文件中定义的数据存储路径
+                 \
+                  \             #TOPIC:TEST
+                   TEST-0       #partiton:1
+                        \
+                         \...
+                   TEST-1       #partiton:2
+                        \
+                         \...
+                         xxxx.index     #索引
+                         xxxx.log       #数据
+```
