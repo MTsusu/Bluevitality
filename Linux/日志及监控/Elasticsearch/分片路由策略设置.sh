@@ -4,8 +4,8 @@ PUT _cluster/settings
   "persistent": {
     "cluster": {
       "routing": {
-        "allocation.cluster_concurrent_rebalance": 2,   #最多允许多少个分片同时迁移，默认2个
-        "allocation.enable": "all"                      #用那种方式路由，有好几种参数
+        "allocation.cluster_concurrent_rebalance": 2,  #最多允许多少分片同时迁移，默认2 ( 此参在关闭负载时建议不写 )
+        "allocation.enable": "all"                     #用那种方式路由，有好几种参数 ( 关闭集群负载，使用：none )
       }
     }
   },
