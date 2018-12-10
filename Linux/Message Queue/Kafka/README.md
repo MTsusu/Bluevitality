@@ -36,22 +36,14 @@ offset：   每个Partition都由一系列有序的、不可变的消息组成�
 分区被分布到集群中的多个服务器上，每个服务器处理它分到的分区，根据配置每个分区还可复制到其它服务器作为备份容错。 
 每个分区有一个leader零或多个follower。Leader处理此分区的所有的读写请求而follower被动的复制数据
 ```
-#### 部署 Kafka
+#### 部署
 ```bash
-# Kafka 依赖 Java version >= 1.7
-
-#部署JAVA
-[root@localhost ~]# tar -zxf jdk.tar.gz -C /home/ && mv /home/jdk1.8.0_101 /home/java
-[root@localhost ~]# cd /home/java && export JAVA_HOME=$(pwd) && export PATH=$JAVA_HOME/bin:$PATH
-[root@localhost ~]# echo "$PATH" >> ~/.bash_profile 
-
+#部署JAVA （ Kafka 依赖 Java version >= 1.7 ）
 #部署Kafka
-[root@localhost ~]# tar -zxf kafka_2.11-1.0.1.tgz -C /home/
-[root@localhost ~]# ln -sv /home/kafka_2.11-1.0.1 /home/kafka
+[root@localhost ~]# tar -zxf kafka_2.11-1.0.1.tgz -C /home/ && ln -sv /home/kafka_2.11-1.0.1 /home/kafka
 
 #部署Kafka自带的Zookeeper
-[root@localhost ~]# cd /home/kafka/config/
-[root@localhost config]# ll
+[root@localhost ~]# cd /home/kafka/config/ && ll
 -rw-r--r--. 1 root root  906 2月  22 06:26 connect-console-sink.properties
 -rw-r--r--. 1 root root  909 2月  22 06:26 connect-console-source.properties
 -rw-r--r--. 1 root root 5807 2月  22 06:26 connect-distributed.properties
@@ -96,16 +88,13 @@ zookeeper.connection.timeout.ms=6000        #ZK的连接超时
 delete.topic.enable=true                    #物理删除topic需设为true，否则只是标记删除
 group.initial.rebalance.delay.ms=0 
 
-#启停Kafka集群
+#启停
 [root@localhost config]# cd /home/kafka/
-#启动ZK：
-bin/zookeeper-server-start.sh config/zookeeper.properties & 
-#启动Kafka：
-bin/kafka-server-start.sh -daemon config/server.properties
-#停止Kafka：
-bin/kafka-server-stop.sh
+bin/zookeeper-server-start.sh config/zookeeper.properties &     #启动ZK
+bin/kafka-server-start.sh -daemon config/server.properties      #启动Kafka
+bin/kafka-server-stop.sh                                        #停止Kafka
 ```
-#### 运维相关命令
+#### 运维
 ```bash
 #创建主题（保存时长：delete.retentin.ms）
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
