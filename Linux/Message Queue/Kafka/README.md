@@ -158,10 +158,11 @@ console-consumer-28542         test_find1     2          303713          303713 
 #重平衡
 ./kafka-preferred-replica-election.sh --zookeeper 192.168.52.130:2181
 
-#查看所有kafka节点
-在zookeeper的bin目录执行 ./zkCli.sh 然后执行 ls /brokers/ids 就可以看到zk中存的所有的 broker id list
+#查看所有kafka节点，在ZK的bin目录:
+./zkCli.sh ---> ls /brokers/ids 就可以看到zk中存储的所有 broker id，查看：get /brokers/ids/{x}
+
 ```
-#### 数据存储结构
+#### 数据存储机制
 ```bash
 log.dirs：/data/kafka           #配置文件中定义的数据存储路径
                  \
