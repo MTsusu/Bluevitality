@@ -107,9 +107,6 @@ bin/kafka-server-stop.sh
 ```
 #### 运维相关命令
 ```bash
-#启动服务
-./kafka-server-start.sh -daemon ../config/server.properties 
-
 #创建主题（保存时长：delete.retentin.ms）
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
 --config delete.retention.ms=86400000    #1天
@@ -117,10 +114,10 @@ bin/kafka-server-stop.sh
 #删除主题
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --delete --topic ES
 
-#查看所有主题
+#主题清单
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --list
 
-#查看主题的详细信息
+#主题详情
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 -describe -topic ES
 
 #生产者客户端命令（生产者产生信息时已经从ZK获取到了Broker的路由，因此这里要填入Broker的地址列表）
@@ -133,18 +130,15 @@ bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 ./kafka-topics.sh –-zookeeper 127.0.0.1:2181 -–alter -–partitions 20 -–topic ES 
 
 #修改消息过期时间 (保存期限)
-./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create \
---replication-factor 1 --partitions 1 --config delete.retention.ms=86400000 \
 ./kafka-topics.sh –-zookeeper 127.0.0.1:2181 –alter –-topic ES --config delete.retention.ms=1
 
-#为topic增加replication
-./kafka-reassign-partitions.sh --zookeeper 127.0.0.1:2181 \
--reassignment-json-file json/partitions-to-move.json -execute
+#修改主题内的分区数
+./kafka-topics.sh -–zookeeper 127.0.0.1:2181 -alter –partitions 5 –topic TEST
 
-#查看有那些 group ID 正在进行消费：
+#查看正在进行消费的 group ID ：
 kafka-consumer-groups.sh --zookeeper localhost:2181 --list
 
-#通过group_id查看当前详细的消费情况
+#通过 group ID 查看当前详细的消费情况
 ./kafka-consumer-groups.sh --group logstash --describe --zookeeper 127.0.0.1:2181
 输出：
 GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
