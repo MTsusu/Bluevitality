@@ -1,0 +1,27 @@
+input {
+    elasticsearch {
+        hosts => "192.168.157.14:9221,192.168.157.15:9221,192.168.157.16:9221"
+        index => "log4x_interface_2018_04_01"
+        query => '{"query":{"bool":{"must":[{"range":{"trdngTime":{"lt":"1522512000000"}}}]}}}'
+        size => 1000
+        scroll => "5m"
+        docinfo => true
+        codec => json
+    }
+}
+
+filter {
+   mutate {
+       remove_field => [ "@timestamp", "@version", "host", "path", "tags", "message" ]
+   }
+}
+
+output {
+    kafka {
+        topic_id => "interfacelog"
+        bootstrap_servers => "192.168.190.148:9092,192.168.190.149:9092,192.168.190.150:9092,192.168.190.151:9092,192.168.190.152:9092"
+        acks => 1
+        compression_type => "snappy"
+        codec => json
+    }
+}

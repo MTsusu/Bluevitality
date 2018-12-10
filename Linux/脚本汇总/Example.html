@@ -1,0 +1,271 @@
+HTML不是编程语言，而是一种描述性的标记语言，用于描述网页中内容的显示方式
+HTML最基本的语法是: <标记符>内容</标记符>（浏览器打开html后会理解里面的标记符）
+    1、标签名应小写。
+    2、HTML标签应闭合（结束）。
+    3、标签应正确嵌套
+
+    &nbsp;        特殊符号，空格
+    &gt;          特殊符号，>
+    &lt;          特殊符号，<
+    &quot;        特殊符号，"
+    &copy;        特殊符号，版权符号
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">     <!-- 支持的字符集 -->
+        <meta http-equiv="refresh" content="30">    <!-- 30s刷新一次页面 -->
+        <meta http-equiv="content-type" content="text/html;charset=utf-8"> <!-- 自定义Http报文的Head头 -->
+        <link rel='stylesheet' href='CSS文件所在地址'>    <!-- 此处载入外部样式表 -->
+        <title>网页标签文字在此</title>
+        <style type="text/css">           <!-- 使用style标签可直接在HTML内定义CSS -->
+        body {
+            height                    <!-- 元素高度 -->
+            width                    <!-- 元素宽度 -->       
+            max-height                <!-- 元素最大高度 -->
+            max-width                <!-- 元素最大宽度 -->
+            min-height                <!-- 元素最小高度 -->
+            min-width                <!-- 元素最小宽度 -->
+            font-family                <!-- 文本字体系列 -->
+            font-size                <!-- 文本字体尺寸 -->
+            font-style                <!-- 文本字体样式 -->
+            font-variant            <!-- 文本字体样式 -->
+            font-weight                <!-- 字体粗细 -->
+            margin                    <!-- 在一个声明中设置所有外边距属性 -->
+            margin-bottom            <!-- 下外边距 -->
+            margin-left                <!-- 左外边距 -->
+            margin-right            <!-- 右外边距 -->
+            margin-top                <!-- 上外边距 -->
+            color:red;                <!-- 前景颜色-->
+            text-decoration:none;    <!-- 链接标题风格：不显示下划线-->
+            float:left                <!-- 对象漂移对齐的方向 -->
+            border:1px                <!-- 边框粗细 -->
+            background-image:url(image/01.gif);        <!-- 背景图片 -->
+            background-position: 0px -20px;            <!-- 指定显示图片内指定的位置 -->
+            background:url(image/01.gif) -10px -20px;
+            font-size:56px;             <!-- 字体大小 -->
+            background-color            <!-- 背景颜色 -->
+            background-size                <!-- 背景图的大小     -->
+            background-repeat            <!-- 如何重复背景图 -->
+            background-origin            <!-- 背景图定位区域 -->
+            border-bottom-color            <!-- 底边框颜色 -->
+            border-bottom-style            <!-- 底边框样式 -->
+            border-bottom-width            <!-- 底边框宽度 -->
+            border-color                <!-- 边框颜色 -->
+            border-left-color            <!-- 左边框颜色 -->
+            border-left-style            <!-- 左边框样式 -->
+            border-left-width            <!-- 左边框宽度 -->
+            border-right-color            <!-- 右边框颜色 -->
+            border-right-style            <!-- 右边框样式 -->
+            border-right-width            <!-- 右边框宽度 -->
+            border-style                <!-- 边框样式 -->
+            border-top-color            <!-- 顶部边框颜色 -->
+            border-top-style            <!-- 顶部边框样式 -->
+            border-top-width            <!-- 顶部边框宽度 -->
+            border-width                <!-- 边框宽度 -->
+            outline-color                <!-- 线条轮廓的颜色 -->
+            outline-style                <!-- 线条轮廓的样式 -->
+            outline-width                <!-- 线条轮廓的宽度 -->
+            border-image                <!-- 边框样式使用图像填充 -->
+            border-image-repeat            <!-- 图像边框是否被重复（repeated）、拉伸（stretched）或铺满（rounded） -->
+            border-image-slice            <!-- 图像边框的向内偏移 -->
+            border-image-width            <!-- 图像边框宽度 -->
+            box-shadow                    <!-- 向方框添加一个或多个阴影 -->
+            padding-bottom                <!-- 元素的底填充 -->
+            padding-left                <!-- 元素的左填充 -->
+            padding-right                <!-- 元素的右填充 -->
+            padding-top                    <!-- 元素的顶填充 -->
+        }
+        </style>
+    </head>
+    <body>
+    <h1>一级标题</h1>
+    <p>段落<br/>段落</p>     <!-- br自己开始自己结束，用于换行  -->
+    <h1><b>二级标题</b></h1>  <!-- 粗体：b   斜体：i-->
+    <hr>     <!-- 创建页面的水平分割线  -->
+
+    <pre>    <!-- 预格式化文本 -->
+    完全按原始排版格式显示    <u>red</u>    <!-- ins标签对文本加入下划线  -->
+    </pre>
+
+    <div>块级标签</div> <!-- 标签分两种: 块级、内联。块级标签占一行，内联标签仅占实际长度，用于嵌套其他标签及CSS使用 -->
+    <span>内联标签</span> <span>内联标签</span>
+
+    <iframe src="URL" width="200" height="200" frameborder="0" ></iframe>     <!-- 框架，用于在WEB页面内显示其他WEB页面，frameborder设置是否显示边框 -->
+
+    <form action='提交到哪，若为空则表示提交到本Page' method='提交方法如POST和GET'>
+    <fieldset> <!-- 用"fieldset"创建带边框的表单 -->
+        <legend>左上角标题：</legend>
+            <input type='text'/> <br/>   <!-- 文本输入框，placeholder="文本"：在框内以灰色显示期望值，required属性要求不能为null-->
+            <input type="text" name="country_code" pattern="[a-z]{3}" title="abc">     <!-- 使用正则检查并提示 -->
+            <input type='checkbox' value="01"/> <br/>       <!-- 对勾复选框-->
+            <input type='checkbox' value="02"/> <br/>       <!-- 对勾复选框-->
+            <input type='radio' name='group1' value="01"/>    <!-- 单项选择框 -->
+            <input type='radio' name='group1' value="02"/>    <!-- 单项选择框 -->
+            <input type='button' value='执行'/> <br/>          <!-- 按钮（button用于触发事件，而submit负责提交表单） -->
+            <input type='file' value='上传'/> <br/>            <!-- 上传文件，multiple关键字可允许同时上传多个文件-->
+            <input type='submit' value='提交'/> <br/>          <!-- 提交 -->
+            <table>
+                <tr> <td> <label for="txtname"> 账号：</label> </td> <td><input type="text" id="txtname" name="login_username" /></td> </tr>
+                <tr> <td> <label for="txtpswd"> 密码：</label> </td> <td><input type="password" id="txtpswd" name="login_pswd" /></td> </tr>
+                <tr> <td colspan=2> <input type="reset" />  <input type="submit" /> </td> </tr>
+            </table>   <!-- 当单击提交按钮时表单内容会被传送到动作属性定义的另一个文件 -->
+            <input type="image" src="img_submit.gif"  alt="Submit" width="66" height="48">     <!-- 使用图片形式的按钮代替sumbit按钮 -->
+            生日: <input type="date" name="bday">        <!-- 日期选择 -->
+            时间: <input type="time" name="usr_time">     <!-- 时间选择 -->
+            范围：<input type="number" name="quantity" min="1" max="5">    <!-- 选择范围，value指定默认值-->
+            name:<input name='username' type='text'/> <br/>
+            pass:<input  name='password' type='password'/>
+            <input list="browsers" name="browser">
+                <datalist id="browsers">  <!-- 实现INPUT的下拉选项 -->
+                    <option value="Internet Explorer">
+                    <option value="Firefox">
+                    <option value="Chrome">
+                    <option value="Opera">
+                    <option value="Safari">
+                </datalist>
+            </fieldset>
+    </form>
+
+    <a href="http://www.x.com" target="_blank">指向的超链接，此处为文字</a>     <!-- a标签用于超文本链接,_blank使其打开新页面跳转 -->
+    <img src="图片路径" alt="图片不存在时的提示" title="鼠标悬浮时的显示" width="30" height="22" />
+    <label for='001'>标签名：<input id='001' type = "text"/></label>    <!-- label用于点击标签名时自动跳转至其指定的ID的内容，如输入框 -->
+
+    <div id='01' style='height:10px'>第1部分</div>    <!-- 每个标签ID不可重复 -->
+    <div id='02' style='height:10px'>第2部分</div>
+    <div id='03' style='height:10px'>第3部分</div>
+    <a href="#01">定位到ID为01的标签</a>    <!-- 当前页面跳转 -->
+
+    <ul> <!-- 无序列表 -->
+        <li>每个一行"黑点"的无序列表1</li>
+        <li>每个一行"黑点"的无序列表n</li>
+    </ul>
+
+    <ol> <!-- 有序列表 -->
+        <li>带序号"行号"的有序列表1</li>
+        <li>带序号"行号"的有序列表n</li>
+    </ol>
+
+    <dl> <!-- 自定义列表 -->
+        <dt>左侧标题1</dt> <dd>右侧内容1</dd>
+        <dt>左侧标题2</dt> <dd>右侧内容2</dd>
+    </dl>
+
+    <table border="1" cellpadding="2" cellspacing="2"> <!-- border边框单位，cellpadding单元格边距，cellspacing单元格间距-->
+        <tbody>
+            <caption> 表格标题 </caption>
+            <tr> <th> 第一列列名 </th> <th> 第二列列名 </th> </tr>
+            <tr> <td> 第1行第1列 </td> <td> 第1行第2列 </td> </tr>  <!-- td的colspan='Num'属性设置其横向占几列 -->
+            <tr> <td> 第2行第1列 </td> <td> 第2行第2列 </td> </tr>  <!-- td的rowspan='Num'属性设置其竖向占几行 -->
+            <tr> <td> 第3行第1列 </td> <td> 第3行第2列 </td> </tr>
+        </tbody>
+    </table>
+
+    <select> <!-- 其内的size='Num'指定列表显示多少选项，mltiple='mltiple'属性使其可多选-->
+        <option value='01'> 下拉列表1 </option>    <!-- value指提交到后台的值 -->
+        <option value='02'> 下拉列表2 </option>    <!-- selected属性指定默认 -->
+        <option value='03'> 下拉列表3 </option>
+    </select>
+
+    <textarea cols="50" rows="20" class='logo' >
+    定义一个文本编辑区域， <mark>此处区域</mark>为其默认的文本内容（可换行的输入框）  <!-- mark以黄色高亮显示文本 -->
+    </textarea>               
+
+    <!-- 两种显示进度、状态条的方式 -->
+    <meter value="1" min="0" max="10"></meter>
+    <meter value="0.1"></meter>
+
+    <video width="320" height="240" controls> <source src="movie.mp4" type="video/mp4"> </video> <!-- 播放视频并加入控制选项 -->
+    <audio controls> <source src="horse.mp3" type="audio/mpeg"> </audio> <!-- 播放音频并加入控制选项 -->
+    <canvas id="myCanvas" width="200" height="100"></canvas> <!-- 指定画布及其大小，JS通过ID进行定位绘图 -->
+
+    <!-- 图片指定区域形状内点击跳转 -->
+    <img src="planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap">
+    <map name="planetmap">
+      <area shape="rect" coords="0,0,82,126" alt="Sun" href="sun.htm">
+      <area shape="circle" coords="90,58,3" alt="Mercury" href="mercur.htm">
+      <area shape="circle" coords="124,58,8" alt="Venus" href="venus.htm">
+    </map>
+        
+    </body>
+</html>
+
+---------------------------------------------------------------------------------------    CSS的引用：
+.logo{    在HTML中使用标签的class='logo'属性引用    }
+.logo div{    在class='logo'的div标签中使用    }
+a,div,p{    指定类型的标签使用的属性    }
+#002{    在HTML中使用标签的id='002'属性引用    }
+a div{    在a标签中的div标签中使用    }
+input[type='text']{    对input中type='text'属性的标签引用的样式    }
+---------------------------------------------------------------------------------------    HTML5语义：
+HTML5提供了新的语义元素来明确一个Web页面的不同部分:
+    <header>
+    <nav>
+    <section>
+    <article>
+    <aside>
+    <figcaption>
+    <figure>
+    <footer>
+
+<section>定义文档中的节（section、区段）。比如章节、页眉、页脚或文档中的其他部分。
+<article>定义独立的内容
+
+<nav> <!-- 定义导航链接的部分 -->
+    <a href="http://www.example.com/">普通的链接：</a>
+    <a href="http://www.example.com/"><img src="URL" alt="图像链接"></a>
+    <a href="mailto:webmaster@example.com">邮件链接</a>
+</nav>
+
+
+<p>My family and I visited The Epcot center this summer.</p>
+<aside> <!-- 定义页面主区域内容之外的内容，如侧边栏 -->
+  <h4>Epcot Center</h4>
+  <p>The Epcot Center is a theme park in Disney World, Florida.</p>
+</aside>
+
+<article>
+  <header> <!-- 描述了文档的头部区域 -->
+    <h1>Internet Explorer 9</h1>
+    <p><time pubdate datetime="2011-03-15"></time></p>
+  </header>
+  <p>Windows Internet Explorer 9(缩写为 IE9 )是在2011年3月14日21:00发布的</p>
+</article>
+
+<footer> <!-- 描述了文档的底部区域 -->
+  <p>Posted by: Hege Refsnes</p>
+  <p><time pubdate datetime="2012-03-01"></time></p>
+</footer>
+
+<figure> <!-- 规定独立的流内容（图像、图表、照片、代码等等） -->
+  <img src="img_pulpit.jpg" alt="The Pulpit Rock" width="304" height="228">
+  <figcaption>Fig1. - The Pulpit Pock, Norway.</figcaption> <!-- 定义 <figure> 元素的标题，应被置于 "figure" 元素的第一个或最后一个子元素的位置 -->
+</figure>
+---------------------------------------------------------------------------------------  SQL：
+<script type="text/javascript">
+   var db = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);
+   var msg;
+   db.transaction(function (tx) {
+      tx.executeSql('CREATE TABLE IF NOT EXISTS LOGS (id unique, log)');
+      tx.executeSql('INSERT INTO LOGS (id, log) VALUES (1, "菜鸟教程")');
+      tx.executeSql('INSERT INTO LOGS (id, log) VALUES (2, "www.runoob.com")');
+      msg = '<p>数据表已创建，且插入了两条数据。</p>';
+      document.querySelector('#status').innerHTML =  msg;
+   });
+   db.transaction(function (tx) {
+        tx.executeSql('DELETE FROM LOGS  WHERE id=1');
+        msg = '<p>删除 id 为 1 的记录。</p>';
+        document.querySelector('#status').innerHTML =  msg;  });
+   db.transaction(function (tx) {
+       tx.executeSql('UPDATE LOGS SET log=\'www.w3cschool.cc\' WHERE id=2');
+        msg = '<p>更新 id 为 2 的记录。</p>';
+        document.querySelector('#status').innerHTML =  msg;  });
+   db.transaction(function (tx) {
+      tx.executeSql('SELECT * FROM LOGS', [], function (tx, results) {
+         var len = results.rows.length, i;
+         msg = "<p>查询记录条数: " + len + "</p>";
+         document.querySelector('#status').innerHTML +=  msg;   
+         for (i = 0; i < len; i++){
+            msg = "<p><b>" + results.rows.item(i).log + "</b></p>";
+            document.querySelector('#status').innerHTML +=  msg;
+         } }, null);  });
+</script>

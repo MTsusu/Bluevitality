@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#-------------------------------------
+#  获取FGC的总数，并且把总数和总体运行时间进行比较的脚本
+#  最后得到每次GC多少秒 ( 检查每次FGC的时间<5s )
+#-------------------------------------
+
+if [ $# -eq 0 ]; then
+    echo "Note: Please input the characteristic to grep jvm, could be PID"
+    exit 1
+fi
+
+pid_characteristic=$1
+pid=`ps aux|grep -v grep|grep tomcat|grep $pid_characteristic|grep java|awk '{print $2}'`
+#echo $pid #test PASSED
+# if there is no PID, should exit program
+if [ "$pid" = "" ]
+then
+	echo "No PID found"
+	exit 0
+fi
+
+my_fgc_count()
+{
+	# 输出当前Java进程的FGC次数
+	fgc_column=`jstat -gcutil $pid | head -n 1 | awk ' { for (i; i<=NF; i++) { if ($i=="FGC") {print i} } } '`	
+	fgc_count=$(jstat -gcutil $pid | awk '{if (NR>1) print}' | tr -s ' ' | sed -e 's/^[[:space:]]*//' | cut -d ' ' -f$((fgc_column)))
+	echo $fgc_count
+}
+
+my_fgct()
+{
+	# 输出当前Java进程的总体FGC时间
+	fgct_column=`jstat -gcutil $pid | head -n 1 | awk ' { for (i; i<=NF; i++) { if ($i=="FGCT") {print i} } } '`
+	fgct=$(jstat -gcutil $pid | awk '{if (NR>1) print}' | tr -s ' ' | sed -e 's/^[[:space:]]*//' | cut -d ' ' -f$((fgct_column)))
+	echo $fgct
+}
+
+divide_yield_result()
+{
+	if [ $1 -eq 0 ]
+		then
+		echo "NO FGC at all"
+	else
+		awk -v fgc_count="$1" -v fgct="$2" 'BEGIN { print "scale=4;"fgct/fgc_count}' | bc
+	fi
+}
+
+fgc_count=$(my_fgc_count)
+fgct=$(my_fgct)
+#echo $fgc_count
+#echo $fgct
+
+divide_yield_result $fgc_count $fgct
+

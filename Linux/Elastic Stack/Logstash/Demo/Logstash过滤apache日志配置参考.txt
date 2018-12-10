@@ -1,0 +1,33 @@
+# 更多ELK资料请访问 http://devops.taobao.com
+
+input {
+  file {
+    path => "/Users/developer/Development/LogStash/logs/access_log"
+    start_position => beginning
+  }
+}
+
+filter {
+  if [path] =~ "access" {
+    mutate { replace => { "type" => "apache_access" } }
+    grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+    }
+  }
+  date {
+    match => [ "timestamp" , "dd/MMM/yyyy:HH:mm:ss Z" ]
+  }
+}
+
+output {
+  #elasticsearch {
+  #  host => localhost
+  #}
+  stdout { codec => rubydebug }
+}
+
+
+
+-----------------------------------------------------
+
+github地址：https://github.com/rrothwell/logstash_graphite_config/tree/master/configuration

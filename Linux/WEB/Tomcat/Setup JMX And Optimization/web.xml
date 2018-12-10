@@ -1,0 +1,27 @@
+<welcome-file-list>
+  <welcome-file>index.html</welcome-file>
+  <welcome-file>index.htm</welcome-file>
+  <welcome-file>index.jsp</welcome-file>
+</welcome-file-list> 
+
+<error-page>
+  <error-code>404</error-code>
+  <location>/notFileFound.jsp</location>
+</error-page>
+如果某文件资源没有找到，服务器要报404错误，按上述配置则会调用\webapps\ROOT\notFileFound.jsp。
+
+
+<error-page>
+  <exception-type>java.lang.NullPointerException</exception-type>
+  <location>/null.jsp</location>
+</error-page>
+如果执行的某个JSP文件产生NullPointException ，则会调用\webapps\ROOT\null.jsp
+
+<session-config>
+  <session-timeout>30</session-timeout>
+</session-config>
+
+-----------------------------------------------------------------
+设置session过期时间，单位是分钟：
+sed -i "s@<session-timeout>.*</session-timeout>@<session-timeout>6220</session-timeout\>@g" /usr/local/tomcat/conf/web.xml
+

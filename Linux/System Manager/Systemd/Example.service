@@ -1,0 +1,60 @@
+
+[Unit]                                          # 与相依性有关的一些设置
+Description=XXXXX server daemon                 # 服务描述
+Documentation= ....                             # 文档地址
+After=network.target sshd-keygen.service        # 若指定的 Unit 也要启动则须在本 Unit 前启动
+Before= ....                                    # 若指定的 Unit 也要启动则须在本 Unit 后启动
+Requires= ....                                  # 强依赖：本 Unit 依赖的其他服务（若没运行则当前Unit不启动）
+Wants=sshd-keygen.service                       # 弱依赖：本 Unit 配合的其他服务（若没运行不会启动失败）
+BindsTo= ....                                   # 与Requires类似，其定的 Unit 若退出会导致当前 Unit 停止
+Conflicts= ....                                 # 这里指定的 Unit 不能与当前 Unit 同时运行
+Condition                                       # 本 Unit 运行必须满足的条件，否则不会运行
+Assert                                          # 本 Unit 运行必须满足的条件，否则报启动失败
+
+[Service]                                       # 与实际执行的指令参数有关
+Type=forking                                    # 启动方式，后台运行：forking
+#PrivateTmp=True                                # 给服务分配独立的临时空间
+EnvironmentFile=/etc/sysconfig/sshd             # 环境变量文件，其内容是"key=value"，用 $key 的形式在当前配置中获取
+ExecStartPre=...                                # 启动当前服务前执行
+ExecStart=/usr/sbin/sshd -D $OPTIONS            # 启动服务的脚本（此处 $OPTIONS 即从EnvironmentFile获取的Key值）
+ExecStartPost=...                               # 启动当前服务后执行的命令
+ExecReload=/bin/kill -HUP $MAINPID              # 重启服务的脚本
+ExecStop=...                                    # 停止当前服务时执行的命令
+ExecStopPost=...                                # 停止当其服务后执行的命令
+KillMode=process
+RemainAfterExit= ....
+RestartSec=42s                                  # 自动重启当前服务间隔的秒数
+TimeoutSec= ....                                # 定义 Systemd 停止当前服务之前等待的秒数
+Restart=on-failure                              # 定义何种情况下自动重启当前服务
+                                  # 值： always（总是重启）、on-success、on-failure、on-abnormal、on-abort、on-watchdog
+                                      
+[Install]                                       # 说明其所属哪个 target
+WantedBy=multi-user.target                      # 表示该服务所在 Target
+                                  # 本Unit在enable时符号链接会放入 /etc/systemd/system 下以 Target.wants 后缀构成的子目录中
+Also= ....                                      # 当前 Unit 激活（enable）时同时激活的其他 Unit
+Alias= ....                                     # 当前 Unit 用于启动的一个别名
+
+# 配置文件中的真假判定关键字：
+# 关键字： 1, yes, true, on     代表启动
+# 关键字： 0, no, false, off    代表关闭
+
+# 顺序与依赖：
+# After/Before字段仅涉及启动顺序而不涉及依赖关系（设置依赖关系需用 Wants、Requires 字段）
+
+# 抑制错误：
+# 所有的启动设置前都可以加一个连词号 '-'，表示"抑制错误"，即发生错误的时候不影响其他命令的执行
+# 如 EnvironmentFile=-/etc/sysconfig/sshd 表示即使 /etc/sysconfig/sshd 不存在也不抛出错误
+
+# TYPE 说明：
+#    Type=simple：    启动的进程为主进程（默认值）
+#    Type=forking：   以fork()方式启动，此时父进程将退出，子进程将成为主进程
+#    Type=oneshot：   类似于simple，但只执行一次，Systemd 会等它执行完才启动其他服务
+#    Type=dbus：      当前服务通过D-Bus启动（类似于simple，但会等待 D-Bus 信号后启动）
+#    Type=notify：    当前服务启动完毕，会通知Systemd再继续往下执行（类似simple，启动结束后会发出通知信号然后 Systemd 再启动其他服务）
+#    Type=idle：      若有其他任务执行完毕，当前服务才会运行（类似于simple，但是要等到其他任务都执行完，才会启动该服务）
+
+# KillMode 说明：
+#    control-group：  当前控制组里面的所有子进程，都会被杀掉（默认）
+#    process：        只杀主进程
+#    mixed：          主进程将收到 SIGTERM 信号，子进程收到 SIGKILL 信号
+#    none：           没有进程会被杀掉，只是执行服务的 stop 命令。

@@ -8,7 +8,7 @@
 │   └── 收集
 ├── Linux
 │   ├── Cluster
-│   │   ├── Corosync + Pacemaker
+│   │   ├── Corosync+Pacemaker
 │   │   │   ├── 软件
 │   │   │   └── 资料
 │   │   ├── DRBD
@@ -22,26 +22,47 @@
 │   │   ├── Heartbeat
 │   │   │   ├── conf  1.x
 │   │   │   └── Setup 3.0.5
-│   │   └── LVS + Keepalive
+│   │   └── LVS+Keepalive
 │   │       ├── Check Scripts
 │   │       ├── Example
 │   │       ├── Lvs
 │   │       └── 资料
-│   ├── Daemon Manage
-│   │   ├── Supervisor
-│   │   │   └── conf
-│   │   ├── Systemd
-│   │   │   └── conf
-│   │   └── Xinetd
-│   │       └── conf
+│   ├── Elastic Stack
+│   │   ├── 2016
+│   │   │   └── 资料
+│   │   ├── Elasticsearch
+│   │   │   ├── Plugins
+│   │   │   ├── Template
+│   │   │   └── 资料
+│   │   ├── Filebeat
+│   │   │   └── 软件
+│   │   ├── Kibana
+│   │   │   ├── 软件
+│   │   │   └── 资料
+│   │   └── Logstash
+│   │       └── Demo
 │   ├── Hadoop
 │   │   ├── Hive
 │   │   ├── Spark
 │   │   ├── xml
 │   │   └── 资料
 │   │       └── 文档
-│   ├── Linux Kernel
-│   │   └── Images
+│   ├── Message Queue
+│   │   ├── ActiveMQ
+│   │   │   ├── Setup 5.6.0
+│   │   │   └── 资料
+│   │   ├── Kafka
+│   │   ├── RabbitMQ （空）
+│   │   └── RocketMQ
+│   │       ├── bin
+│   │       └── 资料
+│   ├── System Manager
+│   │   ├── Supervisor
+│   │   │   └── conf
+│   │   ├── Systemd
+│   │   │   └── conf
+│   │   └── Xinetd
+│   │       └── conf
 │   ├── Virtualization
 │   │   ├── Docker
 │   │   │   ├── Application
@@ -55,7 +76,7 @@
 │   │   │   └── 资料
 │   │   └── OpenStack
 │   │       └── 资料
-│   ├── Web
+│   ├── WEB
 │   │   ├── Apache
 │   │   │   ├── Configs
 │   │   │   ├── Setup 2.4.25
@@ -105,7 +126,15 @@
 │   │   │   └── 资料
 │   │   └── Zookeeper
 │   │       └── 资料
-│   ├── 脚本
+│   ├── 监控&日志
+│   │   ├── Logrotate
+│   │   ├── Mutt + Mstmp
+│   │   ├── Rsyslog
+│   │   └── Zabbix
+│   │       ├── conf
+│   │       ├── Setup 3.4
+│   │       └── 资料
+│   ├── 脚本汇总
 │   │   ├── Asiainfo
 │   │   ├── DDOS
 │   │   │   ├── Demo
@@ -135,26 +164,8 @@
 │   │   ├── 系统状态分析
 │   │   │   └── System Initialize
 │   │   └── 银行网点终端巡检
-│   ├── 日志及监控
-│   │   ├── Elasticsearch
-│   │   │   ├── Plugins
-│   │   │   ├── Template
-│   │   │   └── 资料
-│   │   ├── ELK - 2016
-│   │   │   └── 资料
-│   │   ├── Kibana
-│   │   │   ├── 软件
-│   │   │   └── 资料
-│   │   ├── Logrotate
-│   │   ├── Logstash
-│   │   │   ├── Demo
-│   │   │   └── Filebeat
-│   │   ├── Mutt + Mstmp
-│   │   ├── Rsyslog
-│   │   └── Zabbix
-│   │       ├── conf
-│   │       ├── Setup 3.4
-│   │       └── 资料
+│   ├── 内核相关
+│   │   └── Images
 │   ├── 软件包管理
 │   │   └── Rpmbuild
 │   │       └── Example
@@ -200,15 +211,6 @@
 │   │   ├── SSH
 │   │   ├── Stunnel - 有问题(CFSSL)
 │   │   └── Zxarps
-│   │       └── 资料
-│   ├── 消息服务
-│   │   ├── ActiveMQ
-│   │   │   ├── Setup 5.6.0
-│   │   │   └── 资料
-│   │   ├── Kafka
-│   │   ├── RabbitMQ （空）
-│   │   └── RocketMQ
-│   │       ├── bin
 │   │       └── 资料
 │   ├── 压测
 │   │   ├── Iperf
@@ -306,4 +308,4 @@
     ├── MyBase
     └── Tools
 
-306 directories
+308 directories

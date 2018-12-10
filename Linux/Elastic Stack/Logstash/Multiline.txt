@@ -1,0 +1,20 @@
+input {
+  stdin {
+    codec => multiline {
+      pattern => "^# User@Host:"
+      negate => true
+      what => previous
+    }
+  }
+}
+
+output {
+  elasticsearch { hosts => ["localhost:9200"] }
+  stdout { codec => rubydebug }
+}
+
+------------------------------------------------------ Memo：
+pattern为正则匹配
+negate为反转，只能为 true/false，默认false代表不反转
+what为处理行为，只能为 previous/next，为previous时代表匹配此模式的行属于前面的事件内容，为next时代表匹配此模式的行属于后面的事件内容
+上面的配置表明，如果不以 "# User@Host:" 开头的行都属于前面的事件内容

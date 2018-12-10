@@ -1,0 +1,42 @@
+http {
+    ... // $upstream_cache_status记录缓存命中率
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"'
+                      '"$upstream_cache_status"';
+
+    proxy_temp_path   /usr/local/nginx-1.6/proxy_temp;
+    proxy_cache_path /usr/local/nginx-1.6/proxy_cache levels=1:2 keys_zone=cache_one:100m inactive=2d max_size=2g;
+
+    server {
+        listen       80; 
+        server_name  ittest.example.com;
+        root   html;
+        index  index.html index.htm index.jsp;
+
+        location ~ .*\.(gif|jpg|png|html|css|js|ico|swf|pdf)(.*) {
+            proxy_pass  http://backend;
+            proxy_redirect off;
+            proxy_set_header Host $host;
+            proxy_set_header   X-Real-IP   $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            proxy_cache cache_one;
+            add_header Nginx-Cache $upstream_cache_status;
+            proxy_cache_valid  200 304 301 302 8h;
+            proxy_cache_valid 404 1m;
+            proxy_cache_valid  any 2d;
+            proxy_cache_key $host$uri$is_args$args;
+            expires 30d;
+        }
+
+        location ~ /purge(/.*) {
+            #设置只允许指定的IP或IP段才可以清除URL缓存。
+            allow   127.0.0.1;
+            allow   172.29.73.0/24;
+            deny    all;
+            proxy_cache_purge  cache_one $host$1$is_args$args;
+            error_page 405 =200 /purge$1;
+        }
+    }
+}

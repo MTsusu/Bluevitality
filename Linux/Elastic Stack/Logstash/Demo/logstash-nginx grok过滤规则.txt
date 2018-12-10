@@ -1,0 +1,16 @@
+grok {
+                match => {
+                        "message" => [
+                        "%{IPV4:remote_addr} %{USERNAME:remote_user} \[%{HTTPDATE:time_local}\] \"%{WORD:method} %{URIPATHPARAM:uri} HTTP/%{NUMBER:httpversion}\" %{INT:status} %{NUMBER:request_time} %{INT:body_bytes_sent} %{NOTSPACE:http_referer} %{NOTSPACE:upstream_addr} %{NOTSPACE:upstream_status} %{NOTSPACE:upstream_response_time} %{QS:http_user_agent} %{QS:http_x_forwarded_for}",
+                        "%{IPV4:remote_addr} %{USERNAME:remote_user} \[%{HTTPDATE:time_local}\] \"%{WORD:method} %{URIPATHPARAM:uri} HTTP/%{NUMBER:httpversion}\" %{INT:status} %{NUMBER:request_time} %{INT:body_bytes_sent} %{NOTSPACE:http_referer} %{NOTSPACE:upstream_addr} %{NOTSPACE:upstream_addr2} %{NOTSPACE:upstream_status} %{NOTSPACE:upstream_status2} %{NOTSPACE:upstream_response_time} %{NOTSPACE:upstream_response_time2} %{QS:http_user_agent} %{QS:http_x_forwarded_for}",
+                        "%{IPV4:remote_addr} %{USERNAME:remote_user} \[%{HTTPDATE:time_local}\] \"%{WORD:method} %{URIPATHPARAM:uri} HTTP/%{NUMBER:httpversion}\" %{INT:status} %{NUMBER:request_time} %{INT:body_bytes_sent} %{NOTSPACE:http_referer} %{NOTSPACE:upstream_addr} (?<upstream_error_info>.*) %{QS:http_user_agent} %{QS:http_x_forwarded_for}"
+                        ]
+                }
+                remove_field => ["message","remote_user","upstream_addr2","upstream_status2","upstream_response_time2","upstream_error_info"]
+        }
+
+
+
+
+
+À´×ÔAntonie QQ:75296711   ·ÖÏí

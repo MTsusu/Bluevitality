@@ -1,0 +1,73 @@
+下载  --- >  tar xf   filebeat.tar.gz     -->修改配置文件  如下
+
+
+filebeat.prospectors:
+- input_type: log 
+  paths: 
+    - /home/zyzx/bms/tomcat_bms3/logs/*
+output.kafka:
+ hosts: ["192.168.100.105:9092"] 
+ topic: testa1
+ partition.round_robin:
+    reachable_only: false
+    required_acks: 1
+    compression: gzip
+    max_message_bytes: 1000000
+    
+    
+    
+    
+    
+[zyzx@server-1 kafka-config]$ more kafka_logstash.config 
+input {
+   kafka {
+     bootstrap_servers => "192.168.100.105:9092"
+     topics => "testa1"
+     group_id => "logstash-testa1"
+     max_partition_fetch_bytes=> "4194304"
+     consumer_threads => "1"
+     codec => "json"
+   }
+}
+
+
+filter { 
+    grok {
+        match => ["message", "%{HTTPDATE:logdate}"]
+       }
+    date {
+        match => ["logdate", "dd/MMM/yyyy:HH:mm:ss Z"]
+      }
+    }
+
+
+# match => { "message" => "%{COMBINEDAPACHELOG}" } }
+
+
+output {
+   file {
+      path => "/home/zyzx/test000/cy/logstash-5.5.1/run-logs/testa1.log"
+      flush_interval => 0
+   }
+}
+
+output {
+   elasticsearch {
+     hosts => ["192.168.100.29:9200"]
+     index => "testa1"
+     document_type => "testa1"
+     action => "update"
+     doc_as_upsert => true
+     codec => "json"
+     document_id => "%{id}"
+   }
+}
+[zyzx@server-1 kafka-config]$ 
+
+
+
+
+启动  filebeat     ./filebeat  -c filbeat.yml
+
+
+启动logstash   ./logstash -f kafka_logstash.config 

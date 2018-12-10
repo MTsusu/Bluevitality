@@ -1,0 +1,400 @@
+yum install -y gcc gcc-c++ make glibc flex 
+注意：安装kernel-devel一定要和你uname -r 看到的内核版本一致，建议kernel-devel kernel-headers用本地源安装，不要用网络源安装
+
+tar -zxvf drbd-8.4.3.tar.gz 
+cd drbd-8.4.3
+./configure  --prefix=/usr/local/drbd --with-km
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64
+make install
+cd drbd
+make clean
+make KDIR=/usr/src/kernels/2.6.32-279.el6.x86_64/
+cp drbd.ko /lib/modules/2.6.32-279.el6.x86_64/kernel/lib/
+modprobe  drbd
+lsmod | grep drbd
+
+corosync+pacemaker+drbd+mysql高可用集群部署
+
+一、搭建环境
+2台虚拟机
+操作系统centos6.3
+
+二、ip地址规划
+node1	   172.30.82.45
+node2      172.30.82.58
+VIP		   172.30.82.61
+
+三、注意：
+1、设置各个节点间的时间同步,ntpdate 172.30.82.254 &>/dev/null
+2、基于hosts文件实现能够互相用主机名访问,修改/etc/hosts文件
+172.30.82.45	node1
+172.30.82.58	node2
+node1上执行：
+ssh-keygen -t rsa -P ""
+ssh-copy-id -i ~/.ssh/id_rsa.pub  node2
+node2上执行：
+ssh-keygen -t rsa -P ""
+ssh-copy-id -i ~/.ssh/id_rsa.pub  node1
+3、确保uname -n结果与主机名相同
+4、清空iptatables规则 
+iptabesl -L;chkconfig iptabels off
+5、关闭selinux，setenfroce 0
+
+四、安装相关软件
+yum update -y  
+pssh-2.3.1-4.1.x86_64.rpm crmsh-2.1-1.6.x86_64.rpm  python-pssh-2.3.1-4.1.x86_64.rpm下载地址
+http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/CentOS_CentOS-6/x86_64/
+yum install corosync pacemaker –y
+yum install -y python-dateutil python-lxml redhat-rpm-config cluster-glue cluster-glue-libs resource-agents
+yum --nogpgcheck localinstall pssh-2.3.1-4.1.x86_64.rpm crmsh-2.1-1.6.x86_64.rpm  python-pssh-2.3.1-4.1.x86_64.rpm
+rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm   
+ssh node2 'rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm'   
+ssh node2 'yum update -y'   
+yum install drbd84-utils kmod-drbd84 -y   
+ssh node2 'yum install drbd84-utils kmod-drbd84 -y'
+modprobe drbd
+ssh node2 'modprobe drbd'
+
+五、修改配置文件
+1、拷贝配置文件
+cp /etc/corosync.conf.example /etc/corosync.conf
+
+2、生成autokeys文件
+ corosync-keygen
+
+3、修改corosync.conf
+
+totem {
+        version: 2
+        secauth: off                              #是否开启秘钥认证
+        threads: 0                                #发送集群节点认证信息使用的进程数
+        interface {
+                ringnumber: 0                     #为避免冗余环路设定的所在的网络接口
+                bindnetaddr: 172.30.82.0          #集群所在网络
+                mcastaddr: 239.238.16.1           #集群通告组播地址
+                mcastport: 5405                   #服务端口
+                ttl: 1
+        }
+}
+logging {
+        fileline: off					          #日志是否打印行号
+        to_stderr: no                             #是否输出标准错误（到显示器）
+        to_logfile: yes                           #定义日志
+        logfile: /var/log/corosync.log           
+        to_syslog: no                             #是否开启系统日志
+        debug: off
+        timestamp: on
+        logger_subsys {
+                subsys: AMF
+                debug: off
+        }
+}
+service {                                         #服务启动时启动pacemaker
+        ver: 0
+        name: pacemaker
+}
+
+修改drbd配置文件
+drbd有3个配置文件/etc/drbd.conf主配置文件，主配置文件包含了
+/etc/drbd.d/global_common.conf，drdb启动配置文件
+/etc/drbd.d/mydrdb.res(此文件需自己创建)，drdb资源配置文件
+
+/etc/drbd.d/global_common.conf  
+#global配置段
+global {
+        usage-count no;
+		#装机量统计
+}
+#common配置段,该配置段不是必须的，但可以用来设定多个resource共有的选项，以减少重复性工作。该配置段中又包含如下配置段：disk、net、startup、syncer和handlers
+common {
+        protocol C;
+		#为保证数据同步安全drbd有3种协议
+		#protocol A  异步复制协议，数据写入本地磁盘，且拷贝数据进入本地tcp缓存区，认为主节点的本地操作完成，这种模式，在发生强制故障转移的时候可能发生数据丢失的现象。协议A常用在长距离复制环境中。当它和DRBD代理结合使用的时候，它成为一个有效的灾难恢复解决方案。
+		#protocol B  内存同步复制协议，本地磁盘写入完成，且拷贝数据到达对等节点的内存缓存区，认为主节点本地写操作完成。如果节点同时停电，主节点的数据存储将发生不可逆的损坏，大部分最近在主节点中写入完成的数据可能会丢失。
+		#protocol C #同步复制协议，只有当本地磁盘和远程磁盘都确认写入完成时，就认为在主节点的本地写操作完成。结果，即使一个节点崩溃，也不会丢失任何数据。唯一丢失数据的可能是两个节点同时崩溃。
+        handlers {
+
+                pri-on-incon-degr "/usr/local/drbd/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b > /proc/sysrq-trigger ; reboot -f";
+                pri-lost-after-sb "/usr/local/drbd/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b > /proc/sysrq-trigger ; reboot -f";
+                local-io-error "/usr/local/drbdlib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o > /proc/sysrq-trigger ; halt -f";
+        }
+
+        startup {
+        }
+
+        options {
+        }
+#disk配置段,该配置段用来精细地调节drbd底层存储的属性,这是一个非常重要的配置段，如果底层设备（磁盘）发生了错误或损坏，该配置段将按照设定的策略发生作用
+	#detach：发生I/O错误的节点将放弃底层设备，以diskless mode继续工作。在diskless mode下，只要还有网络连接，drbd将从secondarynode读写数据，而不需要failover,
+	该策略导致一定的损失，但好处也很明显，drbd服务不会中断。官方推荐和默认策略
+        disk {
+                on-io-error detach;
+        }
+
+        net {
+        }
+#syncer配置段,该配置段用来更加精细地调节服务的同步进程
+	#rate：设置同步时的速率,所谓有效可用带宽，是指网络带宽和磁盘读写速度中的最小者,官方提示速率的设定，最好设为有效可用带宽的30%
+        syncer {
+                rate 1000M;
+        }
+}
+
+/etc/drbd.d/mydrbd.res 配置文件说明
+resource mydrbd {
+		定义资源名
+        on node1 {
+                device          /dev/drbd1;
+				#node1节点上drdb设备为/dev/drbd1，我的理解，这是drdb用来截获内存缓存数据的虚拟设备
+                disk            /dev/magevg/magelv;
+				#lvm磁盘设备
+                address         172.30.82.45:7789;
+				#drbd运行地址及端口
+                meta-disk       internal;
+				#元数据是否卸载本地
+        }
+        on node2 {
+                device          /dev/drbd1;
+                disk            /dev/magevg/magelv;
+                address         172.30.82.58:7789;
+                meta-disk       internal;
+        }
+}
+
+配置完成后将corosync 及drbd的配置文件拷贝到另一节点
+scp /etc/{corosync.conf，corosync-keygen} node2:/etc/
+scp /etc/drbd.d/{global_common.conf,mydrdb.res} node2:/etc/drbd.d
+
+六、启动服务并测试
+a、drbd服务启动及测试
+1)在node1,node2上分别创建lvm磁盘设备
+fdisk /dev/sdb1
+n
+p
+1
++500M
+t
+8e
+w
+/dev/sdb2 同上
+pvcreate /dev/sdb{1,2}
+vgcreate -s 16M magevg /dev/sdb{1,2}
+pvcreate -L 992M -n magelv magevg
+
+2）初始化资源，在Node1和Node2上分别执行：
+# drbdadm create-md mydrdb
+3）启动服务，在node1和node2上分别执行：
+/etc/init.d/drbd start
+4）查看启动状态：
+[root@node1]# cat /proc/drbd 
+version: 8.4.3 (api:1/proto:86-101)
+GIT-hash: 89a294209144b68adb3ee85a73221f964d3ee515 build by root@node1, 2015-05-27 23:04:23
+ 0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:1060184
+两个节点都是 Secondary/Secondary 状态
+也可以通过如下命令查看drbd状态
+[root@node1 sbin]# drbd-overview 
+0:mydrbd/0  Connected Secondary/Secondary Inconsistent/Inconsistent C r----- 
+
+5)将node1节点设置为Primary，执行如下命令：
+[root@node1 sbin]# drbdadm  -- --overwrite-data-of-peer primary mydrbd
+查看状态，可以发现数据同步过程开始
+[root@node1 sbin]# drbd-overview 
+0:mydrbd/0  SyncSource Primary/Secondary UpToDate/Inconsistent C r---n- 
+[====>...............] sync'ed: 26.3% (782680/1060184)K
+
+数据同步完成
+[root@node1 sbin]# drbd-overview 
+0:web  Connected Primary/Secondary UpToDate/UpToDate C r----
+drbd 处于主从状态Primary/Secondary
+
+创建文件系统：
+文件系统只能在primary节点上挂载，因此只能在主节点上对drbd设备格式化
+mkfs -t ext4 /dev/drbd1
+mkdir /mnt/drbd
+mount /dev/drbd1 /mnt/drbd
+在drbd设备上常见文件
+touch /mnt/drbd/{a,b,c}
+
+切换primary和secondary节点
+对pri/sec模型的drbd，在某一时刻只能由一个节点为primary,因此要切换两个节点角色，只能将原来的primary节点设置为secondary后，才能将原来的secondary节点设置为primary:
+umount /mnt/drbd
+drbdadm  secondary mydrbd
+主节点上查看drbd状态：
+[root@node1 ~]# drbd-overview 
+0:mydrbd/0  Connected Secondary/Secondary UpToDate/UpToDate C r-----
+从节点上查看drbd状态：
+[root@node2 ~]# drbd-overview 
+0:mydrbd/0  Connected Secondary/Secondary UpToDate/UpToDate C r-----
+让从节点成为主节点，drbd8.4第一次设置某节点成为主节点的命令:
+[root@node2 var]# drbdadm  primary --force mydrbd
+若不是第一次将从节点设为主节点可以使用如下命令:
+drbdadm primary mydrbd
+mount /dev/drbd1 /mnt/drbd
+查看
+[root@node2 drbd]# ll /mnt/drbd
+-rw-r--r--  1 root  root     0 6?   4 16:20 a
+-rw-r--r--  1 root  root     0 6?   4 16:20 b
+-rw-r--r--  1 root  root     0 6?   4 16:20 c
+DRBD启动测试已经完成
+卸载文件系统，降级node2到secondary状态，为高可用准备
+umount /mnt/drbd
+[root@node2 sbin]# drbdadm secondary mydrbd
+在node1,node2上分别执行
+chkconfig drbd off
+
+
+
+b、corosync 启动测试
+1、在node1上执行
+service corosync start
+ssh node2 'service corosync start'
+注意：启动node2需要在node1上使用如上命令进行，不要在node2节点上直接启动；
+查看corosync引擎是否正常启动
+[root@node1 corosync]#  grep -e "Corosync Cluster Engine" -e "configuration file" /var/log/corosync.log 
+May 19 23:11:05 corosync [MAIN  ] Corosync Cluster Engine exiting with status 0 at main.c:2055.
+May 19 23:11:46 corosync [MAIN  ] Corosync Cluster Engine ('1.4.7'): started and ready to provide service.
+May 19 23:11:46 corosync [MAIN  ] Successfully read main configuration file '/etc/corosync/corosync.conf'
+查看初始化成员节点通知是否正常发出：
+[root@node1 corosync]# grep  TOTEM  /var/log/corosync.log 
+May 19 19:59:44 corosync [TOTEM ] Initializing transport (UDP/IP Multicast).
+May 19 19:59:44 corosync [TOTEM ] Initializing transmit/receive security: libtomcrypt SOBER128/SHA1HMAC (mode 0).
+May 19 19:59:44 corosync [TOTEM ] The network interface [172.30.82.45] is now up.
+May 19 19:59:44 corosync [TOTEM ] A processor joined or left the membership and a new membership was formed.
+检查启动过程中是否有错误产生：
+[root@node1 corosync]# # grep ERROR: /var/log/corosync.log 
+查看pacemaker是否正常启动：
+May 19 23:11:46 corosync [pcmk  ] info: pcmk_startup: CRM: Initialized
+May 19 23:11:46 corosync [pcmk  ] Logging: Initialized pcmk_startup
+May 19 23:11:46 corosync [pcmk  ] info: pcmk_startup: Maximum core file size is: 18446744073709551615
+May 19 23:11:46 corosync [pcmk  ] info: pcmk_startup: Service: 9
+May 19 23:11:46 corosync [pcmk  ] info: pcmk_startup: Local hostname: node1
+
+使用如下命令查看集群节点的启动状态：
+[root@node1 corosync]# crm status
+Last updated: Wed May 20 00:10:38 2015
+Last change: Tue May 19 22:49:50 2015
+Stack: classic openais (with plugin)
+Current DC: node1 - partition with quorum
+Version: 1.1.11-97629de
+2 Nodes configured, 2 expected votes
+2 Resources configured
+Online: [ node1 node2 ]
+
+七、安装mysql数据库到/mnt/drdb下
+tar -zxvf mysql-5.1.41.tar.gz
+cd mysql-5.1.41
+./configure --prefix=/mnt/drbd/mysqld
+make && make install
+cp /mnt/drbd/mysqld/share/mysql/my-huge.cnf  /etc/my.cnf
+useradd -s /sbin/nologin mysql
+/mnt/drbd/mysqld/bin/mysql_install_db --basedir=/mnt/drbd/mysqld --datadir=/mnt/drbd/mysqld/data --user=mysql
+chown  -R mysql.root /mnt/drbd/mysqld
+scp /mnt/drbd/mysqld/share/mysql/mysql.server /etc/init.d
+chkconfig --add mysqld
+chkconfig mysqld off
+
+
+七、集群资源配置
+crm(live)configure# property stonith-enabled=false
+定义不启用stonith设备
+
+crm(live)configure# property no-quorum=ignore
+当一台高可用服务不可用，集群的默认的仲裁机制为ignore（集群是2台服务器的必须使用此选项）
+
+crm(live)configure# rsc_defaults resource-stickiness=100
+定义默认的资源粘性
+定义drbd的高可用，首先定义drbd为基本资源，之后定义drbd为克隆的主从资源
+
+crm(live)configure#primitive mysqldrbd  ocf:linbit:drbd params drbd_resource=mydrbd op start timeout=240 op stop timeout=100 op monitor role=node1 interval=20 timeout=30 op monitor role=node2 interval=30 timeout=30
+说明：mysqldrbd 定义一个集群资源，集群资源的代理是ocf下linbit提供的drbd服务，drbd服务要提供本身的资源mydrbd，资源名定义为drbd_resource，op是对drbd的一些动作、监控的时间限定，role指定了资源的所在主机的角色
+注意：这里只有linbit没有beartbeat，corosync1.4以前的版本有heartbeat
+
+crm(live)configure#ms ms_mysqldrbd mysqldrbd meta master-max=1 master-node-max=1 clone-max=2 clone-node-max=1 notify=true
+说明
+ms定义mysqldrbd为主从资源，资源名为ms_mysqldrbd，主从资源一定是克隆类型的，meta对克隆资源的限定
+master-max=1 最多个克隆资源被提升为主资源状态（只能由一个克隆资源被提升为主资源）
+master-node-max=1  运行主资源的有几个节点（运行主资源的必须只有一个节点）
+clone-max=2 一个资源克隆了几份，集群有几个节点就克隆几份
+clone-node-max=1 每个节点最多可以运行几个克隆资源
+notify=ture 发生故障是否向管理员发起通告
+
+crm(live)configure# primitive mystore ocf:heartbeat:Filesystem params device=/dev/drbd1 directory=/mnt/drbd fstype=ext4 op start timeout=60 op stop timeout=60
+定义集群文件系统的存储资源，通过ocf下heartbeat下的Filesystem代理，params指定文件系统的参数，device要挂载的硬件，directory挂载目录，op挂载时间超时设置
+
+crm(live)configure# colocation mystore_with_ms_mysqldrbd inf: mystore ms_mysqldrbd:node1
+colocation排列约束指定资源之间的粘合，约束名为mystore_with_ms_mysqldrbd（可以随便起名）
+inf: 资源约束分数为正无穷，永远在一起
+mystore 与 ms_mysqldrbd 在一起，ms_mysqldrbd 为参照的对象（也就是说它是主体）
+
+crm(live)configure# order mystore_after_ms_mysqldrbd mandatory: ms_mysqldrbd:promote mystore:start
+order 定义资源的启动顺序名mystore_after_ms_mysqldrbd 
+mandatory: 强制启动顺序
+ms_mysqldrbd:promote 先启动 mystore:start 后启动
+
+crm(live)configure# primitive mysqld lsb:mysqld
+定义数据库服务资源
+
+crm(live)configure#colocation mysqld_with_mystore inf: mysqld mystore
+定义数据库资源约束，数据库服务要与文件系统在一起
+crm(live)configure#order mysqd_after_mystore Mandatory: mystore mysqld
+数据库运行在文件系统之后
+
+约束关系可以通过xml文件分析查看
+crm(live)configure#show xml 
+
+crm(live)configure#primitive params ip=172.30.82.42 nic=eth0 cidr_netmask=255.255.255.0
+定义一个虚拟ip集群资源
+crm(live)configure#crm(live)configure#colocation myip_with_ms_mysqldrdb inf: ms_mysqldrbd:Master myip
+定义虚拟ip要与主资源运行在一起
+
+八、自动切换
+node1上执行
+[root@node1 mysql]# crm status
+Last updated: Thu Jun  4 17:02:13 2015
+Last change: Thu Jun  4 16:19:45 2015
+Stack: classic openais (with plugin)
+Current DC: node1 - partition with quorum
+Version: 1.1.11-97629de
+2 Nodes configured, 2 expected votes
+4 Resources configured
+
+
+Online: [ node1 node2]
+
+ Master/Slave Set: ms_mysqldrbd [mysqldrbd]
+     Masters: [ node1 ]
+     Stopped: [ node2 ]
+ mystore        (ocf::heartbeat:Filesystem):    Started node1 
+ mysqld (lsb:mysqld):   Started node1
+ myip	(ocf::heartbeat:IPaddr): 			Started node1
+ 测试是否可以连接数据库
+ mysql -uroot -h172.30.82.61
+ show databases;
+ 
+切换节点
+[root@node1 mysql]# crm node standby
+[root@node2 drbd]# crm status
+Last updated: Thu Jun  4 17:09:03 2015
+Last change: Thu Jun  4 17:08:58 2015
+Stack: classic openais (with plugin)
+Current DC: node1 - partition with quorum
+Version: 1.1.11-97629de
+2 Nodes configured, 2 expected votes
+4 Resources configured
+
+
+Node node1: standby
+Online: [ node2 ]
+
+ Master/Slave Set: ms_mysqldrbd [mysqldrbd]
+     Masters: [ node2 ]
+     Stopped: [ node1 ]
+ mystore        (ocf::heartbeat:Filesystem):    Started node2 
+ mysqld (lsb:mysqld):   Started node2 
+ myip	(ocf::heartbeat:IPaddr): 			Started node2
+ 测试是否可以连接数据库
+ mysql -uroot -h172.30.82.61
+ show databases;
+ 
+ 终于完了

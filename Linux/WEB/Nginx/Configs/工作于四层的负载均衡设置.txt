@@ -1,0 +1,12 @@
+stream {
+    server {
+        listen 1034;
+        proxy_pass app;
+    }
+
+    upstream app {
+        server 192.168.0.3:1034;
+        server 192.168.0.4:1034;
+        server 192.168.0.6:1034;
+    }
+}

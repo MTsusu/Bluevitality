@@ -1,3 +1,0 @@
-;; ReplacerScript
-
-shell32.dll,restore

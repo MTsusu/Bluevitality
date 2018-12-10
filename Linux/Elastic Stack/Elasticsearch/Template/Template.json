@@ -1,0 +1,318 @@
+curl -XPOST "http://192.168.100.106:9200/_template/uvn_audiometry_template" -H 'Content-Type: application/json' -d'{
+    "template": "uvn_audiometry_*",
+    "mappings": {
+        "audiometry": {
+            "_source": {
+                "excludes": [
+                    "isYzNode",
+                    "ifPassFm",
+                    "pjjhscFm",
+                    "pjjkscFm",
+                    "dayId"
+                ]
+            },
+            "_all": {
+                "enabled": false
+            },
+            "properties": {
+                "dayId": {
+                    "type": "keyword"
+                },
+                "timeId": {
+                    "type": "keyword"
+                },
+                "dateTime": {
+                    "type": "date",
+                    "format": "yyyyMMddHH:mm:ss||yyyyMMddHH:mm:ssSSS||date_time",
+                    "doc_values": true
+                },
+                "agentCallId": {
+                    "type": "keyword"
+                },
+                "belongProvId": {
+                    "type": "keyword"
+                },
+                "belongRegionId": {
+                    "type": "keyword"
+                },
+                "brandId": {
+                    "type": "keyword"
+                },
+                "levelId": {
+                    "type": "keyword"
+                },
+                "callEnd": {
+                    "type": "date",
+                    "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                },
+                "callId": {
+                    "type": "keyword"
+                },
+                "callProvId": {
+                    "type": "keyword"
+                },
+                "callRegionId": {
+                    "type": "keyword"
+                },
+                "callRemark": {
+                    "type": "keyword"
+                },
+                "callSc": {
+                    "index": "not_analyzed",
+                    "type": "long"
+                },
+                "callSor": {
+                    "type": "keyword"
+                },
+                "callStart": {
+                    "type": "date",
+                    "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time",
+                    "doc_values": true
+                },
+                "commuNbr": {
+                    "type": "short"
+                },
+                "entranceId": {
+                    "type": "keyword"
+                },
+                "exportId": {
+                    "type": "keyword"
+                },
+                "ifPeople": {
+                    "type": "boolean"
+                },
+                "ifSj": {
+                    "type": "boolean"
+                },
+                "ifVoice": {
+                    "type": "boolean"
+                },
+                "ifYz": {
+                    "type": "boolean"
+                },
+                "ifMy": {
+                    "type": "boolean"
+                },
+                "myContent": {
+                    "type": "keyword"
+                },
+                "myWhy": {
+                    "type": "keyword"
+                },
+                "myTime": {
+                    "type": "date",
+                    "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                },
+                "inputNo": {
+                    "type": "keyword"
+                },
+                "parBrandId": {
+                    "type": "keyword"
+                },
+                "reqStartTime": {
+                    "type": "date",
+                    "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                },
+                "subCcno": {
+                    "type": "keyword"
+                },
+                "vdn": {
+                    "type": "keyword"
+                },
+                "numDx": {
+                    "type": "integer"
+                },
+                "panoramicWav": {
+                    "type": "keyword"
+                },
+                "personWav": {
+                    "type": "keyword"
+                },
+                "commus": {
+                    "type": "nested",
+                    "properties": {
+                        "interactionIdx": {
+                            "type": "short"
+                        },
+                        "interactionNo": {
+                            "type": "keyword"
+                        },
+                        "busiTypeId": {
+                            "type": "keyword"
+                        },
+                        "busiSonId": {
+                            "type": "keyword"
+                        },
+                        "grammar": {
+                            "type": "keyword"
+                        },
+                        "promptWav": {
+                            "type": "keyword"
+                        },
+                        "promptText": {
+                            "type": "keyword"
+                        },
+                        "commuNode": {
+                            "type": "keyword"
+                        },
+                        "flowType": {
+                            "type": "integer"
+                        },
+                        "flowResultType": {
+                            "type": "integer"
+                        },
+                        "flowResult": {
+                            "type": "keyword"
+                        },
+                        "busiResult": {
+                            "type": "keyword"
+                        },
+                        "simpWordResult": {
+                            "index": "no",
+                            "type": "text",
+                            "store": true
+                        },
+                        "wordResult": {
+                            "index": "no",
+                            "type": "text",
+                            "store": true
+                        },
+                        "ifMark": {
+                            "type": "boolean"
+                        },
+                        "promptPlayTime": {
+                            "type": "date",
+                            "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                        },
+                        "flowResultTime": {
+                            "type": "date",
+                            "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                        },
+                        "ifInter": {
+                            "type": "boolean"
+                        },
+                        "interSuccess": {
+                            "type": "boolean"
+                        },
+                        "ifPass": {
+                            "type": "integer"
+                        },
+                        "recText": {
+                            "index": "analyzed",
+                            "type": "text",
+                            "analyzer": "ik_max_word",
+                            "search_analyzer": "ik_max_word"
+                        },
+                        "busiSuccess": {
+                            "type": "boolean"
+                        },
+                        "ifBusiDycg": {
+                            "type": "boolean"
+                        },
+                        "numBusiXysc": {
+                            "type": "float"
+                        },
+                        "numMJhsc": {
+                            "type": "float"
+                        },
+                        "numYzCommu": {
+                            "type": "integer"
+                        },
+                        "speakEndTime": {
+                            "type": "date",
+                            "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                        },
+                        "interStartTime": {
+                            "type": "date",
+                            "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                        },
+                        "interEndTime": {
+                            "type": "date",
+                            "format": "yyyyMMddHH:mm:ssSSS||yyyyMMddHH:mm:ss||date_time"
+                        },
+                        "recCostTime": {
+                            "type": "long"
+                        },
+                        "isYzNode": {
+                            "type": "integer"
+                        },
+                        "markText": {
+                            "type": "keyword"
+                        },
+                        "wordMarkId": {
+                            "type": "keyword"
+                        },
+                        "wordMarkResult": {
+                            "type": "keyword"
+                        },
+                        "busiMarkId": {
+                            "type": "keyword"
+                        },
+                        "busiMarkResult": {
+                            "type": "keyword"
+                        },
+                        "ifRight": {
+                            "type": "boolean"
+                        },
+                        "ifSentenceRight": {
+                            "type": "boolean"
+                        },
+                        "commuRemark": {
+                            "type": "keyword"
+                        },
+                        "flowTypeIdx": {
+                            "type": "integer"
+                        },
+                        "commuTypeIdx": {
+                            "type": "boolean"
+                        },
+                        "ifPassFm": {
+                            "type": "integer"
+                        },
+                        "ifYwFm": {
+                            "type": "integer"
+                        },
+                        "pjjhscFm": {
+                            "type": "integer"
+                        },
+                        "pjjkscFm": {
+                            "type": "integer"
+                        },
+                        "ifDx": {
+                            "type": "boolean"
+                        },
+                        "dxBusinsesName": {
+                            "type": "keyword"
+                        },
+                        "templateId": {
+                            "type": "keyword"
+                        },
+                        "dxSuccess": {
+                            "type": "boolean"
+                        },
+                        "templateNr": {
+                            "type": "keyword"
+                        },
+                        "failReason": {
+                            "type": "keyword"
+                        },
+                        "dxStatus": {
+                            "type": "keyword"
+                        },
+                        "warAddr": {
+                            "index": "no",
+                            "type": "text"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "settings": {
+        "index": {
+            "number_of_replicas": "1",
+            "number_of_shards": "4",
+            "refresh_interval": "60s"
+        }
+    }
+}'

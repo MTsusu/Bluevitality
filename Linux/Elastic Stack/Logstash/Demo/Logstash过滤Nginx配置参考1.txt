@@ -1,0 +1,66 @@
+# 更多ELK资料请访问 http://devops.taobao.com
+
+一、配置前需要注意：
+
+1.Use chmod to modify nginx log file privilege. E.g. chmod 664 access.log
+2.Modify /etc/default/logstash => LS_USER field to change logstash user, e.g. root
+
+
+--------------------------------------------------------------------------
+
+
+二、logstash配置文件：
+
+input {
+    file {
+        type => "nginx-access"
+        path => "/var/nginx/access.log" # MODIFY REQUIRED! point to nginx access.log file
+        start_position => beginning  # read file from beginning, instead of from end as default
+        ignore_older => 0            # do not ignore old file
+    }
+    file {
+        type => "nginx-error"
+        path => "/var/nginx/error.log" # MODIFY REQUIRED! point to nginx error.log file
+        start_position => beginning
+        ignore_older => 0
+    }
+}
+
+filter {
+    # separate parsing for nginx access and error log
+    if [type] == "nginx-access" {
+        # default nginx access log pattern (nginx 1.4.6). You may change it if it doesn't fit
+        grok {
+            match => { "message" => "%{COMBINEDAPACHELOG}+%{GREEDYDATA:extra_fields}" }
+        }
+    } else if [type] == "nginx-error" {
+        # default nginx error log pattern (nginx 1.4.6). You may change it if it doesn't fit (but ensure "clientip" field)
+        grok {
+            match => [ "message" , "(?<timestamp>%{YEAR}[./-]%{MONTHNUM}[./-]%{MONTHDAY}[- ]%{TIME}) \[%{LOGLEVEL:severity}\] %{POSINT:pid}#%{NUMBER}: %{GREEDYDATA:errormessage}(?:, client: (?<clientip>%{IP}|%{HOSTNAME}))(?:, server: %{IPORHOST:server}?)(?:, request: %{QS:request})?(?:, upstream: (?<upstream>\"%{URI}\"|%{QS}))?(?:, host: %{QS:request_host})?(?:, referrer: \"%{URI:referrer}\")?"]
+        }
+    }
+
+    # add geo-location info
+    geoip {
+        source => "clientip"
+    }
+}
+
+output {
+    # output to local Elasticsearch server as index, separated by log type and date
+    elasticsearch {
+        hosts => ["127.0.0.1"]
+        index => "%{type}-%{+YYYY.MM.dd}"
+    }
+}
+
+
+
+--------------------------------------------------------------------------
+
+github地址：https://github.com/adventure-yunfei/ELK-for-nginx-log
+
+
+
+
+

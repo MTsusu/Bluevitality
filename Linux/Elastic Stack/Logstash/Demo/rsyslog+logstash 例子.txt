@@ -1,0 +1,56 @@
+命令审核
+vi /etc/profile
+mkdir -p /usr/lib/cmdlog
+chmod -R 777 /usr/lib/cmdlog/
+export CMDLOG_FILE="/usr/lib/cmdlog/cmdlog.$(date +%F)"
+export PROMPT_COMMAND='{ date "+%F %T ## $(whoami)@${SSH_TTY} ---> $(echo ${SSH_CONNECTION}) ## $(history 1|awk "{\$1=\"\";print}") "; } >>$CMDLOG_FILE'
+
+日志样本：2016-08-04 08:47:28 ## root@/dev/pts/0 ---> 121.33.23.10 49240 120.26.19.94 22 ##  grep oauth *
+
+vi /etc/rsyslog.d/om-commad.conf 
+module(load="imfile")	加载模块
+input(
+    type="imfile"
+    File="/usr/lib/cmdlog/cmdlog.*"
+    addMetadata="off"	关闭元数据
+    Severity="info"
+    Facility="user"
+    tag="commad"
+    ruleset="commad_ruleset"	调用规则
+)
+
+template(name="commad" type="string" string="%msg%\n")		定义输出日志内容的模板
+ruleset( name="commad_ruleset" ){	定义一条规则
+    action(type="omfwd" Target="10.51.1.1" Port="512" Protocol="tcp" template="commad" )	规则调用omfwd模块，输出参数，输出内容模版
+    stop	规则结束
+}
+
+
+-----logstash
+input {
+  tcp {
+        port => 512
+        type => commad
+  }
+}
+
+filter {
+  if [type] == "commad" {
+  grok {
+    match => {"message" => "%{NGINXERR_DATE:log_timestamp} %{NOTSPACE:xx} %{USERNAME:user}@%{NOTSPACE:tty} %{NOTSPACE:xxx} %{IPV4:chient_ip} %{NUMBER:client_port} %{IPV4:server_ip} %{NUMBER:server_port} %{NOTSPACE:xxxx} %{GREEDYDATA:command}"}
+    remove_field => ['xx']
+    remove_field => ['xxx']
+    remove_field => ['xxxx']
+    remove_field => ['message']
+  }
+  date {
+    match => ["log_timestamp" , "yyyy-MM-dd HH:mm:ss"]
+  }
+  }
+
+if [host] == "114.215.200.41" { mutate { replace => { "host" => "my_test1" } } }
+if [host] == "10.51.8.234" { mutate { replace => { "host" => "监控平台" } } }
+
+}
+
+output {...}

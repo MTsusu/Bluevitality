@@ -1,0 +1,5 @@
+#使用阿里巴巴在国内的镜像服务器：
+npm install -gd express --registry=http://registry.npm.taobao.org
+
+#为避免每次安装都要执行 --registry 可用如下命令永久设置：
+npm config set registry http://registry.npm.taobao.org

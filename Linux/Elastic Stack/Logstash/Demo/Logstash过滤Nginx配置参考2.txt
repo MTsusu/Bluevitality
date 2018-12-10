@@ -1,0 +1,34 @@
+# 更多ELK资料请访问 http://devops.taobao.com
+
+input {
+    file {
+        path => "/var/log/nginx/*access*"
+    }
+}
+
+filter {
+    mutate { replace => { "type" => "nginx_access" } }
+    grok {
+        patterns_dir => "/etc/logstash/patterns/"
+        match => { "message" => "%{NGINXACCESS}" }
+    }
+    date {
+        match => [ "timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+    }
+    geoip {
+        source => "clientip"
+    }
+}
+
+output {
+    elasticsearch {
+        host => "localhost"
+        protocol => "http"
+    }
+    stdout { codec => rubydebug }
+}
+
+
+------------------------------------------------------
+
+github地址：https://github.com/nbigot/openresty_nginx_logstash_kibana_elasticsearch_centos6

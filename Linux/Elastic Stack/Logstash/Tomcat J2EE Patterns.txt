@@ -1,0 +1,33 @@
+JAVACLASS (?:[a-zA-Z$_][a-zA-Z$_0-9]*\.)*[a-zA-Z$_][a-zA-Z$_0-9]*
+#Space is an allowed character to match special cases like 'Native Method' or 'Unknown Source'
+JAVAFILE (?:[A-Za-z0-9_. -]+)
+#Allow special <init> method
+JAVAMETHOD (?:(<init>)|[a-zA-Z$_][a-zA-Z$_0-9]*)
+#Line number is optional in special cases 'Native method' or 'Unknown source'
+JAVASTACKTRACEPART %{SPACE}at %{JAVACLASS:class}\.%{JAVAMETHOD:method}\(%{JAVAFILE:file}(?::%{NUMBER:line})?\)
+# Java Logs
+JAVATHREAD (?:[A-Z]{2}-Processor[\d]+)
+JAVACLASS (?:[a-zA-Z0-9-]+\.)+[A-Za-z0-9$]+
+JAVAFILE (?:[A-Za-z0-9_.-]+)
+JAVASTACKTRACEPART at %{JAVACLASS:class}\.%{WORD:method}\(%{JAVAFILE:file}:%{NUMBER:line}\)
+JAVALOGMESSAGE (.*)
+# MMM dd, yyyy HH:mm:ss eg: Jan 9, 2014 7:13:13 AM
+CATALINA_DATESTAMP %{MONTH} %{MONTHDAY}, 20%{YEAR} %{HOUR}:?%{MINUTE}(?::?%{SECOND}) (?:AM|PM)
+# yyyy-MM-dd HH:mm:ss,SSS ZZZ eg: 2014-01-09 17:32:25,527 -0800
+TOMCAT_DATESTAMP 20%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{HOUR}:?%{MINUTE}(?::?%{SECOND}) %{ISO8601_TIMEZONE}
+CATALINALOG %{CATALINA_DATESTAMP:timestamp} %{JAVACLASS:class} %{JAVALOGMESSAGE:logmessage}
+# 2014-01-09 20:03:28,269 -0800 | ERROR | com.example.service.ExampleService - something compeletely unexpected happened...
+TOMCATLOG %{TOMCAT_DATESTAMP:timestamp} \| %{LOGLEVEL:level} \| %{JAVACLASS:class} - %{JAVALOGMESSAGE:logmessage}
+
+# 2016-04-10 07:19:16-|INFO|-Root WebApplicationContext: initialization started
+MYTIMESTAMP 20%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{HOUR}:%{MINUTE}:%{SECOND}
+MYLOG %{MYTIMESTAMP:mytimestamp}-\|%{LOGLEVEL:level}\|-%{JAVALOGMESSAGE:logmsg}
+
+ACCESSIP (?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})
+ACCESSTIMESTAMP %{MONTHDAY}\/%{MONTH}\/20%{YEAR}:%{HOUR}:%{MINUTE}:%{SECOND} %{ISO8601_TIMEZONE}
+HTTPMETHOD (GET|POST|PUT|DELETE)
+PRJNAME ([^\s]*)
+HTTPVERSION (https?\/[0-9]{1}\.[0-9]{1})
+STATUSCODE ([0-9]{3})
+# 192.168.1.101 - - [10/Apr/2016:08:31:34 +0800] "GET /spring-mvc-showcase HTTP/1.1" 302 -
+ACCESSLOG %{ACCESSIP:accIP}\s-\s\-\s\[%{ACCESSTIMESTAMP:accstamp}\]\s"%{HTTPMETHOD:method}\s\/%{PRJNAME:prjName}\s%{JAVALOGMESSAGE:statusCode}

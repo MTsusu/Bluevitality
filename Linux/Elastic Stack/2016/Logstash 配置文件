@@ -1,0 +1,72 @@
+# Logstash Version: 5.2.2
+
+input{
+    file{
+        path => ["/elk201710/ebs/ebs01.log"]
+        type => "ebslog"
+        codec => multiline{
+            pattern => "^%{NOTSPACE} %{NUMBER}"
+            negate => true
+            what => "previous"
+        }
+    }
+}
+
+filter{
+    # codec => rubydebug
+    mutate{
+        split => ["message","> <"]
+        add_field => {
+            "date" => "%{[message][0]}"
+        }
+        add_field => {
+            "severity" => "%{[message][1]}"
+        }
+        add_field => {
+            "stdin" => "%{[message][2]}"
+        }
+        add_field => {
+            "hostname" => "%{[message][3]}"
+        }
+        add_field => {
+            "servername" => "%{[message][4]}"
+        }
+        add_field => {
+            "log4j2" => "%{[message][5]}"
+        }
+        add_field => {
+            "kzt" => "%{[message][6]}"
+        }
+        add_field => {
+            "threadid" => "%{[message][7]}"
+        }
+        add_field => {
+            "userid" => "%{[message][8]}"
+        }
+        add_field => {
+            "affairid" => "%{[message][9]}"
+        }
+        add_field => {
+            "contxtid" => "%{[message][10]}"
+        }
+        add_field => {
+            "information" => "%{[message][11]}"
+        }
+    }
+    grok{
+        match => {"information" =>"%{TIMESTAMP_ISO8601:log_timestamp} %{NOTSPACE:operation} %{NOTSPACE:LOGLEVEL} %{GREEDYDATA:web_log}" }
+    }
+    mutate{ 
+        remove_field => "information"
+        remove_field => "message"
+    }
+}
+
+output{
+    elasticsearch {
+        hosts => ["192.168.8.201:9200"]
+        index => "ebslog-%{+YYYY.MM.dd}"
+        user => elastic
+        password => changeme
+    }
+}
