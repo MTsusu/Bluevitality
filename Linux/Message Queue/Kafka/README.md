@@ -100,20 +100,20 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
 --config delete.retention.ms=86400000    #1天
 
-#删除主题
-./kafka-topics.sh --zookeeper 192.168.133.130:2181 --delete --topic ES
-
 #主题清单
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --list
 
 #主题详情
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 -describe -topic ES
 
+#删除主题
+./kafka-topics.sh --zookeeper 192.168.133.130:2181 --delete --topic ES
+
 #生产者客户端命令（生产者产生信息时已经从ZK获取到了Broker的路由，因此这里要填入Broker的地址列表）
 bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 
 #消费者客户端命令（从头消费：--from-beginning）
-./kafka-console-consumer.sh -zookeeper  192.168.133.130:2181 --from-beginning --topic ES
+./kafka-console-consumer.sh -zookeeper  192.168.133.130:2181 --topic ES --from-beginning
 
 #为Topic增加Partition
 ./kafka-topics.sh –-zookeeper 127.0.0.1:2181 -–alter -–partitions 20 -–topic ES 
@@ -124,16 +124,18 @@ bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 #修改主题内的分区数
 ./kafka-topics.sh -–zookeeper 127.0.0.1:2181 -alter –partitions 5 –topic TEST
 
-#查看正在进行消费的 group ID ：
+#查看正在进行消费的 group ID ：（旧/新）
 kafka-consumer-groups.sh --zookeeper localhost:2181 --list
+kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 
-#通过 group ID 查看当前详细的消费情况
-./kafka-consumer-groups.sh --group logstash --describe --zookeeper 127.0.0.1:2181
-输出：
-GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
+#通过 group ID 查看当前详细的消费情况（旧/新）
+./kafka-consumer-groups.sh --zookeeper 127.0.0.1:2181 --group logstash01 --describe 
+./kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --group logstash01 --describe
+#输出：
+#GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
 
-查看指定group.id 的消费者消费情况 
-# kafka-consumer-groups.sh --zookeeper localhost:2181 --group console-consumer-28542 --describe
+#特定 group ID 的消费情况 
+./kafka-consumer-groups.sh --zookeeper localhost:2181 --group console-consumer-28542 --describe
 GROUP                          TOPIC          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG      OWNER
 console-consumer-28542         test_find1     0          303094          303094          0               
 console-consumer-28542         test_find1     2          303713          303713          0  
@@ -143,7 +145,6 @@ console-consumer-28542         test_find1     2          303713          303713 
 
 #查看所有kafka节点，在ZK的bin目录:
 ./zkCli.sh ---> ls /brokers/ids 就可以看到zk中存储的所有 broker id，查看：get /brokers/ids/{x}
-
 ```
 #### 数据存储机制
 ```bash
