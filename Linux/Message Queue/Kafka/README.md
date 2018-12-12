@@ -97,7 +97,7 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 #### 运维
 ```bash
 #创建主题（保存时长：delete.retentin.ms）
-./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic LOGSTASH \
+./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic TEST \
 --config delete.retention.ms=86400000    #1天
 #线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
 #parttitions和replication－factor是两个必备选项
