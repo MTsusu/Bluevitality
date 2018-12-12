@@ -153,6 +153,15 @@ console-consumer-28542         test_find1     2          303713          303713 
 #查看所有kafka节点，在ZK的bin目录:
 ./zkCli.sh ---> ls /brokers/ids 就可以看到zk中存储的所有 broker id，查看：get /brokers/ids/{x}
 ```
+#### 查看各TOPIC的Broker中分区容量
+```bash
+#查看某特定TOPIC在各Broker上的分区容量信息
+./kafka-log-dirs.sh  --bootstrap-server <broker:port> --describe --topic-list <topics> --broker-list <broker.id_list> 
+#--bootstrap-server:     必填项, <broker:port>.
+#--broker-list:  可选, 可指定查看某个broker.id上topic-partitions的size, 默认为集群所有broker.
+#--describe:     描述
+#--topic-list:   指定要查询的 topic 在disk上的空间占用情况
+```
 #### 性能测试
 ```bash
 #消费
