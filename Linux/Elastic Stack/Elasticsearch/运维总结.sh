@@ -23,7 +23,7 @@
 }'
 
 #统计ES某个索引数据量：
-[wangyu@localhost Test]$ curl -XGET '10.110.79.22:9200/_cat/count/new-sgs-rbil-core-sys
+[wangyu@localhost Test]$ curl -XGET '10.110.79.22:9200/_cat/count/new-sgs-rbil-core-sys'
 
 #获取mapping
 [wangyu@localhost Test]$ curl -XGET http://localhost:9200/{index}/{type}/_mapping?pretty
