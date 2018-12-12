@@ -211,6 +211,25 @@ $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
   }
 }
 
+
+#集群设置
+PUT /_cluster/settings
+{
+    "transient" : {
+        "logger.index.search.slowlog" : "DEBUG",  #针对搜索的情况（级别以上,是">="的关系）
+        "logger.index.indexing.slowlog" : "WARN"  #针索引写入的情况
+    }
+}
+
+#索引级别（query：获取索引内的数据，fetch：ORZ....）
+PUT /<INDEX>/_settings
+{
+    "index.search.slowlog.threshold.query.warn": "10s",   #大于10s即属于WARN级别以上的
+    "index.search.slowlog.threshold.query.info": "6s",    #...
+    "index.search.slowlog.threshold.fetch.warn": "1800ms", 
+    "index.search.slowlog.threshold.fetch.info": "1s" 
+}
+
 #Create a logstash_writer role that has the manage_index_templates and monitor cluster privileges, and the write, delete, and 
 #create_index privileges for the Logstash indices. You can create roles from the Management > Roles UI in Kibana or through the role API
 #ES 6.4版本： 在对应的manage_index_templates、monitor的2个集群对logstash-*开头的索引创建对应的权限，权限ROLE名为：logstash_writer
