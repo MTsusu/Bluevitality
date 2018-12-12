@@ -97,7 +97,7 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 #### 运维
 ```bash
 #创建主题（保存时长：delete.retentin.ms）
-./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
+./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic LOGSTASH \
 --config delete.retention.ms=86400000    #1天
 #线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
 #parttitions和replication－factor是两个必备选项
@@ -154,21 +154,36 @@ console-consumer-28542         test_find1     2          303713          303713 
 ```
 #### 性能测试
 ```bash
-./kafka-producer-perf-test.sh --broker-list 172.22.241.162:9092 \
---batch-size 1 --message-size 1024 --messages 10000 --sync --topics topic_test
-#--messages       生产者发送总的消息数量
+#消费
+./kafka-consumer-perf-test.sh --zookeeper 172.22.241.162:9092/kafka \
+--messages 50000000 --topic TEST --threads 1
+#输出格式
+start.time,end.time, compression, message.size, batch.size, total.data.sent.in.MB, MB.sec,total.data.sent.in.nMsg, nMsg.sec
+
+#生产
+./kafka-producer-perf-test.sh --broker-list 172.22.241.162:9092 --threads 3 \
+--messages 10000 --batch-size 1 --message-size 1024 --topics topic_test --sync
+#--messages       生产者发送的消息总量
 #--message-size   每条消息大小
 #--batch-size     每次批量发送消息的数量
 #--topics         生产者发送的topic
 #--threads        生产者使用几个线程同时发送
-#--producer-num-retries 一个消息失败发送重试次数
-#--request-timeout-ms   一个消息请求发送超时时间
-
+#--producer-num-retries 每条消息失败发送重试次数
+#--request-timeout-ms   每条消息请求发送超时时间
+#--compression-codec    ?设置生产端压缩数据的codec，可选参数："none"，"gzip"， "snappy"
 
 #--producer-props PROP-NAME = PROP-VALUE [PROP-NAME = PROP-VALUE ...]
 #                 生成器相关的配置属性，如bootstrap.servers，client.id等。这些优先于通过--producer.config传递的配置
 #--producer.config CONFIG-FILE
 #                 生成器配置属性文件
+
+#输出格式：
+start.time,end.time, compression, message.size, batch.size, total.data.sent.in.MB, MB.sec,total.data.sent.in.nMsg, nMsg.sec
+2015-05-2611:44:12:728, 2015-05-26 11:52:33:540, 0, 100, 200, 4768.37, 9.5213, 50000000,99837.8633
+#replicationfactor不会影响consumer的吞吐性能，因为consumer只从每个partition的leader读数据
+#一般情况下：分区越多，单线程生产者吞吐率越小，副本越多，吞吐率越低，异步生产数据比同步产生的吞吐率高近3倍
+#短消息对Kafka来说是更难处理的使用方式，可以预期，随着消息长度的增大，records/second会减小
+#当消息长度为10Byte时，因为要频繁入队花了太多时间获取锁，CPU成了瓶颈，并不能充分利用带宽...
 ```
 #### 数据存储机制
 ```bash
