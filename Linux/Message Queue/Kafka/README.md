@@ -156,11 +156,42 @@ console-consumer-28542         test_find1     2          303713          303713 
 #### 查看各TOPIC的Broker中分区容量
 ```bash
 #查看某特定TOPIC在各Broker上的分区容量信息
-./kafka-log-dirs.sh  --bootstrap-server <broker:port> --describe --topic-list <topics> --broker-list <broker.id_list> 
+./kafka-log-dirs.sh --bootstrap-server <broker:port>  \
+--describe --topic-list <topics> --broker-list <broker.id_list> \
+| grep '^{' \
+| jq '[ ..|.size? | numbers ] | add'
+
 #--bootstrap-server:     必填项, <broker:port>.
 #--broker-list:  可选, 可指定查看某个broker.id上topic-partitions的size, 默认为集群所有broker.
 #--describe:     描述
 #--topic-list:   指定要查询的 topic 在disk上的空间占用情况
+
+{
+    "version": 1,
+    "brokers": [{
+        "broker": 0,
+        "logDirs": [{
+            "logDir": "/data/kafka-logs",
+            "error": null,
+            "partitions": [{
+                "partition": "afei-1",
+                "size": 567,
+                "offsetLag": 0,
+                "isFuture": false
+            }, {
+                "partition": "afei-2",
+                "size": 639,
+                "offsetLag": 0,
+                "isFuture": false
+            }, {
+                "partition": "afei-0",
+                "size": 561,
+                "offsetLag": 0,
+                "isFuture": false
+            }]
+        }]
+    }]
+}
 ```
 #### 性能测试
 ```bash
