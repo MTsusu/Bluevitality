@@ -85,7 +85,7 @@ transaction.state.log.replication.factor=1
 transaction.state.log.min.isr=1
 zookeeper.connect=192.168.133.130:2181      #ZK的IP:PORT，格式：IP:PORT,IP:PORT,IP:PORT,...
 zookeeper.connection.timeout.ms=6000        #ZK的连接超时
-delete.topic.enable=true                    #物理删除topic需设为true，否则只是标记删除
+delete.topic.enable=true                    #物理删除topic需设为true，否则只是标记删除!
 group.initial.rebalance.delay.ms=0 
 
 #启停
@@ -98,7 +98,12 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 ```bash
 #创建主题（保存时长：delete.retentin.ms）
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --replication-factor 1 --partitions 1 --topic ES \
---config delete.retention.ms=86400000    #1天
+--config delete.retention.ms=86400000    #1天
+#线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
+#parttitions和replication－factor是两个必备选项
+#第 1 个参数是消费并行度的一个重要参数
+#第 2 个极大提高了topic的可用性.备份因子默认是1，相当于没有备份，注意其值不能大于broker个数，否则会报错。
+#同时还可以指定topic级别的配置，这种特定的配置会覆盖默认配置，并存储在zookeeper的/config/topics/[topic_name]节点
 
 #主题清单
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --list
@@ -106,7 +111,7 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 #主题详情
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 -describe -topic ES
 
-#删除主题
+#删除主题，在配置中需要开启删除主题的功能：delete.topic.enable=true
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --delete --topic ES
 
 #生产者客户端命令（生产者产生信息时已经从ZK获取到了Broker的路由，因此这里要填入Broker的地址列表）
@@ -116,7 +121,8 @@ bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 ./kafka-console-consumer.sh -zookeeper  192.168.133.130:2181 --topic ES --from-beginning
 
 #为Topic增加Partition
-./kafka-topics.sh –-zookeeper 127.0.0.1:2181 -–alter -–partitions 20 -–topic ES 
+./kafka-topics.sh –-zookeeper 127.0.0.1:2181 -–alter -–partitions 20 -–topic ES
+#只能增加不能减少，若原有分散策略是hash的方式，将会受影响。发送端（默认10min会刷新本地元信息）/消费端无需重启即生效
 
 #修改消息过期时间 (保存期限)
 ./kafka-topics.sh –-zookeeper 127.0.0.1:2181 –alter –-topic ES --config delete.retention.ms=1
@@ -145,6 +151,24 @@ console-consumer-28542         test_find1     2          303713          303713 
 
 #查看所有kafka节点，在ZK的bin目录:
 ./zkCli.sh ---> ls /brokers/ids 就可以看到zk中存储的所有 broker id，查看：get /brokers/ids/{x}
+```
+#### 性能测试
+```bash
+./kafka-producer-perf-test.sh --broker-list 172.22.241.162:9092 \
+--batch-size 1 --message-size 1024 --messages 10000 --sync --topics topic_test
+#--messages       生产者发送总的消息数量
+#--message-size   每条消息大小
+#--batch-size     每次批量发送消息的数量
+#--topics         生产者发送的topic
+#--threads        生产者使用几个线程同时发送
+#--producer-num-retries 一个消息失败发送重试次数
+#--request-timeout-ms   一个消息请求发送超时时间
+
+
+#--producer-props PROP-NAME = PROP-VALUE [PROP-NAME = PROP-VALUE ...]
+#                 生成器相关的配置属性，如bootstrap.servers，client.id等。这些优先于通过--producer.config传递的配置
+#--producer.config CONFIG-FILE
+#                 生成器配置属性文件
 ```
 #### 数据存储机制
 ```bash
