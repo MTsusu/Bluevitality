@@ -100,10 +100,10 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic TEST \
 --config delete.retention.ms=86400000    #1天
 #线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
-#parttitions和replication－factor是两个必备选项
-#第 1 个参数是消费并行度的一个重要参数
-#第 2 个极大提高了topic的可用性.备份因子默认是1，相当于没有备份，注意其值不能大于broker个数，否则会报错。
-#同时还可以指定topic级别的配置，这种特定的配置会覆盖默认配置，并存储在zookeeper的/config/topics/[topic_name]节点
+#parttitions和replication－factor是两个必备选项（需要严格读取Topic消息顺序的时候，只使用1个partition）
+#分区 是消费并行度的一个重要参数（多Partition时只有Partition的learder才能进对于该partiotion读写，其余都是副本）
+#副本 极大提高了Topic的可用性.备份因子默认是1，相当于没有备份，注意其值不能大于broker个数，否则会报错。
+#同时还可以指定Topic级别的配置，这种特定的配置会覆盖默认配置，并存储在zookeeper的/config/topics/[topic_name]节点
 
 #主题清单
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --list
