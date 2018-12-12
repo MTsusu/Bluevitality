@@ -107,21 +107,21 @@ curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
 GET http://localhost:9200/_cluster/pending_tasks
 
 
-当关闭节点时，分配进程会等待 index.unassigned.node_left.delayed_timeout（默认为1分钟）
-然后开始将该节点上的分片复制到其他节点，这可能涉及大量I/O.
-某些情况下节点很快将重新启动，因此不需要此I/O，可以通过在关闭节点之前禁用分配来避免时钟竞争：
+#当关闭节点时，分配进程会等待 index.unassigned.node_left.delayed_timeout（默认为1分钟）
+#然后开始将该节点上的分片复制到其他节点，这可能涉及大量I/O.
+#某些情况下节点很快将重新启动，因此不需要此I/O，可以通过在关闭节点之前禁用分配来避免时钟竞争：
 PUT _cluster/settings
 {
   "persistent": {     //persistent ---> 即永久生效，重启仍可用
     "cluster.routing.allocation.enable": "none"
   }
 }
-集群重启后再改回配置：curl -XPUT http://127.0.0.1:9200/_cluster/settings -d '{
+#集群重启后再改回配置：curl -XPUT http://127.0.0.1:9200/_cluster/settings -d '{
     "transient" : {
         "cluster.routing.allocation.enable" : "all"
     }
 }'
-在升级下个节点前，请等待群集完成分片分配。可通过提交_cat/health请求来检查进度：GET _cat / health
+#在升级下个节点前，请等待群集完成分片分配。可通过提交_cat/health请求来检查进度：GET _cat / health
 
 
 #同时为多个索引映射到一个索引别名
@@ -229,6 +229,12 @@ PUT /<INDEX>/_settings
     "index.search.slowlog.threshold.fetch.warn": "1800ms", 
     "index.search.slowlog.threshold.fetch.info": "1s" 
 }
+
+#查看索引的数据在ES节点内执行段合并的信息（将小数据文件合并成大文件，提高查询效率）
+GET _cat/segments/log4x_trace_2018_12_12?v&h=index,ip,segment,size
+GET log4x_csf_2018_12_12/_segments
+POST log4x_trace_2018_12_12/_forcemerge?max_num_segments=700
+
 
 #Create a logstash_writer role that has the manage_index_templates and monitor cluster privileges, and the write, delete, and 
 #create_index privileges for the Logstash indices. You can create roles from the Management > Roles UI in Kibana or through the role API
