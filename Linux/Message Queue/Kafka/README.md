@@ -175,17 +175,17 @@ console-consumer-28542         test_find1     2          303713          303713 
             "error": null,
             "partitions": [{
                 "partition": "afei-1",
-                "size": 567,
+                "size": 567,            #单位byte
                 "offsetLag": 0,
                 "isFuture": false
             }, {
                 "partition": "afei-2",
-                "size": 639,
+                "size": 639,            #单位byte
                 "offsetLag": 0,
                 "isFuture": false
             }, {
                 "partition": "afei-0",
-                "size": 561,
+                "size": 561,            #单位byte
                 "offsetLag": 0,
                 "isFuture": false
             }]
