@@ -98,7 +98,8 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 ```bash
 #创建主题（保存时长：delete.retentin.ms）
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic TEST \
---config delete.retention.ms=86400000    #1天
+--config delete.retention.ms=86400000    #定义保存时间（1天）
+--config retention.bytes=1073741824      #定义保存容量（针对的是每个分区，因此实际占用容量 = 此值 * 分区数）
 #线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
 #parttitions和replication－factor是两个必备选项（需要严格读取Topic消息顺序的时候，只使用1个partition）
 #分区 是消费并行度的一个重要参数（多Partition时只有Partition的learder才能进对于该partiotion读写，其余都是副本）
