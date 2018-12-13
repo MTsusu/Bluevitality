@@ -2,18 +2,18 @@
 Elasticsearch是实时的分布式搜索和分析引擎，可用于全文搜索，结构化搜索以及分析。
 它是建立在全文搜索引擎 Apache Lucene 基础上的搜索引擎，使用 Java 编写。
 
-注! ES Version >= 5.x 的Elasticsearch-head不能放在ES的plugins、modules目录下且不再用"elasticsearch-plugin install"
+ES Version >= 5.x 的 head 不能放在ES的plugins、modules下且不再用 "elasticsearch-plugin install" ( 作为独立软件 )
 
 Elastic v5.5.0
 其他依赖和插件：
     Jdk1.8
-    Nodejs   作为head插件的依赖被安装
+    Nodejs   作为head插件的依赖
     Head     提供Node管理及可视化RestfulAPI接口
     Kibana
-    x-pack   注意! 必须运行与Elasticsearch版本相匹配的X-Pack版本!
-    ik       同上，此插件需要maven进行打包...
+    x-pack   必须运行与Elasticsearch版本相匹配的X-Pack版本!
+    ik       同上，此插件需maven进行打包...
 ```
-#### 软件列表
+#### 软件
 ```txt
    32M  elasticsearch-5.5.0.tar.gz
   812K  elasticsearch-head-master.tar.gz
@@ -22,7 +22,7 @@ Elastic v5.5.0
    16M  node-v8.1.4-linux-x64.tar.gz
   153M  x-pack-5.5.0.zip
 ```
-#### 部署 Elasticsearch 5.5.0、head、x-pack、ik
+#### 部署 Elasticsearch 5.5.0
 ```bash
 #ES5.X依赖JAVA Version >= 1.8，注! ES不能运行在CentOS7以下的版本上
 #集群中的节点可分为：Master nodes、Data nodes、Client node
@@ -145,7 +145,7 @@ connect: {
 #   type: local
 #   index.name.time_format: YYYY.MM
 
-#安装IK分词，其版本必须与ES严格一致，IK地址：https://github.com/medcl/elasticsearch-analysis-ik/tree/5.x
+#安装IK分词，其版本须与ES严格一致，地址：https://github.com/medcl/elasticsearch-analysis-ik/tree/5.x
 [wangyu@localhost bin]$ cd ~ && unzip elasticsearch-analysis-ik-5.5.0.zip -d ~/elasticsearch/
 [wangyu@localhost bin]$ cd ~/elasticsearch/elasticsearch-analysis-ik-5.5.0
 [wangyu@localhost elasticsearch-analysis-ik-5.5.0]$ mvn package #使用maven对源码进行打包，内存较小的话比较耗时
@@ -154,12 +154,10 @@ connect: {
 ./target/releases/elasticsearch-analysis-ik-5.5.0.zip
 
 #启动ES：
-cd ~/elasticsearch/elasticsearch-5.5.0/bin/
-nohup ./elasticsearch -d &> /dev/null &
+cd ~/elasticsearch/elasticsearch-5.5.0/bin/ && nohup ./elasticsearch -d &> /dev/null &
 
 #启动HEAD
-cd ~/elasticsearch/head/node_modules/grunt/bin/
-nohup ./grunt server &> /dev/null &
+cd ~/elasticsearch/head/node_modules/grunt/bin/ && nohup ./grunt server &> /dev/null &
 ```
 #### 测试ES的IK插件分词功能
 ```bash
