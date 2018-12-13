@@ -191,4 +191,21 @@ nohup ./grunt server &> /dev/null &
   ]
 }
 ```
+####  Shard / segment
+```txt
+一个Shard就是一个Lucene实例，是一个完整的搜索引擎
+一个索引可以只包含一个Shard，只是一般情况下会用多个分片，可以拆分索引到不同的节点上，分担索引压力。
+
+elasticsearch中每个分片包含多个segment，每个segment都是一个倒排索引
+在查询的时，会把所有的segment查询结果汇总归并后最为最终的分片查询结果返回；
+在创建索引时elasticsearch会把文档信息写到内存bugffer中（为了安全，也同时写到translog）
+定时（可配置）把数据写到segment缓存小文件中，然后刷新查询，使刚写入的segment可查。
+虽然写入的segment可查询，但是还没有持久化到磁盘上。因此，还是会存在丢失的可能性的。
+所以elasticsearch会执行flush操作，把segment持久化到磁盘并清除translog数据（因为此时数据已经写到磁盘，不在需要了） 
+
+当索引数据不断增长时，对应的segment也会不断的增多，查询性能可能就会下降。
+因此，Elasticsearch会触发segment合并的线程，把很多小的segment合并成更大的segment，然后删除小的segment。 
+segment是不可变的，当我们更新一个文档时，会把老的数据打上已删除的标记，然后写一条新的文档。
+在执行flush操作的时候，才会把已删除的记录物理删除掉。
+```
 
