@@ -1,5 +1,5 @@
 ```txt
-Elasticsearch是一个实时的分布式搜索和分析引擎，可用于全文搜索，结构化搜索以及分析。
+Elasticsearch是实时的分布式搜索和分析引擎，可用于全文搜索，结构化搜索以及分析。
 它是建立在全文搜索引擎 Apache Lucene 基础上的搜索引擎，使用 Java 编写。
 
 注! ES Version >= 5.x 的Elasticsearch-head不能放在ES的plugins、modules目录下且不再用"elasticsearch-plugin install"
@@ -191,3 +191,4 @@ nohup ./grunt server &> /dev/null &
   ]
 }
 ```
+
