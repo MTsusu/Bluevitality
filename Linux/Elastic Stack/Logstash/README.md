@@ -1,4 +1,4 @@
-###### filebeat   -->   kafka   -->   logstash   -->   Elasticsearch   -->   Kibana
+###### filebeat     -->     kafka     -->     logstash     -->     Elasticsearch     -->     Kibana
 #### Kibana 监控 Logstash 节点状态 ( X-pack )
 ```bash
 #logstash把自身监控数据发送到es的index中，kibana读取该index获取数据
@@ -74,4 +74,16 @@ output{
         codec => "rubydebug"
     }
 }
+
+#execute ...
+cd ~/logstash
+nohup bin/logstash -f run-configs/demo.config \
+--path.data=run.data/demo/ -l run-logs/demo/ --node.name=demo -u 200 -b 2000 &
+
+# –configtest 或 -t            测试配置文件的语法
+# –pipeline-workers 或 -w      运行 filter / output 的pipeline线程数，默认是CPU核数
+# –pipeline-batch-size 或 -b   
+# 每个pipeline线程在执行具体的filter和output前最多能累积的日志条数。默认125条。越大性能越好，但会消耗更多JVM内存
+# –pipeline-batch-delay 或 -u  
+# 每个pipeline线程在打包批量日志时最多等待几毫秒，默认5ms
 ```
