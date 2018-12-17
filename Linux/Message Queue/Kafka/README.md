@@ -136,16 +136,12 @@ kafka-consumer-groups.sh --zookeeper localhost:2181 --list
 kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 
 #通过 group ID 查看当前详细的消费情况（旧/新）
-./kafka-consumer-groups.sh --zookeeper 127.0.0.1:2181 --group logstash01 --describe 
-./kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --group logstash01 --describe
-#输出：
-#GROUP-消费者组 TOPIC-话题id PARTITION-分区id CURRENT-OFFSET-当前已消费条数 LOG-END-OFFSET-总条数 LAG-未消费条数
-
-#特定 group ID 的消费情况 
-./kafka-consumer-groups.sh --zookeeper localhost:2181 --group console-consumer-28542 --describe
-GROUP                          TOPIC          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG      OWNER
-console-consumer-28542         test_find1     0          303094          303094          0               
-console-consumer-28542         test_find1     2          303713          303713          0  
+./kafka-consumer-groups.sh --zookeeper localhost:2181 --group TEAM1 --describe
+./kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9292 --new-consumer  --group TEAM1--describe
+#消费者组                       话题id         分区id     当前已消费条数    总条数                   未消费条数
+#GROUP                         TOPIC          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG      OWNER
+#console-consumer-28542        test_find1     0          303094          303094          0               
+#console-consumer-28542        test_find1     2          303713          303713          0  
 
 #重平衡
 ./kafka-preferred-replica-election.sh --zookeeper 192.168.52.130:2181
