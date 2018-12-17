@@ -13,7 +13,7 @@ Elastic v5.5.0
     x-pack   必须运行与Elasticsearch版本相匹配的X-Pack版本!
     ik       同上，此插件需maven进行打包...
 ```
-#### 软件
+#### Software
 ```txt
    32M  elasticsearch-5.5.0.tar.gz
   812K  elasticsearch-head-master.tar.gz
@@ -22,7 +22,7 @@ Elastic v5.5.0
    16M  node-v8.1.4-linux-x64.tar.gz
   153M  x-pack-5.5.0.zip
 ```
-#### 部署 Elasticsearch 5.5.0
+#### Setup Elasticsearch 5.5.0
 ```bash
 #ES5.X依赖JAVA Version >= 1.8，注! ES不能运行在CentOS7以下的版本上
 #集群中的节点可分为：Master nodes、Data nodes、Client node
@@ -159,7 +159,7 @@ cd ~/elasticsearch/elasticsearch-5.5.0/bin/ && nohup ./elasticsearch -d &> /dev/
 #启动HEAD
 cd ~/elasticsearch/head/node_modules/grunt/bin/ && nohup ./grunt server &> /dev/null &
 ```
-#### 测试ES的IK插件分词功能
+#### 测试IK插件的分词功能
 ```bash
 [root@localhost ~]# curl -XGET 'http://10.0.0.3:9200/_analyze?pretty&analyzer=ik_max_word' -d '这是一个测试'
 [root@localhost ~]# curl -XGET 'http://10.0.0.3:9200/_analyze?pretty&analyzer=ik_smart' -d '这是一个测试'
@@ -189,16 +189,17 @@ cd ~/elasticsearch/head/node_modules/grunt/bin/ && nohup ./grunt server &> /dev/
   ]
 }
 ```
-####  Shard / segment
+####  Shard / Segment
 ```txt
 一个Shard就是一个Lucene实例，是一个完整的搜索引擎
-一个索引可以只包含一个Shard，只是一般情况下会用多个分片，可以拆分索引到不同的节点上，分担索引压力。
+一个索引可以只包含一个Shard，只是一般情况下会用多个分片，可以拆分索引到不同的节点上来分担索引的压力
 
-elasticsearch中每个分片包含多个segment，每个segment都是一个倒排索引
-在查询的时，会把所有的segment查询结果汇总归并后最为最终的分片查询结果返回；
-在创建索引时elasticsearch会把文档信息写到内存bugffer中（为了安全，也同时写到translog）
-定时（可配置）把数据写到segment缓存小文件中，然后刷新查询，使刚写入的segment可查。
-虽然写入的segment可查询，但是还没有持久化到磁盘上。因此，还是会存在丢失的可能性的。
+elasticsearch中每个分片包含多个segment，每个segment都是一个倒排索引!
+
+在查询的时，会把所有的segment查询结果汇总归并后最为最终的分片查询结果返回
+在创建索引时elasticsearch会把文档信息写到内存bugffer中（为了安全也同时写到translog）
+定时（可配置）把数据写到segment缓存小文件中，然后刷新查询，使刚写入的segment可查
+虽然写入的segment可查询，但是还没有持久化到磁盘上。因此还是会存在丢失的可能性
 所以elasticsearch会执行flush操作，把segment持久化到磁盘并清除translog数据（因为此时数据已经写到磁盘，不在需要了） 
 
 当索引数据不断增长时，对应的segment也会不断的增多，查询性能可能就会下降。
