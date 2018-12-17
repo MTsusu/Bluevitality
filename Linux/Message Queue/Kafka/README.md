@@ -138,7 +138,7 @@ kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 #通过 group ID 查看当前详细的消费情况（旧/新）
 ./kafka-consumer-groups.sh --zookeeper localhost:2181 --group TEAM1 --describe
 ./kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9292 --new-consumer  --group TEAM1--describe
-#消费者组                       话题id         分区id     当前已消费条数    总条数                   未消费条数
+#消费者组                       话题id         分区id     当前已消费条数    总条数          未消费条数
 #GROUP                         TOPIC          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG      OWNER
 #console-consumer-28542        test_find1     0          303094          303094          0               
 #console-consumer-28542        test_find1     2          303713          303713          0  
