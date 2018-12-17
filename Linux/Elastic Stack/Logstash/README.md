@@ -6,7 +6,7 @@ xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200"
 #xpack.monitoring.elasticsearch.username: "logstash_system" 
 #xpack.monitoring.elasticsearch.password: "changeme"
 ```
-#### filebeat
+#### Filebeat
 ```bash
 filebeat:
   prospectors:
@@ -25,7 +25,7 @@ output.kafka:
 #output.console:
 #    pretty: true
 ```
-#### kafka
+#### Kafka
 ```bash
 #在Kafka的Broker端创建"Logstash"消费的主题
 kafka-topics.sh --create --zookeeper 10.0.0.3:21811 --replication-factor 1 --partitions 1 --topic ES
@@ -49,7 +49,8 @@ filter{
     grok {
         match => { 
             #Grok从message语义中按Patterns获取并分割成Key，其表达式很像C语言中的宏定义
-            "message" => '%{IP:client} - - \[%{DATA:time}\] "%{DATA:verb} %{DATA:url_path} %{DATA:httpversion}" %{NUMBER:response} %{NUMBER:} "-" \"%{DATA:agent}\" "-" \"%{NUMBER:request_time}\" -' 
+            "message" => '%{IP:client} - - \[%{DATA:time}\] "%{DATA:verb} %{DATA:url_path} 
+            %{DATA:httpversion}" %{NUMBER:response} %{NUMBER:} "-" \"%{DATA:agent}\" "-" \"%{NUMBER:request_time}\" -' 
         }
     }
     mutate{ 
