@@ -38,7 +38,7 @@ input{
         group_id => "logstash"                  #要启用消费组，同组的消费者间"竞争"消费相同主题的1个消息
         topics => "ES"                          #消费主题，生产环境中可使用列表类型来订阅多个主题
         consumer_threads => 2
-        decorate_events => true                 #属性会将当前topic、offset、group、partition等信息也带到message中
+        decorate_events => true                 #将当前topic、offset、group、partition等信息也写入message
         auto_commit_interval_ms => 1000         #消费间隔，毫秒
         auto_offset_reset => latest             #
         codec => "json"                         #将Filebeat传输的消息解析为JSON格式
@@ -49,8 +49,9 @@ filter{
     grok {
         match => { 
             #Grok从message语义中按Patterns获取并分割成Key，其表达式很像C语言中的宏定义
-            "message" => '%{IP:client} - - \[%{DATA:time}\] "%{DATA:verb} %{DATA:url_path} 
-            %{DATA:httpversion}" %{NUMBER:response} %{NUMBER:} "-" \"%{DATA:agent}\" "-" \"%{NUMBER:request_time}\" -' 
+            "message" => '%{IP:client} - \[%{DATA:time}\] "%{DATA:verb} %{DATA:url_path}
+            %{DATA:httpversion}" %{NUMBER:response} %{NUMBER:} "-" \"%{DATA:agent}\"
+            "-" \"%{NUMBER:request_time}\" -' 
         }
     }
     mutate{ 
@@ -62,7 +63,7 @@ filter{
 output{
     if [type] == "log" {
         elasticsearch {
-            hosts => ["10.0.0.3:9200"]          #ES根据请求体中提供的数据自动创建映射 (由Logstash自动创建的模板)
+            hosts => ["10.0.0.3:9200"]          #会根据请求体中提供的数据自动创建映射 (由Logstash端创建)
             index => "es"
             timeout => 300
             flush_size：100                     #默认500，logstash攒够500条数据再一次性向es发送
