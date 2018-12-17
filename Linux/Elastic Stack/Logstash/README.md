@@ -1,4 +1,11 @@
-###### filebeat   -->   kafka   -->   logstash   -->   Elasticsearch   -->   Kibana
+###### filebeat   -->   kafka   -->   logstash   -->   Elasticsearch   -->   Kibana
+#### Kibana 监控 Logstash 节点状态 ( X-pack )
+```bash
+#logstash把自身监控数据发送到es的index中，kibana读取该index获取数据
+xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200" 
+#xpack.monitoring.elasticsearch.username: "logstash_system" 
+#xpack.monitoring.elasticsearch.password: "changeme"
+```
 #### filebeat
 ```bash
 filebeat:
@@ -55,14 +62,14 @@ output{
     if [type] == "log" {
         elasticsearch {
             hosts => ["10.0.0.3:9200"]          #ES根据请求体中提供的数据自动创建映射 (由Logstash自动创建的模板)
-            index => "es"                       #索引名不要大写!
+            index => "es"
             timeout => 300
             flush_size：100                     #默认500，logstash攒够500条数据再一次性向es发送
             idle_flush_time：2                  #默认1s，如果1s内没攒够500条还是会一次性将攒的数据发出去给es
         }
     }
-#    stdout {
-#        codec => "rubydebug"
-#    }
+    stdout {
+        codec => "rubydebug"
+    }
 }
 ```
