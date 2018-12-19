@@ -15,7 +15,7 @@ ms_time=100
 
 #输出当天URL访问量前30个的统计结果
 function SCAN_LOGFILE_URL_SORT() {  #修改成通过管道将文件传输进来
-    awk '{print $(NF-1)}' | sed -e 's/&.*//g' -e 's/?.*//g' \
+    awk '{print $(NF-1)}' | sed -e 's/&.*//g' -e 's/?.*//g' -e 's/%.*//g' \
     | awk '{s[$0]+=1}END{for(i in s){print s[i]"\t"i}}' \
     | sort -rn | head -n 30
 }
