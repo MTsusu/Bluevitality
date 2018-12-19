@@ -38,8 +38,8 @@ function SCAN_LOGFILE_POSITION() {
     read -p "请输入扫描的日志开始时间,格式:yyyymmddHHMM: " S_TIME
     read -p "请输入扫描的日志结束时间,格式:yyyymmddHHMM: " E_TIME
 
-   LOG_S_TIME=$(python -c "import time,sys;t=sys.argv[1];print(time.strftime('%d/%b/%Y:%H:%M', time.strptime(t,'%Y%m%d%H%M')))" ${S_TIME});
-   LOG_E_TIME=$(python -c "import time,sys;t=sys.argv[1];print(time.strftime('%d/%b/%Y:%H:%M', time.strptime(t,'%Y%m%d%H%M')))" ${E_TIME})
+  LOG_S_TIME=$(python -c "import time,sys;t=sys.argv[1];print(time.strftime('%d/%b/%Y:%H:%M', time.strptime(t,'%Y%m%d%H%M')))" ${S_TIME});
+  LOG_E_TIME=$(python -c "import time,sys;t=sys.argv[1];print(time.strftime('%d/%b/%Y:%H:%M', time.strptime(t,'%Y%m%d%H%M')))" ${E_TIME})
     
     if grep -F '$LOG_S_TIME' ${LOG};then
         echo "没有匹配到开始时间关键字"
