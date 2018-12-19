@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Nginx 日志格式：（使用此脚本分析日志需要使用使用如下的格式定义）
-#    log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time || $upstream_status || $upstream_response_time'
+#    log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time '
+#                     ' || $upstream_status || $upstream_response_time '
 #                     ' || $upstream_cache_status || $body_bytes_sent || $http_referer'
 #                     ' || $remote_user || $http_user_agent || $http_x_forwarded_for || $request';
 
