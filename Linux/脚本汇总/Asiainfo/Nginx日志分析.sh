@@ -1,6 +1,12 @@
 #!/bin/bash
 
-#指定日志文件相对/绝对路径
+# Nginx 日志格式：（使用此脚本分析日志需要使用使用如下的格式定义）
+#    log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time || $upstream_status || $upstream_response_time'
+#                     ' || $upstream_cache_status || $body_bytes_sent || $http_referer'
+#                     ' || $remote_user || $http_user_agent || $http_x_forwarded_for || $request';
+
+
+#指定日志文件相对/绝对路径（执行脚本时需要传入日志文件名作为参数）
 LOG=$1
 [ -z $LOG ] && exit 1
 #扫描>${ms_time}ms时间的URL的时间值定义...
