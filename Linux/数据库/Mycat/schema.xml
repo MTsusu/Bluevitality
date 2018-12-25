@@ -4,11 +4,6 @@
 <!DOCTYPE mycat:schema SYSTEM "schema.dtd">
 <mycat:schema xmlns:mycat="http://io.mycat/">
     
-    <!-- 
-    name    唯一标识dataHost标签，供上层的标签使用（逻辑库）
-    maxCon  指定每个读写实例连接池的最大连接
-    minCon  指定每个读写实例连接池的最小连接
-    -->
     <schema name="TESTDB" checkSQLschema="false" sqlMaxLimit="100">
         <!-- 
         Table       定义了MyCat中的逻辑表，所有需要拆分的表都需要在这个标签中定义
@@ -58,28 +53,12 @@
     <!-- 定义数据节点，包括了各种逻辑项的配置 -->
     <dataHost name="localhost1" maxCon="1000" minCon="10" balance="0" writeType="0" dbType="mysql"
               dbDriver="native" switchType="1" slaveThreshold="100">
-        <!-- 配置真实MySQL与MyCat的心跳 -->
-        <heartbeat>select user()</heartbeat>
-        <!-- 定义可写主机 -->
-        <writeHost host="hostM1" url="localhost:3306" user="root" password="123456">
-            <!-- 定义可读主机 -->
-            <readHost host="hostS2" url="192.168.1.200:3306" user="root" password="xxx" />
+        <heartbeat>select user()</heartbeat>    <!-- 配置真实MySQL与MyCat的心跳 -->
+        <writeHost host="hostM1" url="localhost:3306" user="root" password="123456">        <!-- 定义可写 -->
+            <readHost host="hostS2" url="192.168.1.200:3306" user="root" password="xxx" />  <!-- 定义可读-->
         </writeHost>
-        <!-- 定义可写主机 -->
-        <writeHost host="hostS1" url="localhost:3316" user="root" password="123456" />
-    </dataHost>
-    
-    <!--
-    <dataHost name="sequoiadb1" maxCon="1000" minCon="1" balance="0" dbType="sequoiadb" dbDriver="jdbc">
-    <heartbeat>             </heartbeat>
-    <writeHost host="hostM1" url="sequoiadb://1426587161.dbaas.sequoialab.net:11920/SAMPLE" user="jifeng" password="jifeng"></writeHost>
+        <writeHost host="hostS1" url="localhost:3316" user="root" password="123456" />      <!-- 可写主机 -->
     </dataHost>
 
-    <dataHost name="oracle1" maxCon="1000" minCon="1" balance="0" writeType="0"   dbType="oracle" dbDriver="jdbc">
-        <heartbeat>select 1 from dual</heartbeat>
-        <connectionInitSql>alter session set nls_date_format='yyyy-mm-dd hh24:mi:ss'</connectionInitSql>
-        <writeHost host="hostM1" url="jdbc:oracle:thin:@127.0.0.1:1521:nange" user="base" password="123456" > </writeHost>
-    </dataHost>
-    
 </mycat:schema>
  
