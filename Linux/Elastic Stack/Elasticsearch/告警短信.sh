@@ -34,3 +34,9 @@ if diff alive-node-system all-node-system | grep -qE '<|>'; then
         alert $i "$MESSAGES"
     }
 fi
+
+#未完成，没有调用短信（调用有错）
+ansible -i ./hosts-es-system -m shell -a 'df -h | grep dat' \
+| sed -E '/^[[:digit:]]/{N;s/\n/\t/}' \
+| awk '{print $1"\t 剩余:"$(NF-2)"\t 使用率:"$(NF-1)"\t"$(NF)}'
+| sort -rn 
