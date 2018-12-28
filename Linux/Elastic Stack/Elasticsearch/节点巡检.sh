@@ -79,51 +79,51 @@ cat > elasticsearch.html <'EOF'
             tdArray0.push(td0s[i].innerHTML);
         }
         for(var i=0;i<td1s.length;i++){
-            tdArray1.push(parseInt(td1s[i].innerHTML));
+            tdArray1.push(parseFloat(td1s[i].innerHTML));
         }
         for(var i=0;i<td2s.length;i++){
-            tdArray2.push(parseInt(td2s[i].innerHTML));
+            tdArray2.push(parseFloat(td2s[i].innerHTML));
         }
         for(var i=0;i<td3s.length;i++){
-            tdArray3.push(parseInt(td3s[i].innerHTML));
+            tdArray3.push(parseFloat(td3s[i].innerHTML));
         }
         for(var i=0;i<td4s.length;i++){
-            tdArray4.push(parseInt(td4s[i].innerHTML));
+            tdArray4.push(parseFloat(td4s[i].innerHTML));
         }
         for(var i=0;i<td5s.length;i++){
-            tdArray5.push(parseInt(td5s[i].innerHTML));
+            tdArray5.push(parseFloat(td5s[i].innerHTML));
         }
         for(var i=0;i<td6s.length;i++){
-            tdArray6.push(parseInt(td6s[i].innerHTML));
+            tdArray6.push(parseFloat(td6s[i].innerHTML));
         }
         for(var i=0;i<td7s.length;i++){
-            tdArray7.push(parseInt(td7s[i].innerHTML));
+            tdArray7.push(parseFloat(td7s[i].innerHTML));
         }
         for(var i=0;i<td8s.length;i++){
-            tdArray8.push(parseInt(td8s[i].innerHTML));
+            tdArray8.push(parseFloat(td8s[i].innerHTML));
         }
         for(var i=0;i<td9s.length;i++){
-            tdArray9.push(parseInt(td9s[i].innerHTML));
+            tdArray9.push(parseFloat(td9s[i].innerHTML));
         }
         for(var i=0;i<tdas.length;i++){
-            tdArraya.push(parseInt(tdas[i].innerHTML));
+            tdArraya.push(parseFloat(tdas[i].innerHTML));
         }
         for(var i=0;i<tdbs.length;i++){
-            tdArrayb.push(parseInt(tdbs[i].innerHTML));
+            tdArrayb.push(parseFloat(tdbs[i].innerHTML));
         }
         for(var i=0;i<tdcs.length;i++){
-            tdArrayc.push(parseInt(tdcs[i].innerHTML));
+            tdArrayc.push(parseFloat(tdcs[i].innerHTML));
         }
         for(var i=0;i<tdds.length;i++){
-            tdArrayd.push(parseInt(tdds[i].innerHTML));
+            tdArrayd.push(parseFloat(tdds[i].innerHTML));
         }
         for(var i=0;i<tdes.length;i++){
-            tdArraye.push(parseInt(tdes[i].innerHTML));
+            tdArraye.push(parseFloat(tdes[i].innerHTML));
         }
         var tds=document.getElementsByName("td"+obj.id.substr(2,1));
         var columnArray=[];
         for(var i=0;i<tds.length;i++){
-            columnArray.push(parseInt(tds[i].innerHTML));
+            columnArray.push(parseFloat(tds[i].innerHTML));
         }
         var orginArray=[];
         for(var i=0;i<columnArray.length;i++){
