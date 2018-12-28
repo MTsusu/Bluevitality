@@ -168,10 +168,7 @@ curl -s '192.168.157.11:9213/_cat/nodes?v&h=name,pid,http_address,segments.count
 | sed 's/,$//' \
 | awk -F',' '{print "<tr>" ; for(i=1;i<=NF;i++){print "    <td name=\"td"i"\">"$i"</td>"}print "</tr>"}' \
 | sed -e 's/td1"/td0"/g' -e 's/td2"/td1"/g' -e 's/td3"/td2"/g' -e 's/td4"/td3"/g' -e 's/td5"/td4"/g' \
--e 's/td6"/td5"/g' -e 's/td7"/td6"/g' -e 's/td8"/td7"/g' -e 's/td9"/td8"/g'  \
--e 's/td10"/td9"/g' -e 's/td11"/tda"/g' -e 's/td12"/tdb"/g' -e 's/td13"/tdc"/g' -e 's/td14"/tdd"/g'  -e 's/td15"/tde"/g'  > ${TMPLOG}
-
+-e 's/td6"/td5"/g' -e 's/td7"/td6"/g' -e 's/td8"/td7"/g' -e 's/td9"/td8"/g' \
+-e 's/td10"/td9"/g' -e 's/td11"/tda"/g' -e 's/td12"/tdb"/g' -e 's/td13"/tdc"/g' -e 's/td14"/tdd"/g'  -e 's/td15"/tde"/g' > ${TMPLOG}
 
 vim +"24r ${TMPLOG}|wq!" elasticsearch.html
-
-rm TMPLOG
