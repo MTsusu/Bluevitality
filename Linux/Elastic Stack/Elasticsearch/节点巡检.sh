@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 TMPLOG=`mktemp`
 
 cat > elasticsearch.html <'EOF'
@@ -10,7 +9,7 @@ cat > elasticsearch.html <'EOF'
     <meta charset="utf-8">
     </head>
     <body>
-        <table border="0">
+        <table border="1" cellspacing="0" cellpadding="0">
             <tr>
                 <th id="th0" onclick="SortTable(this)" class="as">name</th>
                 <th id="th1" onclick="SortTable(this)" class="as">Pid</th>
@@ -173,6 +172,3 @@ curl -s '192.168.157.11:9213/_cat/nodes?v&h=name,pid,http_address,segments.count
 vim +"24r ${TMPLOG}|wq!" elasticsearch.html
 
 rm TMPLOG
-
-
-
