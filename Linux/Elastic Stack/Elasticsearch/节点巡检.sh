@@ -7,9 +7,12 @@ cat > elasticsearch.html <'EOF'
 <html>
     <head>
     <meta charset="utf-8">
+    <style>
+    #tab{font-size:21;font-family:楷体}
+    </style>
     </head>
     <body>
-        <table border="1" cellspacing="0" cellpadding="0">
+        <table id="tab" border="1" cellspacing="0" cellpadding="0">
             <tr>
                 <th id="th0" onclick="SortTable(this)" class="as">name</th>
                 <th id="th1" onclick="SortTable(this)" class="as">Pid</th>
