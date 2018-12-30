@@ -280,3 +280,28 @@ output {
     password => x-pack-test-password
   }
 }
+
+#分组聚合查询
+#https://www.elastic.co/guide/en/elasticsearch/reference/6.0/search-aggregations-metrics-sum-aggregation.html
+POST /sales/_search?size=0
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "match" : { "type" : "hat" }
+            }
+        }
+    },
+    "aggs" : {
+        "hat_prices" : { "sum" : { "field" : "price" } }
+    }
+}
+返回:
+{
+    ...
+    "aggregations": {
+        "hat_prices": {
+           "value": 450.0
+        }
+    }
+}
