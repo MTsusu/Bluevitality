@@ -51,7 +51,7 @@
 │   │   ├── ActiveMQ
 │   │   │   ├── Setup 5.6.0
 │   │   │   └── 资料
-│   │   ├── Kafka
+│   │   ├── KAFKA
 │   │   ├── RabbitMQ （空）
 │   │   └── RocketMQ
 │   │       ├── bin
@@ -304,7 +304,7 @@
 │           └── ZhiHu1
 └── Tmp
     ├── Chrome Bookmarks
-    ├── English
+    ├── Eng
     │   └── Improve
     ├── MyBase
     └── Tools
