@@ -37,6 +37,7 @@
 │   │   ├── Filebeat
 │   │   │   └── 软件
 │   │   ├── Kibana
+│   │   │   ├── Images
 │   │   │   ├── 软件
 │   │   │   └── 资料
 │   │   └── Logstash
@@ -309,4 +310,4 @@
     ├── MyBase
     └── Tools
 
-309 directories
+310 directories
