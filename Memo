@@ -52,7 +52,7 @@
 │   │   ├── ActiveMQ
 │   │   │   ├── Setup 5.6.0
 │   │   │   └── 资料
-│   │   ├── Kafka
+│   │   ├── KAFKA
 │   │   │   └── KafkaOffsetMonitor
 │   │   ├── RabbitMQ （空）
 │   │   └── RocketMQ
