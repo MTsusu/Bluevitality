@@ -357,3 +357,38 @@ curl -XGET http://localhost:9200/blogs/normal/format-doc-001
         "title": "springboot in action"
     }
 }
+
+#值递增（使用脚本局部更新新创建的文档）
+curl -XPOST http://localhost:9200/blogs/normal/format-doc-002/_update -d '{
+  "script" : "ctx._source.views+=1"
+}
+'
+#报错：因为id为format-doc-002的文档不存在
+# 加上upsert参数(设置字段的初始值)
+curl -XPOST http://localhost:9200/blogs/normal/format-doc-002/_update -d '{
+  "script" : "ctx._source.views+=1",
+  "upsert": {
+       "views": 1
+   }
+}'
+#获取文档
+curl -XGET http://localhost:9200/blogs/normal/format-doc-002
+{
+    "_index": "blogs",
+    "_type": "normal",
+    "_id": "format-doc-002",
+    "_version": 1,
+    "found": true,
+    "_source": {
+        "views": 1
+    }
+}
+
+#3个批量操作，分别是创建文档，更新文档以及删除文档
+#创建文档时需要使用换行分割开创建目录和文档数据，更新文档时也需用换行分开创建目录和文档，最后一个操作要用换行结束
+curl -XPOST http://localhost:9200/_bulk --d '
+{ "create": { "_index": "blogs", "_type": "normal", "_id": "format-bulk-doc-001" } }
+{ "title": "Hadoop in action", "author": "Chuck Lam" }
+{ "update": { "_index": "blogs", "_type": "normal", "_id": "format-bulk-doc-001" } }
+{ "doc": { "create_at": "2017-07-19" } }
+{ "delete": { "_index": "blogs", "_type": "normal", "_id": "format-doc-002" } }
