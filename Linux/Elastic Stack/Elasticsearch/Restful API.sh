@@ -268,6 +268,9 @@ $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
 }'
 
 #排除写入某节点（不必要的参数要省略掉）
+#index.routing.allocation.require.	【必须】
+#index.routing.allocation.include. 	【允许】
+#index.routing.allocation.exclude.	【排除】
 "settings": {
   "index":{
     "routing":{
