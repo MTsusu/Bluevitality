@@ -1,18 +1,25 @@
-分片多的话可以提升建立索引的能力，5~20个比较合适，分片数过少或过多都会导致检索比较慢。
-分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
-建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
--------------------------------------------------
-#显示集群系统信息，包括CPU JVM等等
+#分片多的话可以提升建立索引的能力，5~20个比较合适，分片数过少或过多都会导致检索比较慢。
+#分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
+#建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
+-------------------------------------------------------------------------------------------------------
+#显示集群系统信息,包括CPU JVM等等
 [wangyu@localhost Test]$ curl -XGET 10.116.182.65:9200/_cluster/stats?pretty=true
 
-#集群的详细信息。包括节点、分片等
+#集群的详细信息,包括节点、分片等
 [wangyu@localhost Test]$ curl -XGET 10.116.182.65:9200/_cluster/state?pretty=true
 
-#获取集群堆积的任务
+#获取集群堆积任务
 [wangyu@localhost Test]$ curl -XGET 10.116.182.65:9200/_cluster/pending_tasks?pretty=true
 {
   "tasks" : []
 }
+
+#查看未分配的分片信息
+[wangyu@localhost Test]$ curl -s -u 'elastic:241yftest' '192.168.157.11:9213/_cat/shards?v' | grep UNASSIGNED
+index shard prirep state      docs store ip           node   
+users 1     r      UNASSIGNED                                
+users 2     r      UNASSIGNED                                
+users 0     r      UNASSIGNED
 
 #修改集群配置 ( transient 表示临时的，persistent表示永久的 )
 #举例：
@@ -59,6 +66,18 @@ curl -XGET 'localhost:9200/logstash-2015.12.23/_search?q=geoip.city_name:Buffalo
 #查看节点状态
 #get _nodes/hot_threads
 #get _nodes/node-1/hot_threads
+
+## Select nodes by role
+GET /_nodes/_all,master:false
+GET /_nodes/data:true,ingest:true
+GET /_nodes/coordinating_only:true
+
+#当分片不足时的等待时间 (等待节点重新启动，分片恢复) 默认1min
+curl -XPOST http://localhost:9200/blogs/normal?consistency=all&timeout=10s -d '
+{
+  "name" : "POST-1"
+}
+'
 
 #查看集群负载相关信息
 [root@node3 elasticsearch]# curl -X GET http://localhost:9200/_cat/nodes?v      
@@ -116,11 +135,13 @@ PUT _cluster/settings
     "cluster.routing.allocation.enable": "none"
   }
 }
-#集群重启后再改回配置：curl -XPUT http://127.0.0.1:9200/_cluster/settings -d '{
+#集群重启后再改回配置：curl -XPUT http://127.0.0.1:9200/_cluster/settings -d 
+'{
     "transient" : {
         "cluster.routing.allocation.enable" : "all"
     }
 }'
+
 #在升级下个节点前，请等待群集完成分片分配。可通过提交_cat/health请求来检查进度：GET _cat / health
 
 
@@ -176,7 +197,6 @@ $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
     }]
 }'
 
-
 #分配分片：( 如down机后启动时本机分片未加入索引中的情况 )
 $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
     "commands":[{
@@ -210,7 +230,6 @@ $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
   }
   }
 }
-
 
 #集群设置
 PUT /_cluster/settings
@@ -283,6 +302,7 @@ output {
 
 #分组聚合查询
 #https://www.elastic.co/guide/en/elasticsearch/reference/6.0/search-aggregations-metrics-sum-aggregation.html
+#搜索：
 POST /sales/_search?size=0
 {
     "query" : {
@@ -296,7 +316,7 @@ POST /sales/_search?size=0
         "hat_prices" : { "sum" : { "field" : "price" } }
     }
 }
-返回:
+#返回:
 {
     ...
     "aggregations": {
