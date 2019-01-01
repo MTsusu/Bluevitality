@@ -118,6 +118,13 @@ curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
     ]
 }'
 
+#至少有几个分片可用的情况下才认为是可用的（主+副分片）
+curl -XPUT http://localhost:9200/blogs/_settings -d '
+{
+	"index.write.wait_for_active_shards": 3
+}
+'
+
 #查看当前节点health相关信息
 [root@node3 ~]# curl -X GET http://localhost:9200/_cat/health                   
 1514807391 19:49:51 elasticsearch green 1 1 0 0 0 0 0 0 - 100.0%
@@ -323,5 +330,30 @@ POST /sales/_search?size=0
         "hat_prices": {
            "value": 450.0
         }
+    }
+}
+
+#使用文档局的部更新
+curl -XPOST http://localhost:9200/blogs/normal/format-doc-001/_update -d '
+{
+  "doc": {  #"doc"可以理解为针对文档内容进行的修改
+  	"title" : "springboot in action",
+	  "author" : "Format"
+  }
+}
+'
+#获取：
+curl -XGET http://localhost:9200/blogs/normal/format-doc-001
+
+{
+    "_index": "blogs",
+    "_type": "normal",
+    "_id": "format-doc-001",
+    "_version": 3,
+    "found": true,
+    "_source": {
+        "create_at": "2017-07-18",
+        "author": "Format",
+        "title": "springboot in action"
     }
 }
