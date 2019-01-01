@@ -2,8 +2,15 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
+#修改集群数据节点宕机后延迟等待节点恢复，当失败时再分配分片的时间（默认1分钟）
+curl -XPUT 'localhost:9200/<INDEX_NAME>/_settings' -d '
+{
+    "settings": {
+      "index.unassigned.node_left.delayed_timeout": "30s"
+    }
+}'
 
-#index/分片数，/主分片还是副本分片/是否处于 unassigned 状态 / unassigned 的原因
+#index/分片数 / 主分片还是副本分片 / 是否处于 unassigned 状态 / unassigned 的原因
 curl -XGET -s  '192.168.157.11:9212/_cat/shards?v&h=index,shard,prirep,state,unassigned.reason' \
 | grep UNASSIGNED \
 | head -n 4
