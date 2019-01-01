@@ -129,7 +129,7 @@ curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
     ]
 }'
 
-#至少有几个分片可用的情况下才认为是可用的（主+副分片）
+#至少有几个分片可用的情况下才认为是可用的（主+副分片）默认索引操作只需要主分片可用时：wait_for_active_shards:1 即可
 curl -XPUT http://localhost:9200/blogs/_settings -d '
 {
 	"index.write.wait_for_active_shards": 3
