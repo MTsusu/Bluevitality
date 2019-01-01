@@ -2,6 +2,26 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
+
+#查看集群所有节点磁盘使用率
+curl -XGET -s  '192.168.157.11:9212/_cat/allocation?v' | head -n 3
+shards disk.indices disk.used disk.avail disk.total disk.percent host            ip              node
+    27      988.1gb    14.8tb     11.7tb     26.6tb           55 192.168.157.11  192.168.157.11  157.11data-2
+    28      866.8gb      14tb     12.5tb     26.6tb           52 192.168.157.14  192.168.157.14  157.14data-4
+
+#修改触及"low disk watermark"阈值的磁盘使用比例（默认超过85%将不落主分片的副本）
+#cluster.routing.allocation.disk.watermark.low:
+#若磁盘使用超过85%则ES不允许在分配新的分片。当配置具体的大小如100MB时，表示若磁盘空间小于100MB则不允许分配分片
+#cluster.routing.allocation.disk.watermark.high:
+#磁盘空间使用高于90%时ES将尝试分配分片到其他节点
+curl -XPUT 'localhost:9200/_cluster/settings' -d
+'{
+    "transient": {  
+      "cluster.routing.allocation.disk.watermark.low": "90%",
+      "cluster.routing.allocation.disk.watermark.high"："95%"
+    }
+}'
+
 #修改集群数据节点宕机后延迟等待节点恢复，当失败时再分配分片的时间（默认1分钟）
 curl -XPUT 'localhost:9200/<INDEX_NAME>/_settings' -d '
 {
@@ -131,6 +151,20 @@ curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
             "move" : {
                 "index" : "info-test", "shard" : 3,
                 "from_node" : "172.18.1.26", "to_node" : "172.18.1.25"
+            }
+        }
+    ]
+}'
+
+#强制迁移主分片
+curl -XPOST 'localhost:9200/_cluster/reroute' -d '{
+    "commands": [
+        {
+            "allocate": {
+                "allow_primary": "true",
+                "index": "constant-updates",
+                "node": "<NODE_NAME>",
+                "shard": 0
             }
         }
     ]
