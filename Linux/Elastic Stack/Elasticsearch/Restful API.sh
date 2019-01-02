@@ -2,7 +2,6 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
-
 #查看集群所有节点磁盘使用率
 curl -XGET -s  '192.168.157.11:9212/_cat/allocation?v' | head -n 3
 shards disk.indices disk.used disk.avail disk.total disk.percent host            ip              node
@@ -155,7 +154,6 @@ curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
         }
     ]
 }'
-
 #强制迁移主分片
 curl -XPOST 'localhost:9200/_cluster/reroute' -d '{
     "commands": [
@@ -169,6 +167,9 @@ curl -XPOST 'localhost:9200/_cluster/reroute' -d '{
         }
     ]
 }'
+
+#查看节点详细信息
+curl -XGET  s '192.168.166.66:9212/_nodes/<NODE_NAME>?pretty' | head -n 30
 
 #至少有几个分片可用的情况下才认为是可用的（主+副分片）默认索引操作只需要主分片可用时：wait_for_active_shards:1 即可
 curl -XPUT http://localhost:9200/blogs/_settings -d '
