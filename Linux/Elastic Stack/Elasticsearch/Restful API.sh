@@ -2,7 +2,7 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
-#在Kibana执行数据迁移
+#在Kibana执行数据迁移 ( 先创建Mapping )
 #必须使用该reindex.remote.whitelist属性在elasticsearch.yaml中将远程主机明确列入白名单
 #它可设为逗号分隔的允许远程host和port组合列表（如 otherhost:9200, another:9200, 127.0.10.*:9200, localhost:*）
 POST _reindex
@@ -29,7 +29,7 @@ POST _reindex
   }
 }
 
-#在Logstash执行数据迁移
+#在Logstash执行数据迁移 ( 先创建Mapping )
 input {
   elasticsearch {
     hosts => ["XX.XX.XX.XX:9212","XX.XX.XX.XX:9212","XX.XX.XX.XX:9212"]
