@@ -2,6 +2,62 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
+#在Kibana执行数据迁移
+#必须使用该reindex.remote.whitelist属性在elasticsearch.yaml中将远程主机明确列入白名单
+#它可设为逗号分隔的允许远程host和port组合列表（如 otherhost:9200, another:9200, 127.0.10.*:9200, localhost:*）
+POST _reindex
+{
+  "source": {
+    "remote": {
+      "host": "http://172.19.72.219:9200",		#源INDEX所在集群地址
+      "username": "elastic",
+      "password": "x^sqzb%1"
+    },
+    "index": "isc_identrecords_2018_12",
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "match_all": {}
+                }
+            ]
+        }
+      }
+  },
+  "dest": {
+    "index": "isc_identrecords_2018_12"
+  }
+}
+
+#在Logstash执行数据迁移
+input {
+  elasticsearch {
+    hosts => ["XX.XX.XX.XX:9212","XX.XX.XX.XX:9212","XX.XX.XX.XX:9212"]
+    index => "<INDEX>"
+    size => 1250
+    scroll => "5m"
+    docinfo => true
+    user => 'username...'
+    password => "pass...."
+  }
+}
+
+filter {
+  mutate {
+    remove_field => ["@version"]
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["XX.XX.XX.XX:9212","XX.XX.XX.XX:9212","XX.XX.XX.XX:9212"] 
+    index => "<INDEX>"  
+    document_type => "<type>"
+    flush_size => 250
+    codec => "json"
+  }
+}
+
 #查看集群所有节点磁盘使用率
 curl -XGET -s  '192.168.157.11:9212/_cat/allocation?v' | head -n 3
 shards disk.indices disk.used disk.avail disk.total disk.percent host            ip              node
