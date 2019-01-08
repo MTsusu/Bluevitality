@@ -89,3 +89,12 @@ nohup bin/logstash -f run-configs/demo.config \
 # –pipeline-batch-delay 或 -u  
 # 每个pipeline线程在打包批量日志时最多等待几毫秒，默认5ms
 ```
+#### Kibana 监控 Logstash
+```bash
+#在logstash/config/logstash.yml中增加如下：
+xpack.monitoring.enabled: true
+xpack.monitoring.collection.interval: 10s
+xpack.monitoring.elasticsearch.url: http://172.19.52.87:9211    #ES节点地址
+http.host: "172.19.72.65"   #本机地址
+
+```
