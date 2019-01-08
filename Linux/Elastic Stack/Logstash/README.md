@@ -1,11 +1,4 @@
 ###### filebeat     -->     kafka     -->     logstash     -->     Elasticsearch     -->     Kibana
-#### Kibana 监控 Logstash 节点状态 ( X-pack )
-```bash
-#logstash把自身监控数据发送到es的index中，kibana读取该index获取数据
-xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200" 
-#xpack.monitoring.elasticsearch.username: "logstash_system" 
-#xpack.monitoring.elasticsearch.password: "changeme"
-```
 #### Filebeat
 ```bash
 filebeat:
@@ -103,9 +96,16 @@ nohup bin/logstash -f run-configs/demo.config \
 #### Kibana 监控 Logstash
 ```bash
 #在logstash/config/logstash.yml中增加如下：
+#logstash把自身监控数据发送到es的index中，kibana读取该index获取数据
 xpack.monitoring.enabled: true
 xpack.monitoring.collection.interval: 10s
 xpack.monitoring.elasticsearch.url: http://172.19.52.87:9211    #ES节点地址
 http.host: "172.19.72.65"   #本机地址
 
+```
+#### Kibana ( X-pack )
+```bash
+xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200" 
+#xpack.monitoring.elasticsearch.username: "logstash_system" 
+#xpack.monitoring.elasticsearch.password: "changeme"
 ```
