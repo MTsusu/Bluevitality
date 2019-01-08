@@ -2,9 +2,8 @@
 # Memo
 
 - [ ] SHELL、Python 深入理解&巩固
-- [ ] VIM的IDE
-- [ ] 项目README与sh的完善、增删、优化
-- [ ] heartbeatV3 安装部分不完善，研究
+- [ ] VIM
+- [ ] 项目README与sh的增删、优化
 - [ ] demo（模板改用新版本形式：https://www.cnblogs.com/itcomputer/p/6241421.html ） Rsyslog调用日志并使用模板处理
 
 #### 2018.4.22~2019.12.12学习规划
