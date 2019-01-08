@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#安装时将本目录部署在Linux用户的"$HOME/software/nginx/"目录下
+#安装时将本目录所有文件先放在"$HOME/software/nginx"下
 #默认依赖：yum -y install gcc gcc-c++ autoconf automake unzip
 
 usr=`whoami`
