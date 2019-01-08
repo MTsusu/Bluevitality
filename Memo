@@ -31,7 +31,7 @@
 │   │   ├── 2016
 │   │   │   └── 资料
 │   │   ├── Elasticsearch
-│   │   │   ├── elasticdump
+│   │   │   ├── Elasticdump
 │   │   │   ├── Plugins
 │   │   │   ├── Template
 │   │   │   └── 资料
@@ -89,6 +89,7 @@
 │   │   │   ├── Compile 1.12.2
 │   │   │   ├── Configs
 │   │   │   ├── Setup 1.12.1
+│   │   │   ├── Setup 1.14.2 - Asiainfo
 │   │   │   └── 资料
 │   │   ├── Nodejs
 │   │   │   └── Setup 8.1.4
@@ -312,4 +313,4 @@
     ├── MyBase
     └── Tools
 
-312 directories
+313 directories
