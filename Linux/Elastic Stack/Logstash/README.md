@@ -40,8 +40,8 @@ input{
         consumer_threads => 2
         decorate_events => true                 #将当前topic、offset、group、partition等信息也写入message
         auto_commit_interval_ms => 1000         #消费间隔，毫秒
-        auto_offset_reset => latest             #
-        codec => "json"                         #将Filebeat传输的消息解析为JSON格式
+        auto_offset_reset => latest             #从最后消费
+        codec => "json"                         #将Filebeat传输的消息解析为JSON格式
     }
 }
 
