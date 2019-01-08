@@ -11,7 +11,7 @@ xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200"
 filebeat:
   prospectors:
     - paths:
-        - /home/wangyu/Test/access.log
+        - /home/wangyu/Test/*.log
       input_type: log
       document_type: oslog
       scan_frequency: 10s              #Every 10s scan ..
