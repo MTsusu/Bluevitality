@@ -80,6 +80,8 @@ cd ~/logstash
 nohup bin/logstash -f run-configs/demo.config \
 --path.data=run.data/demo/ -l run-logs/demo/ --node.name=demo -u 200 -b 2000 &
 
+# -u 提交间隔
+# -b 每次提交的数量
 # –configtest 或 -t            测试配置文件的语法
 # –pipeline-workers 或 -w      运行 filter / output 的pipeline线程数，默认是CPU核数
 # –pipeline-batch-size 或 -b   
