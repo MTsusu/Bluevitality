@@ -9,12 +9,23 @@ xpack.monitoring.elasticsearch.url: "http://10.40.23.79:9200"
 #### Filebeat
 ```bash
 filebeat:
+  registry_file: .filebeat            #记录filebeat处理日志文件的位置的文件，默认在启动的根目录下
   prospectors:
     - paths:
         - /home/wangyu/Test/*.log
       input_type: log
-      document_type: oslog
-      scan_frequency: 10s              #Every 10s scan ..
+      document_type: oslog            #输出时的document的type字段 可用来给日志进行分类 Default: log
+      scan_frequency: 10s             #Every 10s scan ..
+      encoding: plain
+      include_lines: ["^ERR", "^WARN"]  #含正则列表的行（默认所有）include_lines执行之后会执行exclude_lines
+      exclude_lines: ["^DBG"]         #要排除的行
+      exclude_files: [".gz$"]         #忽略掉符合正则表达式列表的文件
+      close_older: 1h                 #若文件在某个时间段内没有发生更新则关闭监控的文件handle（默认1h）
+      max_bytes: 10485760             #增加1行算1个事件，max_bytes限制在1次日志事件中最多上传的字节，多出的被丢弃
+      tail_files: false               #是否从文件尾部开始监控文件新增内容
+      backoff: 1s                     #检测到了EOF（文件结尾）后，每次等待多久再去检测文件是否有更新，默认1s
+      fields:                         #添加额外的信息
+         level: debug                 #新增一个JSON的key
 output.kafka: 
   enabled: true 
   hosts: ["10.0.0.3:9092"]
