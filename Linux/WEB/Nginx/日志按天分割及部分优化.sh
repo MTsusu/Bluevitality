@@ -48,6 +48,7 @@ cat > ~/nginx/conf/proxy_header.conf <<'eof'
   proxy_redirect http:// $scheme://;
 eof
 
+# ----------------------------------------------------------------------------------------------- nginx.conf
 
 cat > ~/nginx/conf/nginx.conf <<'eof'
 worker_processes  32;
@@ -112,11 +113,11 @@ http {
         #check_http_send "GET /HTTP/1.0\r\n\r\n";
         #check_http_expect_alive http_2xx http_3xx;
     }
+    
     server {
         listen 10000;
         proxy_pass proxy_guizhou;
     }
-       
         include conf.d/tcp/*-tcp.conf;
 }
 eof
