@@ -14,7 +14,7 @@ filebeat:
         - /home/wangyu/Test/access.log
       input_type: log
       document_type: oslog
-      scan_frequency: 2s              #Every 2s scan ..
+      scan_frequency: 10s              #Every 10s scan ..
 output.kafka: 
   enabled: true 
   hosts: ["10.0.0.3:9092"]
