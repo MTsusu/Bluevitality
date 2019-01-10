@@ -54,6 +54,7 @@
 │   │   │   ├── Setup 5.6.0
 │   │   │   └── 资料
 │   │   ├── KAFKA
+│   │   │   ├── kafka-eagle
 │   │   │   └── KafkaOffsetMonitor
 │   │   ├── RabbitMQ （空）
 │   │   └── RocketMQ
@@ -313,4 +314,4 @@
     ├── MyBase
     └── Tools
 
-313 directories
+314 directories
