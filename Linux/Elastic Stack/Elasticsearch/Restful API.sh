@@ -2,6 +2,18 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
+#设置每个节点的磁盘写入速率，默认20MB/s
+PUT /_cluster/settings
+{
+    "persistent" : {
+        "indices.store.throttle.max_bytes_per_sec" : "100mb"
+    }
+}
+
+#如果你使用的是机械磁盘而非 SSD，需要添加下面配置到 elasticsearch.yml 里：
+#机械磁盘在并发 I/O 支持方面比较差，所以我们需要降低每个索引并发访问磁盘的线程数
+index.merge.scheduler.max_thread_count: 1
+
 #在Kibana执行数据迁移 ( 先创建Mapping )
 #必须使用该reindex.remote.whitelist属性在elasticsearch.yaml中将远程主机明确列入白名单
 #它可设为逗号分隔的允许远程host和port组合列表（如 otherhost:9200, another:9200, 127.0.10.*:9200, localhost:*）
