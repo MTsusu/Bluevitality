@@ -11,7 +11,7 @@
 LOG=$1
 [ -z $LOG ] && exit 1
 #扫描>${ms_time}ms时间的URL的时间值定义...
-ms_time=100
+ms_time=3
 
 #输出当天URL访问量前30个的统计结果
 function SCAN_LOGFILE_URL_SORT() {  #修改成通过管道将文件传输进来
