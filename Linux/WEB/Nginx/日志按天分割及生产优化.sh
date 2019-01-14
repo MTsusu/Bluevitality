@@ -119,7 +119,7 @@ http {
 }
 eof
 
-cd ~/ngin
+cd ~/nginx
 mkdir -p tmp/proxy_cache
 mkdir -p tmp/proxy_temp
 mkdir -p conf/conf.d/tcp
