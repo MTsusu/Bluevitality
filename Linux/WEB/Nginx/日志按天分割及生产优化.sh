@@ -10,6 +10,7 @@ upstream fupin {
 }
 eof
 
+#日志按天生成需要的年月日变量获取
 cat > ~/nginx/conf/server_general.conf <<'eof'
 if ($request_method !~ ^(GET|POST|HEAD|PUT|DELETE)) {
         return 444;
