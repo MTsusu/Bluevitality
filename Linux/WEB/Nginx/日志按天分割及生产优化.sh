@@ -103,22 +103,21 @@ http {
     gzip_vary on;
     gzip_proxied  expired no-cache no-store private auth;
 
+    include conf.d/tcp/*-tcp.conf;
     include conf.d/vhost/app/*.conf;
     include conf.d/upstream/app/*-upstream.conf;
-}
 
-   stream {
-     upstream proxy_guizhou {
-        server XX.XX.XX.XX:XXX;
+   #stream {
+     #upstream proxy_guizhou {
+        #server XX.XX.XX.XX:XXX;
         #check interval=3000 rise=2 fall=5 timeout=1000;
         #check_http_send "GET /HTTP/1.0\r\n\r\n";
         #check_http_expect_alive http_2xx http_3xx;
-    }
+    #}
     
-    server {
-        listen 10000;
-        proxy_pass proxy_guizhou;
-    }
-        include conf.d/tcp/*-tcp.conf;
+   #server {
+        #listen 10000;
+        #proxy_pass proxy_guizhou;
+   #}
 }
 eof
