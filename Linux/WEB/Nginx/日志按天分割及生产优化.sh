@@ -7,7 +7,7 @@ upstream fupin {
 }
 eof
 
-#日志按天生成时的日志文件名中年月日变量部分从变量"time_iso8601"获取
+#日志按天生成时的日志文件名中年月日变量部分从变量"time_iso8601"获取，禁用不安全的方法
 cat > ~/nginx/conf/server_general.conf <<'eof'
 if ($request_method !~ ^(GET|POST|HEAD|PUT|DELETE)) {
         return 444;
@@ -25,19 +25,20 @@ location ~ /nginx_status {
 eof
 
 ADDRESS=`hostname -i`
-cat > XXX.conf <<'eof'
+cat > 工程名.conf <<'eof'
 server {
     listen 80;
     server_name ${ADDRESS};
     include server_general.conf;
     location / {
         include proxy_header.conf;
-        proxy_pass http://XXX;
-        access_log logs/XXX-access-$year-$month-$day.log main;
+        proxy_pass http://工程名;
+        access_log logs/工程名-access-$year-$month-$day.log main;
     }
 }
 eof
 
+#反向代理相关设置
 cat > ~/nginx/conf/proxy_header.conf <<'eof'
   proxy_set_header Host $http_host;
   proxy_set_header X-Real-IP $remote_addr;
@@ -66,7 +67,6 @@ http {
     log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time || $upstream_status || $upstream_response_time'
                      ' || $upstream_cache_status || $body_bytes_sent || $http_referer'
                      ' || $remote_user || $http_user_agent || $http_x_forwarded_for || $request';
-
 
     sendfile        on;
     keepalive_timeout  15;
