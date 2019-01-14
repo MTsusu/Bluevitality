@@ -1,16 +1,13 @@
 cat > XXX-upstream.conf <<'eof'
 upstream fupin {
 	check interval=3000 rise=2 fall=5 timeout=1000 type=tcp;
-	server 192.168.100.1:10101;
-	server 192.168.100.1:10109;
-	server 192.168.100.1:10105;
-	server 192.168.100.2:10101;
-	server 192.168.100.2:10109;
-	server 192.168.100.2:10105;
+	server 192.168.1.1:1011;
+	server 192.168.1.2:1011;
+	server 192.168.1.3:1011;
 }
 eof
 
-#日志按天生成需要的年月日变量获取
+#日志按天生成时的日志文件名中年月日变量部分从变量"time_iso8601"获取
 cat > ~/nginx/conf/server_general.conf <<'eof'
 if ($request_method !~ ^(GET|POST|HEAD|PUT|DELETE)) {
         return 444;
@@ -121,3 +118,11 @@ http {
    #}
 }
 eof
+
+cd ~/ngin
+mkdir -p tmp/proxy_cache
+mkdir -p tmp/proxy_temp
+mkdir -p conf/conf.d/tcp
+mkdir -p conf/vhost/app
+mkdir -p conf/upstream/app
+
