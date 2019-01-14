@@ -64,8 +64,8 @@ http {
     set_real_ip_from 192.168.0.0/16;
     real_ip_header X-Forwarded-For;
 
-    log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time || $upstream_status || $upstream_response_time'
-                     ' || $upstream_cache_status || $body_bytes_sent || $http_referer'
+    log_format main  '$time_local || $remote_addr || $upstream_addr ||  $status || $request_time || $upstream_status'
+                     ' || $upstream_response_time || $upstream_cache_status || $body_bytes_sent || $http_referer'
                      ' || $remote_user || $http_user_agent || $http_x_forwarded_for || $request';
 
     sendfile        on;
