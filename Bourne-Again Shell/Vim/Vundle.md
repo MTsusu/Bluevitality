@@ -32,14 +32,17 @@ set ts=4
 " python-syntax 语法高亮
 let python_highlight_all = 1
 
-" nerdtree 插件使用，<F3>对其进行呼入和呼出
+" nerdtree 插件使用，<F3> 对其进行呼入/呼出
 map <F3> :NERDTreeMirror<CR>
 map <F3> :NERDTreeToggle<CR>
 " autocmd vimenter * NERDTree  "自动开启Nerdtree
-autocmd vimenter * if !argc()|NERDTree|endif  "打开vim时如果没有文件自动打开NERDTree
-let g:NERDTreeHidden=0     "不显示隐藏文件
+" autocmd vimenter * if !argc()|NERDTree|endif  "打开vim时如果没有文件自动打开NERDTree
+let g:NERDTreeHidden=0      "不显示隐藏文件
 let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
+let g:NERDTreeWinSize = 30  "侧边栏宽度
+let g:NERDTreeDirArrowExpandable = '▸'  "树的显示图标
+let g:NERDTreeDirArrowCollapsible = '▾' "树的显示图标
 
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
