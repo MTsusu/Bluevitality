@@ -25,6 +25,10 @@ set t_Co=256
 let g:SuperTabDefaultCompletionType = "context"
 let g:jedi#popup_on_dot = 0
 
+" supertab
+set expandtab 
+set ts=4
+
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
