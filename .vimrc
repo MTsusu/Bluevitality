@@ -13,6 +13,8 @@ set hlsearch
 syntax on
 " 文件编码
 set fenc=utf-8
+" 将TAB转为4个字符
+set expandtab 
 
 " --------------------------------- Map ---------------------------------
 
