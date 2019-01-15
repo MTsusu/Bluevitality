@@ -22,7 +22,8 @@ function! Exec()
     execute "silent !%:p 2>&1 | tee /tmp/output_".n
     execute "vsplit ~/.vim/output_".n
     execute "redraw!"
-    set autoread  
+    set autoread 
+    execute "!rm /tmp/output*"
 endfunction
 
 :nmap <F5> :call Exec()
