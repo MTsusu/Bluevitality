@@ -14,8 +14,20 @@ syntax on
 set fenc=utf-8
 
 
+" 按 "F5" 自动运行并分屏输出，本段在写入 ~/.vimrc 前要先创建文件： mkdir ~/.vim
+function! Exec()
+    execute "w"
+    execute "silent !chmod +x %:p"
+    let n=expand('%:t')
+    execute "silent !%:p 2>&1 | tee /tmp/output_".n
+    execute "vsplit ~/.vim/output_".n
+    execute "redraw!"
+    set autoread  
+endfunction
 
-" 多窗口,ctl+w 进行切换
+:nmap <F5> :call Exec()
+
+" 多窗口 使用 <c-w> 进行切换
 map <F6>  <ESC>:vs #FILENAME
 
 " 使用bash解释器执行本文件
