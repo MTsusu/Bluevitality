@@ -7,6 +7,7 @@ remote: Total 3136 (delta 0), reused 0 (delta 0), pack-reused 3136
 Receiving objects: 100% (3136/3136), 933.42 KiB | 591.00 KiB/s, done.
 Resolving deltas: 100% (1105/1105), done.
 
+#关于Vundle及部分插件需要的相关设置和参数
 [root@localhost ~]# vim ~/.vimrc
 # ........................................................
 filetype off
@@ -37,7 +38,7 @@ filetype plugin indent on
 # ........................................................
 ```
 
-#### Plugin Install （ 插件附加执行的命令 ）
+#### Plugin Install （ 插件安装后需要在主机执行的命令 ）
 ```bash
 #解决依赖问题
 #在终端执行：
