@@ -50,7 +50,7 @@ filetype plugin indent on
 #安装字体
 [root@localhost ~]# mv 10-powerline-symbols.conf /usr/share/fonts/
 [root@localhost ~]# mv PowerlineSymbols.otf /usr/share/fonts/
-" 参考：https://www.jianshu.com/p/f0513d18742a/
+#参考：https://www.jianshu.com/p/f0513d18742a/
 
 #jedi-vim插件安装后需要进入其目录使用git来更新模块才能使用
 [root@localhost ~]# cd ~/.vim/bundle/jedi-vim/ && git submodule update --init
