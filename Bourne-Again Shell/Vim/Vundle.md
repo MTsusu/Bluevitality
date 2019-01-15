@@ -37,7 +37,7 @@ filetype plugin indent on
 # ........................................................
 ```
 
-##### Plugin Install
+#### Plugin Install （ 插件附加执行的命令 ）
 ```bash
 #解决依赖问题
 #在终端执行：
