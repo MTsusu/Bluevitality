@@ -3,8 +3,7 @@
 │   ├── Dialog
 │   ├── History Memo
 │   ├── Vim
-│   │   └── Plugin
-│   │       └── NERDTree
+│   │   └── vimrc
 │   └── 收集
 ├── Linux
 │   ├── Cluster
@@ -314,4 +313,4 @@
     ├── MyBase
     └── Tools
 
-314 directories
+313 directories
