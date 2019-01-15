@@ -8,6 +8,10 @@ set laststatus=2
 set incsearch
 " 高亮显示搜索文本
 set hlsearch
+" 语法高亮
+syntax on
+" 文件编码
+set fenc=utf-8
 
 " 使用bash解释器执行本文件
 map <F7>  <ESC>:! bash %
