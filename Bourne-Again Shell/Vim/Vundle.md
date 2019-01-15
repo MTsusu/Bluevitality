@@ -20,11 +20,17 @@ set laststatus=2
 let g:Powerline_symbols='unicode'
 set t_Co=256
 
+" jedi-vim插件需要的一些设置，用于语法TAB补齐
+let g:SuperTabDefaultCompletionType = "context"
+let g:jedi#popup_on_dot = 0
+
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'L9'
 Plugin 'Lokaltog/vim-powerline'
+Plugin 'davidhalter/jedi-vim'
+Plugin 'ervandew/supertab'
 Plugin '这里写入需要另外安装的插件名称，默认都是从Github进行下载'
 call vundle#end()
 filetype plugin indent on
