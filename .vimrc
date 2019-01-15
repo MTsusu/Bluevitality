@@ -20,12 +20,11 @@ function! Exec()
     execute "silent !chmod +x %:p"
     let n=expand('%:t')
     execute "silent !%:p 2>&1 | tee /tmp/output_".n
-    execute "vsplit ~/.vim/output_".n
+    execute "vsplit /tmp/output_".n
     execute "redraw!"
     set autoread 
     execute "!rm /tmp/output*"
 endfunction
-
 :nmap <F5> :call Exec()
 
 " 多窗口 使用 <c-w> 进行切换
