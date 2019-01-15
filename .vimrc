@@ -13,11 +13,15 @@ syntax on
 " 文件编码
 set fenc=utf-8
 
+
+
+" 多窗口,ctl+w 进行切换
+map <F6>  <ESC>:vs #FILENAME
+
 " 使用bash解释器执行本文件
 map <F7>  <ESC>:! bash %
 
 " 使用python解释器执行本文件
 map <F8>  <ESC>:! python %
 
-" 多窗口,ctl+w 进行切换
-map <F6>  <ESC>:vs #FILENAME()
+
