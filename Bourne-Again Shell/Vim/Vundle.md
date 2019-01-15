@@ -29,6 +29,9 @@ let g:jedi#popup_on_dot = 0
 set expandtab 
 set ts=4
 
+" python-syntax 语法高亮
+let python_highlight_all = 1
+
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
@@ -36,6 +39,7 @@ Plugin 'L9'
 Plugin 'Lokaltog/vim-powerline'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'ervandew/supertab'
+Plugin 'hdima/python-syntax'
 Plugin '这里写入需要另外安装的插件名称，默认都是从Github进行下载'
 call vundle#end()
 filetype plugin indent on
