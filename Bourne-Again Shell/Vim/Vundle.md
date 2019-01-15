@@ -8,7 +8,7 @@ Receiving objects: 100% (3136/3136), 933.42 KiB | 591.00 KiB/s, done.
 Resolving deltas: 100% (1105/1105), done.
 
 vim ~/.vimrc
-# ........
+# ........................................................
 filetype off
 
 " 以下是vim-powerline插件需要的设置选项
@@ -28,7 +28,7 @@ Plugin 'Lokaltog/vim-powerline'
 Plugin '这里写入需要另外安装的插件名称，默认都是从Github进行下载'
 call vundle#end()
 filetype plugin indent on
-#.........
+# ........................................................
 ```
 
 ##### Plugin Install
