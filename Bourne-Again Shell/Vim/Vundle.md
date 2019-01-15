@@ -7,7 +7,7 @@ remote: Total 3136 (delta 0), reused 0 (delta 0), pack-reused 3136
 Receiving objects: 100% (3136/3136), 933.42 KiB | 591.00 KiB/s, done.
 Resolving deltas: 100% (1105/1105), done.
 
-vim ~/.vimrc
+[root@localhost ~]# vim ~/.vimrc
 # ........................................................
 filetype off
 
@@ -35,15 +35,15 @@ filetype plugin indent on
 ```bash
 #解决依赖问题
 #在终端执行：
-export TERM="screen-256color"
+[root@localhost ~]# export TERM="screen-256color"
 #Powerline使用特殊符号来为开发者显示特殊的箭头效果和符号内容。因此系统中必须要有符号字体或者补丁过的字体
-wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
-wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
+[root@localhost ~]# wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
+[root@localhost ~]# wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
 #更新系统字体缓存
-yum -y install fontconfig && fc-cache -vf /usr/share/fonts/    
+[root@localhost ~]# yum -y install fontconfig && fc-cache -vf /usr/share/fonts/    
 #安装字体
-mv 10-powerline-symbols.conf /usr/share/fonts/
-mv PowerlineSymbols.otf /usr/share/fonts/
+[root@localhost ~]# mv 10-powerline-symbols.conf /usr/share/fonts/
+[root@localhost ~]# mv PowerlineSymbols.otf /usr/share/fonts/
 " 参考：https://www.jianshu.com/p/f0513d18742a/
 
 #在vim中执行如下命令开始安装vundle中定义的插件
