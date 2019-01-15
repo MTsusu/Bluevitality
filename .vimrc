@@ -14,7 +14,7 @@ syntax on
 set fenc=utf-8
 
 
-" 按 "F5" 自动运行并分屏输出，本段在写入 ~/.vimrc 前要先创建文件： mkdir ~/.vim
+" 按 "F5" 自动运行并分屏输出
 function! Exec()
     execute "w"
     execute "silent !chmod +x %:p"
