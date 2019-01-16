@@ -86,7 +86,11 @@ transaction.state.log.min.isr=1
 zookeeper.connect=192.168.133.130:2181      #ZK的IP:PORT，格式：IP:PORT,IP:PORT,IP:PORT,...
 zookeeper.connection.timeout.ms=6000        #ZK的连接超时
 delete.topic.enable=true                    #物理删除topic需设为true，否则只是标记删除!
-group.initial.rebalance.delay.ms=0 
+group.initial.rebalance.delay.ms=0
+#auto.offset.reset                          #默认为 latest
+#   earliest    当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时从头开始
+#   latest      当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时消费新产生的该分区下的数据 
+#   none        topic各分区都存在已提交的offset时从offset后开始消费；只要有1个分区不存在已提交的offset，则抛异常
 
 #启停
 [root@localhost config]# cd /home/kafka/
