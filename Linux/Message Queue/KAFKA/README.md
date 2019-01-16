@@ -158,6 +158,9 @@ kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 --topic <TOPIC> --time -2   #输出其offset的最小值
 ./kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list `hostname -i`:9092 \
 --topic <TOPIC> --time -1   #输出其offset的最大值
+
+./kafka-run-class.sh kafka.tools.ConsumerOffsetChecker --zookeeper `hostname -i`:2181 \
+--group test --topic testKJ1  ???????????
 ```
 #### 查看特定TOPIC分区大小
 ```bash
