@@ -60,7 +60,7 @@ offset：   每个Partition都由一系列有序的、不可变的消息组成�
 
 #这里使用的是Kafka自带的ZK，简单的Demo，实际生产中应使用ZK集群的方式
 [root@localhost config]# vim /home/kafka/config/zookeeper.properties     
-dataDir=/tmp/zookeeper                      #ZK的快照存储路径
+dataDir=/var/zookeeper                      #ZK的快照存储路径
 clientPort=2181                             #客户端访问端口
 maxClientCnxns=0                            #最大客户端连接数
 
@@ -88,15 +88,15 @@ zookeeper.connection.timeout.ms=6000        #ZK的连接超时
 delete.topic.enable=true                    #物理删除topic需设为true，否则只是标记删除!
 group.initial.rebalance.delay.ms=0
 #auto.offset.reset                          #默认为 latest
-#   earliest    当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时从头开始
-#   latest      当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时消费新产生的该分区下的数据 
-#   none        topic各分区都存在已提交的offset时从offset后开始消费；只要有1个分区不存在已提交的offset，则抛异常
+#   earliest    当各分区下有已提交的offset时，从提交的offset开始消费,无提交的offset时从头开始
+#   latest      当各分区下有已提交的offset时，从提交的offset开始消费,无提交的offset时消费新产生的该分区下的数据 
+#   none        topic各分区都存在已提交的offset时从offset后开始消费,只要有1个分区不存在已提交的offset，则抛异常
 
 #启停
-[root@localhost config]# cd /home/kafka/
-bin/zookeeper-server-start.sh config/zookeeper.properties &     #启动ZK
-bin/kafka-server-start.sh -daemon config/server.properties      #启动Kafka
-bin/kafka-server-stop.sh                                        #停止Kafka
+[root@localhost config]# cd /home/kafka/bin
+./zookeeper-server-start.sh config/zookeeper.properties &     #启动ZK
+./kafka-server-start.sh -daemon config/server.properties      #启动Kafka
+./kafka-server-stop.sh                                        #停止Kafka
 ```
 #### 运维
 ```bash
@@ -104,10 +104,11 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 ./kafka-topics.sh --zookeeper 192.168.133.130:2181 --create --partitions 1 --replication-factor 1 --topic TEST \
 --config delete.retention.ms=86400000    #定义保存时间（1天）
 --config retention.bytes=1073741824      #定义保存容量（针对的是每个分区，因此实际占用容量 = 此值 * 分区数）
+
 #线上环境将自动创建topic禁用，改为手动创建"auto.create.topics.enable=false"
 #parttitions和replication－factor是两个必备选项（需要严格读取Topic消息顺序的时候，只使用1个partition）
-#分区 是消费并行度的一个重要参数（多Partition时只有Partition的learder才能进对于该partiotion读写，其余都是副本）
-#副本 极大提高了Topic的可用性.备份因子默认是1，相当于没有备份，注意其值不能大于broker个数，否则会报错。
+#分区是消费并行度的一个重要参数（多Partition时仅其中的learder才能进对本partiotion读写，其余都是冗余副本）
+#副本极大提高了Topic的可用性.其数量默认是1，注意其值不能大于broker个数，否则报错。
 #同时还可以指定Topic级别的配置，这种特定的配置会覆盖默认配置，并存储在zookeeper的/config/topics/[topic_name]节点
 
 #主题清单
