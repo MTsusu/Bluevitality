@@ -149,6 +149,10 @@ kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 #查看所有kafka节点，在ZK的bin目录:
 ./zkCli.sh ---> ls /brokers/ids 就可以看到zk中存储的所有 broker id，查看：get /brokers/ids/{x}
 
+#查看topic各个分区的消息的信息 ( 指定分组 )
+./kafka-run-class.sh kafka.tools.ConsumerOffsetChecker --zookeeper `hostname -i`:2181 \
+--group test --topic <TOPIC> 
+
 #查看TOPIC在其每个分区下的消费偏移量
 ./kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list `hostname -i`:9092 \
 --topic <TOPIC> --time -2   #输出其offset的最小值
