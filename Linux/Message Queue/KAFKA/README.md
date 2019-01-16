@@ -119,7 +119,7 @@ bin/kafka-server-stop.sh                                        #停止Kafka
 bin/kafka-console-producer.sh --broker-list 192.168.133.130:9092 --topic ES
 
 #消费者客户端命令（从头消费：--from-beginning）
-./kafka-console-consumer.sh -zookeeper  192.168.133.130:2181 --topic ES --from-beginning
+./kafka-console-consumer.sh -zookeeper  192.168.133.130:2181 --topic ES --from-beginning [ --group xxx  ]
 
 #为Topic增加Partition
 ./kafka-topics.sh –-zookeeper 127.0.0.1:2181 -–alter -–partitions 20 -–topic ES
@@ -137,7 +137,7 @@ kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 
 #通过 group ID 查看当前详细的消费情况（旧/新）
 ./kafka-consumer-groups.sh --zookeeper localhost:2181 --group TEAM1 --describe
-./kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9292 --new-consumer  --group TEAM1--describe
+./kafka-consumer-groups.sh --bootstrap-server 127.0.0.1:9292 --new-consumer  --group TEAM1 --describe
 #消费者组                       话题id         分区id     当前已消费条数    总条数          未消费条数
 #GROUP                         TOPIC          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG      OWNER
 #console-consumer-28542        test_find1     0          303094          303094          0               
