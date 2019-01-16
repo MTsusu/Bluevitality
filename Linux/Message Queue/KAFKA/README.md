@@ -159,6 +159,20 @@ kafka-consumer-groups.sh --new-consumer --bootstrap-server 127.0.0.1:9292 --list
 ./kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list `hostname -i`:9092 \
 --topic <TOPIC> --time -1   #输出其offset的最大值
 
+#对TOPIC添加配置：
+kafka-configs.sh --zookeeper IP:port/chroot --entity-type topics --entity-name <TOPIC> --alter --add-config x=y
+                 
+#对TOPIC删除配置：
+kafka-configs.sh --zookeeper IP:port/chroot --entity-type topics --entity-name <TOPIC> --alter --delete-config x
+
+#--members：此选项提供使用者组中所有活动成员的列表。
+> bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group my-group --members --verbose
+CONSUMER-ID                                    HOST          CLIENT-ID       #PARTITIONS  ASSIGNMENT
+consumer1-3fc8d6f1-581a-4472-bdf3-3515b4aee8c1 /127.0.0.1    consumer1       2            topic1(0), topic2(0)
+consumer4-117fe4d3-c6c1-4178-8ee9-eb4a3954bee0 /127.0.0.1    consumer4       1            topic3(2)
+consumer2-e76ea8c3-5d30-4299-9005-47eb41f3d3c4 /127.0.0.1    consumer2       3            topic2(1), topic3(0,1)
+consumer3-ecea43e4-1f01-479f-8349-f9130b75d8ee /127.0.0.1    consumer3       0            -
+
 ./kafka-run-class.sh kafka.tools.ConsumerOffsetChecker --zookeeper `hostname -i`:2181 \
 --group test --topic testKJ1  ???????????
 ```
