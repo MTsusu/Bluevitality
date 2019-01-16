@@ -165,8 +165,10 @@ kafka-configs.sh --zookeeper IP:port/chroot --entity-type topics --entity-name <
 #对TOPIC删除配置：
 kafka-configs.sh --zookeeper IP:port/chroot --entity-type topics --entity-name <TOPIC> --alter --delete-config x
 
-#--members：此选项提供使用者组中所有活动成员的列表。
-> bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group my-group --members --verbose
+#--members：此选项提供使用者组中所有活动成员的列表 ( 新老版本输出差异较大 )
+#注意!!  所有的KAFKA终端命令中，新版本使用: --bootstrap-server  老版本使用： --zookeeper  否则执行报错或误报!...
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group <GROUP>  \
+--members --verbose [--all-topics]
 CONSUMER-ID                                    HOST          CLIENT-ID       #PARTITIONS  ASSIGNMENT
 consumer1-3fc8d6f1-581a-4472-bdf3-3515b4aee8c1 /127.0.0.1    consumer1       2            topic1(0), topic2(0)
 consumer4-117fe4d3-c6c1-4178-8ee9-eb4a3954bee0 /127.0.0.1    consumer4       1            topic3(2)
