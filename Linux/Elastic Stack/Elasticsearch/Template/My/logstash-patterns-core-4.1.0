@@ -1,0 +1,8 @@
+URIPARM1 [A-Za-z0-9$.+!*'|(){},~@#%&/=:;^\\_<>`?\-\[\]]*
+URIPATH1 (?:/[\\A-Za-z0-9$.+!*'(){},~:;=@#% \[\]_<>^\-&?]*)+
+HOSTNAME1 \b(?:[0-9A-Za-z_\-][0-9A-Za-z-_\-]{0,62})(?:\.(?:[0-9A-Za-z_\-][0-9A-Za-z-:\-_]{0,62}))*(\.?|\b)
+STATUS ([0-9.]{0,3}[, ]{0,2})+
+HOSTPORT1 (%{IPV4}:%{POSINT}[, ]{0,2})+
+ANY .*
+NGINXACCESS %{HTTPDATE:time_local} \|\| %{IPORHOST:remote_addr} \|\| (?:%{HOSTPORT1:upstream_addr}|-) \|\| (%{STATUS:status:int}|-) \|\| (%{BASE16FLOAT:request_time:float}|-) \|\| (%{STATUS:upstream_status:int}|-) \|\| (%{BASE16FLOAT:upstream_response_time:float}|-) \|\| (%{STATUS:upstream_cache_status}|-) \|\| (?:%{BASE10NUM:body_bytes_sent}|-) \|\| (?:%{GREEDYDATA:http_referrer}|-) \|\| (%{USERNAME:user}|-) \|\| (%{GREEDYDATA:user_agent}|-) \|\| %{ANY:cookie_cmos_vision} \|\| %{ANY:http_x_group_env} \|\| (%{WORD:request_method}|-) (%{URIPATH1:uri}|-|) (%{URIPARM1:param}|-) \|\| %{ANY:http_x_forwarded_for} \|\| %{ANY:proxy_host} \|\| %{ANY:upst_area} \|\| %{ANY:province}
+SMRZACCESS %{HTTPDATE:time_local} \|\| %{IPORHOST:remote_addr} \|\| (?:%{HOSTPORT1:upstream_addr}|-) \|\| (%{STATUS:status:int}|-) \|\| (%{BASE16FLOAT:request_time:float}|-) \|\| (%{STATUS:upstream_status:int}|-) \|\| (%{BASE16FLOAT:upstream_response_time:float}|-) \|\| (%{STATUS:upstream_cache_status}|-) \|\| (?:%{BASE10NUM:body_bytes_sent}|-) \|\| (?:%{GREEDYDATA:http_referrer}|-) \|\| (%{USERNAME:user}|-) \|\| (%{GREEDYDATA:user_agent}|-) \|\| %{ANY:http_x_forwarded_for} \|\| (%{WORD:request_method}|-) (%{URIPATH1:uri}|-|) (%{URIPARM1:param}|-)
