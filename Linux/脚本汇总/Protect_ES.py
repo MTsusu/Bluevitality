@@ -1,11 +1,12 @@
 #!/usr/bin/python             
 # -*- coding: UTF-8 -*-
-  
+
+import time
 import os
 import multiprocessing
-import time
-
+from random import random
 from multiprocessing import cpu_count
+
 CPU_NUMBERS=cpu_count() #CPU核心数量
 SECURITY_LOAD_LEVEL=float(CPU_NUMBERS * 0.5)  #保持在负载安全阈值
 
@@ -26,7 +27,13 @@ def Oh(x):
             continue
         print "cpu numbers:" + str(float(CPU_NUMBERS * 0.5))
         print "Load" + str(get_load())
-        pass    #空转
+        '''pass    #空转'''
+        hits=0
+        for i in range(1,1000*1000+1):  #计算圆周率
+            x,y=random(),random()
+            dist=pow(x**2+y**2,0.5)
+            if dist <=1.0:
+                hits=hits+1
 
 if __name__ == '__main__':
     record = []
