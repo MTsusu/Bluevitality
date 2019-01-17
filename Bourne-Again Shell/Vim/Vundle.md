@@ -98,7 +98,7 @@ filetype plugin indent on
 #     i       split 一个新窗口打开选中文件，并跳到该窗口
 #     gi      split 一个新窗口打开选中文件，但不跳到该窗口
 #     s       vsplit 一个新窗口打开选中文件，并跳到该窗口
-#     gs      vsplit 一个新 窗口打开选中文件，但不跳到该窗口
+#     gs      vsplit 一个新窗口打开选中文件，但不跳到该窗口
 #     !       执行当前文件
 #     O       递归打开选中 结点下的所有目录
 #     m       文件操作：复制、删除、移动等
@@ -111,8 +111,8 @@ filetype plugin indent on
 #     :tabc   关闭当前的 tab
 #     :tabo   关闭所有其他的 tab
 #     :tabs   查看所有打开的 tab
-#     :tabp   前一个 tab
-#     :tabn   后一个 tab
+#     :tabp   前一个 tab   (pre)
+#     :tabn   后一个 tab   (next)
 # 
 # 标准模式下：
 #     gT      前一个 tab
