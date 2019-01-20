@@ -60,10 +60,8 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
  --enable-multibyte \
  --enable-rubyinterp=yes\
  --enable-pythoninterp=yes \
- --enable-python3interp=yes \
- --enable-perlinterp=yes\
- --enable-luainterp=yes  && cd ..
-[root@localhost ~]# make VIMRUNTIMEDIR=/usr/local/bin/vim
+ --enable-python3interp=yes  && cd ..
+[root@localhost ~]# make VIMRUNTIMEDIR=/usr/share/vim/vim81
 [root@localhost ~]# make install
 [root@localhost ~]# vim /etc/.bash_profile
 #--------------------
