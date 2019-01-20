@@ -63,12 +63,12 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
  --enable-python3interp=yes  && cd ..
 [root@localhost ~]# make VIMRUNTIMEDIR=/usr/share/vim/vim81
 [root@localhost ~]# make install
-[root@localhost ~]# vim /etc/.bash_profile
+[root@localhost ~]# vim ~/.bash_profile
 #--------------------
 VIM_BIN=/usr/local/bin/vim
 PATH==$VIM_BIN:$PATH:$HOME/bin
 #--------------------
-[root@localhost ~]# . /etc/.bash_profile
+[root@localhost ~]# . ~/.bash_profile
 
 #安装插件管理器
 [root@localhost ~]# git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
