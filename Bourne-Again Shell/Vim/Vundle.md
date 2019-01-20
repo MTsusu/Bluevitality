@@ -164,12 +164,17 @@ let g:repl_exit_commands = {
 \	"zsh": "exit",
 \	"default": "exit",
 \	}
+"           打开REPL：:REPLToggle
+"           退出REPL：:REPLToggle
+"           如何向REPL中发送代码：
+"             在Normal模式下：按`<leader>w`，光标所在行（包括一个最后的回车）便会输入到REPL中。
+"             在Visual模式下：按`<leader>w`，对应的所有行（包括最后的回车）便会输入到REPL中。
 
-" 打开REPL：:REPLToggle
-" 退出REPL：:REPLToggle
-" 如何向REPL中发送代码：
-"   在Normal模式下：按`<leader>w`，光标所在行（包括一个最后的回车）便会输入到REPL中。
-"   在Visual模式下：按`<leader>w`，对应的所有行（包括最后的回车）便会输入到REPL中。
+" molokai Plugin
+set t_Co=256            
+color molokai           
+let g:molokai_original=1
+let g:rehash256=1       
 
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
@@ -183,6 +188,7 @@ Plugin 'scrooloose/nerdtree'    "目录树
 Plugin 'sillybun/vim-repl'      "运行终端
 Plugin 'sillybun/vim-async'     "配套
 Plugin 'sillybun/zytutil'       "配套
+Plugin 'tomasr/molokai'         "高级配色
 " Plugin 'Valloric/YouCompleteMe' "自动补全 (暂时保留，使用Jedi-vim进行替代)
 " Plugin 'Valloric/ListToggle'
 " Plugin 'scrooloose/syntastic'
