@@ -1,8 +1,17 @@
 #### Install
 ```bash
+#安装
 [root@localhost ~]# pip install sqlmap -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
 [root@localhost ~]# cd /root/ansible-cmdb-1.30
 [root@localhost ~]# python setup.py install
+
+#打离线包
+[root@localhost ~]# pip freeze --all > package.txt
+[root@localhost ~]# pip install -i http://pypi.douban.com/simple/ \
+--trusted-host pypi.douban.com --download /tmp/pip-packages -r package.txt 
+
+#离线安装
+[root@localhost ~]# pip install --no-index --find-index=${HOME}/pip-packages -r package.txt
 ```
 #### Demo
 ```bash
