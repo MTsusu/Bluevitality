@@ -19,7 +19,8 @@ set fenc=utf-8
 set expandtab 
 " 多窗口环境下使用的边界分隔符
 set fillchars=vert:\|
-
+" 插入模式下写入当前时间
+" <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
 " --------------------------------- Map ---------------------------------
 " <F5> 运行脚本并分屏输出
 function! Exec()
