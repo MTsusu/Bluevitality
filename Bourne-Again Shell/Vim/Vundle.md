@@ -52,8 +52,8 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
 #### Use Vundle for VIM Plugin
 ```bash
 #升级VIM到8.1+ 
-[root@localhost ~]# yum install ncurses-devel.x86_64  gcc gcc-c++ -y    #注意ncurses最好是64位
-[root@localhost ~]# yum remove vim -y
+[root@localhost ~]# yum -y install ncurses-devel.x86_64  gcc gcc-c++ wget    #注意ncurses最好是64位
+[root@localhost ~]# yum -y remove vim 
 [root@localhost ~]# git clone https://github.com/vim/vim.git
 [root@localhost ~]# cd vim
 [root@localhost ~]# ./configure --with-features=huge \
