@@ -56,7 +56,15 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
 [root@localhost ~]# yum remove vim -y
 [root@localhost ~]# git clone https://github.com/vim/vim.git
 [root@localhost ~]# cd vim
-[root@localhost ~]# make
+[root@localhost vim]# ./configure --with-features=huge \
+[root@localhost vim]# --enable-multibyte \
+[root@localhost vim]# --enable-rubyinterp=yes\
+[root@localhost vim]# --enable-pythoninterp=yes \
+[root@localhost vim]# --enable-python3interp=yes \
+[root@localhost vim]# --enable-perlinterp=yes\
+[root@localhost vim]# --enable-luainterp=yes \
+[root@localhost vim]# --with-tlib=library  && cd ..
+[root@localhost ~]# make VIMRUNTIMEDIR=/usr/local/bin/vim
 [root@localhost ~]# make install
 [root@localhost ~]# vim /etc/.bash_profile
 #----------
@@ -180,7 +188,7 @@ call vundle#end()
 # ........................................................
 ```
 
-#### Plugin Install （ 插件安装后需要在主机执行的命令 ）
+#### Plugin Setup （ 插件安装后需要在主机执行的命令 ）
 ```bash
 #解决依赖问题
 #在终端执行：
