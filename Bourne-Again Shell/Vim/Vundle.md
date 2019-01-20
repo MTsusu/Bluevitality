@@ -108,7 +108,7 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTree
 let g:NERDTreeHidden=0      "不显示隐藏文件
 let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
-let g:NERDTreeWinSize = 20  "侧边栏宽度
+let g:NERDTreeWinSize = 22  "侧边栏宽度
 let g:NERDTreeDirArrowExpandable = '▸'  "树的显示图标
 let g:NERDTreeDirArrowCollapsible = '▾' "树的显示图标
 
@@ -137,12 +137,12 @@ execute pathogen#infect()
 syntax on
 filetype plugin indent on 
 
-nnoremap <leader>r :REPLToggle<Cr>                "使用普通模式的\r代替命令模式的:REPLToggle
-let g:repl_width = None                           "窗口宽度
-let g:repl_height = None                          "窗口高度
-let g:sendtorepl_invoke_key = "<leader>w"         "传送代码快捷键，默认为<leader>w    注:<Leader>默认是\
-let g:repl_position = 0                           "0表示出现在下方，1表示出现在上方，2在左边，3在右边
-let g:repl_stayatrepl_when_open = 0               "打开REPL时是回到原文件（1）还是停留在REPL窗口中（0）
+nnoremap <leader>r :REPLToggle<Cr>                  "使用普通模式的\r代替命令模式的:REPLToggle
+let g:repl_width = 15                               "窗口宽度
+let g:repl_height = 10                              "窗口高度
+let g:sendtorepl_invoke_key = "<leader>w"           "传送代码快捷键，默认为<leader>w    注:<Leader>默认是\
+let g:repl_position = 0                             "0出现在下方，1出现在上方，2在左边，3在右边
+let g:repl_stayatrepl_when_open = 0                 "打开REPL时是回到原文件（1）还是停留在REPL窗口中（0）
 
 " 指定REPL程序 （注意\可能导致VIM输入2个，另需注意python版本为3+）
 let g:repl_program = {
