@@ -66,7 +66,7 @@ set fillchars+=stl:\ ,stlnc:\
 set rtp+=~/.vim/bundle/Vundle.vim
 set laststatus=2
 let g:Powerline_symbols='unicode'
-set t_Co=256
+set t_Co=256        "开启256色支持
 
 " jedi-vim插件需要的一些设置，用于语法TAB补齐
 let g:SuperTabDefaultCompletionType = "context"
