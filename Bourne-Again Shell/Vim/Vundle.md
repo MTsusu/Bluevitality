@@ -17,6 +17,11 @@ syntax on
 set fenc=utf-8
 " 将TAB转为4个字符
 set expandtab 
+" 对搜索时的关键字高亮处理
+hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
+" 行号字体颜色与其背景颜色的设置，在控制台下使用cterm，否则使用gui关键字...
+highlight LineNr ctermfg=red
+highlight LineNr ctermbg=white
 " 多窗口环境下使用的边界分隔符
 set fillchars=vert:\|
 " 插入模式下写入当前时间
