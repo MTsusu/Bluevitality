@@ -19,7 +19,12 @@
 [root@localhost ~]# ansible -i x all -m setup --tree /tmp/ansible-cmdb  #使用setup模块收集主机信息后导出到指定目录
 [root@localhost ~]# ansible-cmdb /tmp/ansible-cmdb > index.html    #使用ansible-cmdb模块将生成的JSON串转为静态页面
 
-#以资产列表得形式统计出主机信息：
+#生成CSV表格
+[root@localhost ~]# ansible-cmdb -t csv
+"Name","OS","IP","Arch","Mem","MemFree","MemUsed","CPUs","Virt","Disk avail"
+"192.168.86.129","CentOS 7.2.1511","192.168.86.129","x86_64/x86_64","2g","0g","2g","1","VMware/guest","15.0g, 0.0g"
+
+#以资产列表得形式统计出主机信息：( 部分列不支持，暂时还没找到解决办法 )
 [root@localhost ~]# ansible-cmdb -t txt_table --columns name,os,ip,mem,cpus out
 Name            OS               IP              Mem  CPUs  
 --------------  ---------------  --------------  ---  ----  
