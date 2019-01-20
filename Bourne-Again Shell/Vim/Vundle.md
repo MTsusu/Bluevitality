@@ -31,11 +31,11 @@ function! Exec()
 endfunction
 :nmap <F5> :call Exec()
 
-" 多窗口 "<c-w>" 进行切换
+" 多窗口 "<c-w> + hjkl" 进行切换
 map <F6>  <ESC>:vsp #FileName
 
 " 多窗口模式下将当前窗口向右增加10列
-map <c-1>  <ESC>:vertical resize+10
+map <C-W>  <ESC>:vertical resize+10
 
 " 使用bash解释器执行本文件
 map <F7>  <ESC>:! bash %
