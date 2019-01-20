@@ -37,3 +37,5 @@ Name            OS               IP              Mem  CPUs
 | disk_total 
 | disk_free
 ```
+#### WEB-UI
+![DEMO](资料/demo.png)
