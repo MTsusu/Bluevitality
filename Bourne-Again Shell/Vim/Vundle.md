@@ -18,6 +18,7 @@ hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
 " 行号字体颜色与其背景颜色的设置，在控制台下使用cterm，否则使用gui关键字...
 highlight LineNr ctermfg=red
 highlight LineNr ctermbg=231
+set nu
 
 highlight VertSplit ctermfg=green               " 多窗口环境下边界分隔符背景色
 set fillchars=vert:\|                           " 多窗口环境下使用的边界分隔符
