@@ -1,6 +1,6 @@
 #### ~/.vimrc
 ```vim
-" ------------------------------ Default --------------------------------
+" ---------------------------------------- Default ------------------------------------------
 set history=1000
 set backspace=2                                 " 启用退格键
 set tabstop=4                                   " 默认缩进数
@@ -31,7 +31,7 @@ set encoding=utf-8
 " 设置IDE环境的背景色，Value部分可以通过设置16进制颜色值来执行，入：=#00FF00
 highlight Normal guibg=White        "针对GUI
 highlight Normal ctermbg=231        "针对cterm
-" --------------------------------- Map ---------------------------------
+" ------------------------------------------- Map -------------------------------------------
 " map <F8>  <ESC>:! python %              " 使用python解释器执行本文件
 " <F5> 运行脚本并分屏输出
 function! Exec()
@@ -49,7 +49,7 @@ map <F6>  <ESC>:vsp #FileName                   " 多窗口 "<c-w> + hjkl" 进�
 map <leader>+  <ESC>:vertical resize+10<Cr>     " 多窗口模式下将当前窗口向右增加10列
 map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本文件
 ```
-#### Vundle Install VIM Plugin
+#### Use Vundle for VIM Plugin
 ```bash
 #升级VIM到8.1+ 
 [root@localhost ~]# yum install ncurses-devel.x86_64  gcc gcc-c++ -y    #注意ncurses最好是64位
@@ -66,10 +66,10 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
 [root@localhost ~]# make VIMRUNTIMEDIR=/usr/local/bin/vim
 [root@localhost ~]# make install
 [root@localhost ~]# vim /etc/.bash_profile
-#----------
+#--------------------
 VIM_BIN=/usr/local/bin/vim
 PATH==$VIM_BIN:$PATH:$HOME/bin
-#----------
+#--------------------
 [root@localhost ~]# . /etc/.bash_profile
 
 #安装插件管理器
@@ -187,7 +187,7 @@ call vundle#end()
 # ........................................................
 ```
 
-#### Plugin Setup （ 插件安装后需要在主机执行的命令 ）
+#### Plugin configure （ 插件安装后需要在主机执行的命令 ）
 ```bash
 #解决依赖问题
 #在终端执行：
