@@ -47,6 +47,21 @@ map <F7>  <ESC>:! bash %                " 使用bash解释器执行本文件
 ```
 #### Vundle Install VIM Plugin
 ```bash
+#升级VIM到8.1+ 
+[root@localhost ~]# yum install ncurses-devel gcc gcc-c++ -y
+[root@localhost ~]# yum remove vim -y
+[root@localhost ~]# git clone https://github.com/vim/vim.git
+[root@localhost ~]# cd vim
+[root@localhost ~]# make
+[root@localhost ~]# make install
+[root@localhost ~]# vim /etc/.bash_profile
+#----------
+VIM_BIN=/usr/local/bin/vim
+PATH==$VIM_BIN:$PATH:$HOME/bin
+#----------
+[root@localhost ~]# . /etc/.bash_profile
+
+#安装插件管理器
 [root@localhost ~]# git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 Cloning into '/root/.vim/bundle/Vundle.vim'...
 remote: Enumerating objects: 3136, done.
