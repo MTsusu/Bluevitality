@@ -60,7 +60,8 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
  --enable-multibyte \
  --enable-rubyinterp=yes\
  --enable-pythoninterp=yes \
- --enable-python3interp=yes  && cd ..
+ --enable-python3interp=yes \
+ --enable-shared && cd ..
 [root@localhost ~]# make 
 [root@localhost ~]# make install
 [root@localhost ~]# vim ~/.bash_profile
@@ -207,8 +208,9 @@ call vundle#end()
 [root@localhost ~]# cd ~/.vim/bundle/vim-repl/ && bash ./install.sh
 [root@localhost ~]# cd ~/.vim/bundle/vim-async/ && bash ./install.sh
 
-#如果需要扩展YouCompleteMe的大部分语言补全功能，需要执行此操作
+#如果需扩展YouCompleteMe的大部分语言补全功能，需要执行此操作
 [root@localhost ~]# cd ~/.vim/bundle/YouCompleteMe
+[root@localhost YouCompleteMe]# git submodule update --init --recursive
 [root@localhost YouCompleteMe]# ./install.py --clang-completer
 
 #jedi-vim插件安装后需要进入其目录使用git来更新模块才能使用
