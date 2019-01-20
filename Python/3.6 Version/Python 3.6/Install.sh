@@ -20,7 +20,7 @@ bzip2-devel expat-devel gdbm-devel readline-devel sqlite-devel
 #判断是否有源码包
 [ -s Python-3.6.3.tar.gz ] || exit 1
 tar -zxvf Python-3.6.3.tar.gz
-cd cd Python-3.6.3
+cd Python-3.6.3
 ./configure --prefix=${PYTHON_PATH} --enable-optimizations
 NUM=$( awk '/processor/{NUM++};END{print NUM}' /proc/cpuinfo )
 if [ $NUM -gt 1 ] ;then
