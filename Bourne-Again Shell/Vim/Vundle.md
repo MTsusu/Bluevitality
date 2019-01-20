@@ -32,7 +32,7 @@ endfunction
 :nmap <F5> :call Exec()
 
 " 多窗口 "<c-w>" 进行切换
-map <F6>  <ESC>:vs #FileName
+map <F6>  <ESC>:vsp #FileName
 
 " 多窗口模式下将当前窗口向右增加10列
 map <c-1>  <ESC>:vertical resize+10
