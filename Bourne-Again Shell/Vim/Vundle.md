@@ -84,6 +84,8 @@ map <F3> :NERDTreeMirror<CR>
 map <F3> :NERDTreeToggle<CR>
 " autocmd vimenter * NERDTree  "自动开启Nerdtree
 " autocmd vimenter * if !argc()|NERDTree|endif  "打开vim时如果没有文件自动打开NERDTree
+" 只剩 NERDTree时自动关闭
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 let g:NERDTreeHidden=0      "不显示隐藏文件
 let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
