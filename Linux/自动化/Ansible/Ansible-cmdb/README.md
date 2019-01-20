@@ -27,11 +27,13 @@
 "Name","OS","IP","Arch","Mem","MemFree","MemUsed","CPUs","Virt","Disk avail"
 "192.168.86.129","CentOS 7.2.1511","192.168.86.129","x86_64/x86_64","2g","0g","2g","1","VMware/guest","15.0g, 0.0g"
 
-#以资产列表得形式统计出主机信息：( 部分列不支持，暂时还没找到解决办法 )
-[root@localhost ~]# ansible-cmdb -t txt_table --columns name,os,ip,mem,cpus out
-Name            OS               IP              Mem  CPUs  
---------------  ---------------  --------------  ---  ----  
-192.168.86.129  CentOS 7.2.1511  192.168.86.129  2g   1   
+#以资产列表得形式统计出主机信息：( 部分列不支持，暂时还没找到解决办法，如果需要可以修改模板 )
+[root@localhost ~]# ansible-cmdb -t txt_table --columns name,os,ip,mac,arch,mem\
+,memfree,memused,cpus,virt,diskavail /tmp/666
+
+Name            OS               IP              Mac                Arch           Mem  MemFree  MemUsed  CPUs  Virt          
+--------------  ---------------  --------------  -----------------  -------------  ---  -------  -------  ----  ------------  
+192.168.86.129  CentOS 7.2.1511  192.168.86.129  00:0c:29:bd:2c:e0  x86_64/x86_64  2g   0g       2g       1     VMware/guest   
 
 #输出为sql格式的文件：
 [root@localhost ~]# ansible-cmdb -t sql out > cmdb.sql      #将数据导入数据库：  mysql -uroot -p ansdb < cmdb.sql 
