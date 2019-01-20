@@ -1,0 +1,84 @@
+curl -XPUT 'http://192.168.100.106:9200/_template/nginx_gd_template?pretty' -H 'Content-Type: application/json' -d '
+{
+  "template" : "nginx_gd_*",
+  "mappings": {
+    "nginx": {
+	  "dynamic": false,
+	  "properties": {
+		"remote_addr": {
+		  "type": "keyword"
+		},
+		"request": {
+		  "type": "text"
+		},
+		"upstream_addr": {
+		  "type": "keyword"
+		},
+		"body_bytes_sent": {
+		  "type": "long"
+		},
+		"time_local": {
+		  "format": "dd/MMM/yyyy:HH:mm:ss ZZ",
+		  "type": "date",
+		  "locale": "US"
+		},
+		"http_user_agent": {
+		  "index": false,
+		  "type": "text"
+		},
+		"remote_user": {
+		  "type": "keyword"
+		},
+		"upstream_status": {
+		  "type": "keyword"
+		},
+		"request_time": {
+		  "type": "float"
+		},
+		"upstream_cache_status": {
+		  "type": "keyword"
+		},
+		"http_referer": {
+		  "type": "keyword"
+		},
+		"http_x_forwarded_for": {
+		  "type": "keyword"
+		},
+		"upstream_response_time": {
+		  "type": "float"
+		},
+		"status": {
+		  "type": "keyword"
+		},
+		"app_name": {
+		  "type": "keyword"
+		},
+		"request_url": {
+		  "type": "keyword"
+		},
+		"cookie_cmos_vision": {
+		  "type": "keyword"
+		},
+		"proxy_host": {
+		  "type": "keyword"
+		}
+	  },
+	  "_all": {
+	    "enabled": false
+	  }
+	}
+  },
+  "settings": {
+    "index": {
+	  "routing": {
+	    "allocation": {
+		  "total_shards_per_node": "2"
+		}
+	  },
+	  "refresh_interval": "60s",
+	  "number_of_shards": "3",
+	  "number_of_replicas": "1"
+	}
+  }
+}
+'
