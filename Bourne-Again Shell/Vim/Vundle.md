@@ -173,6 +173,7 @@ call vundle#end()
 [root@localhost YouCompleteMe]# ./install.py --clang-completer
 
 #jedi-vim插件安装后需要进入其目录使用git来更新模块才能使用
+[root@localhost ~]# pip install jedi    #建议更新...
 [root@localhost ~]# cd ~/.vim/bundle/jedi-vim/ && git submodule update --init
 #在vim中执行如下命令开始安装vundle中定义的插件
 :PluginInstall
