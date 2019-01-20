@@ -18,7 +18,7 @@ def get_load():
     loadstate=f.read().split()
     return loadstate
 
-XARGS="| xargs -n 200 -I {} echo -n {}"
+XARGS="| xargs -n 200 -I {} echo -n {}' '"
 
 Result=json.dumps({  
       "CPU_Load"            : str(get_load()),
