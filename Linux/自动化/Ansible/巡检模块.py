@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+# By Wangyu @ 2019.1.19
+# Email: wangyu10@asiainfo.com
+# Ansible Module Path: /usr/lib/python2.7/site-packages/ansible/modules/system
+
 import time
 import os
 import sys
