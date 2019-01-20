@@ -13,6 +13,9 @@
 --trusted-host pypi.douban.com --download /tmp/pip-packages -r package.txt 
 #离线安装
 [root@localhost ~]# pip install --no-index --find-index=${HOME}/pip-packages -r package.txt
+
+#注!
+#ansible-cmdb支持的模板路径：/root/ansible-cmdb-1.30/build/lib/ansiblecmdb/data/tpl
 ```
 #### Demo
 ```bash
