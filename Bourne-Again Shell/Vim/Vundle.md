@@ -61,7 +61,7 @@ map <F7>  <ESC>:! bash %                        " 使用bash解释器执行本�
  --enable-rubyinterp=yes\
  --enable-pythoninterp=yes \
  --enable-python3interp=yes  && cd ..
-[root@localhost ~]# make VIMRUNTIMEDIR=/usr/share/vim/vim81
+[root@localhost ~]# make 
 [root@localhost ~]# make install
 [root@localhost ~]# vim ~/.bash_profile
 #--------------------
