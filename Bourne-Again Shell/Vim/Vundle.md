@@ -18,6 +18,14 @@ highlight LineNr ctermfg=red
 highlight LineNr ctermbg=white
 set fillchars=vert:\|                       " 多窗口环境下使用的边界分隔符
 " <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>   " 插入模式下写入当前时间
+" 中文语言设置参数
+set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936 
+set termencoding=utf-8
+set encoding=utf-8
+
+" 设置IDE环境的背景色，Value部分可以通过设置16进制颜色值来执行，入：=#00FF00
+highlight Normal guibg=White        "针对GUI
+highlight Normal ctermbg=White      "针对cterm
 " --------------------------------- Map ---------------------------------
 " map <F8>  <ESC>:! python %              " 使用python解释器执行本文件
 " <F5> 运行脚本并分屏输出
