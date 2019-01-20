@@ -181,6 +181,9 @@ Plugin 'scrooloose/nerdtree'    "目录树
 Plugin 'sillybun/vim-repl'      "运行终端
 Plugin 'sillybun/vim-async'     "配套
 Plugin 'sillybun/zytutil'       "配套
+Plugin 'Valloric/YouCompleteMe' "自动补全
+Plugin 'Valloric/ListToggle'
+Plugin 'scrooloose/syntastic'
 call vundle#end()
 # ........................................................
 ```
