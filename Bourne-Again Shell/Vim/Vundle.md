@@ -15,17 +15,18 @@ set expandtab       " 将TAB转为4个字符
 hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
 " 行号字体颜色与其背景颜色的设置，在控制台下使用cterm，否则使用gui关键字...
 highlight LineNr ctermfg=red
-highlight LineNr ctermbg=white
+highlight LineNr ctermbg=231
+
+highlight VertSplit ctermfg=green           " 多窗口环境下边界分隔符背景色
 set fillchars=vert:\|                       " 多窗口环境下使用的边界分隔符
 " <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>   " 插入模式下写入当前时间
 " 中文语言设置参数
 set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936 
 set termencoding=utf-8
 set encoding=utf-8
-
 " 设置IDE环境的背景色，Value部分可以通过设置16进制颜色值来执行，入：=#00FF00
 highlight Normal guibg=White        "针对GUI
-highlight Normal ctermbg=White      "针对cterm
+highlight Normal ctermbg=231        "针对cterm
 " --------------------------------- Map ---------------------------------
 " map <F8>  <ESC>:! python %              " 使用python解释器执行本文件
 " <F5> 运行脚本并分屏输出
@@ -39,7 +40,6 @@ function! Exec()
     set autoread 
 endfunction
 :nmap <F5> :call Exec()
-
 
 map <F6>  <ESC>:vsp #FileName           " 多窗口 "<c-w> + hjkl" 进行切换
 map <C-W>  <ESC>:vertical resize+10     " 多窗口模式下将当前窗口向右增加10列
@@ -87,9 +87,29 @@ map <F3> :NERDTreeToggle<CR>
 let g:NERDTreeHidden=0      "不显示隐藏文件
 let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
-let g:NERDTreeWinSize = 30  "侧边栏宽度
+let g:NERDTreeWinSize = 20  "侧边栏宽度
 let g:NERDTreeDirArrowExpandable = '▸'  "树的显示图标
 let g:NERDTreeDirArrowCollapsible = '▾' "树的显示图标
+
+" NERDTress File highlighting
+function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
+ exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
+ exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
+endfunction
+
+call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
+call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('md', 'blue', 'none', '#3366FF', '#151515')
+call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('html', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('styl', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('css', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#151515')
+call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
+call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
