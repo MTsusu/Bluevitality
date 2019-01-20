@@ -128,16 +128,23 @@ call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#151515')
 call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
 call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 
+" jedi-vim 
+execute pathogen#infect()
+syntax on
+filetype plugin indent on 
+
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'L9'
-Plugin 'Lokaltog/vim-powerline'
-Plugin 'davidhalter/jedi-vim'
-Plugin 'ervandew/supertab'
-Plugin 'hdima/python-syntax'
-Plugin 'scrooloose/nerdtree'
-Plugin '这里写入需要另外安装的插件名称，默认都是从Github进行下载'
+Plugin 'Lokaltog/vim-powerline' "状态栏
+Plugin 'davidhalter/jedi-vim'   "自动补全
+Plugin 'ervandew/supertab'      "TAB
+Plugin 'hdima/python-syntax'    "语法检查
+Plugin 'scrooloose/nerdtree'    "目录树
+Plugin 'sillybun/vim-repl'      "运行终端
+Plugin 'sillybun/vim-async'     "配套
+Plugin 'sillybun/zytutil'       "配套
 call vundle#end()
 filetype plugin indent on
 # ........................................................
@@ -157,6 +164,10 @@ filetype plugin indent on
 [root@localhost ~]# mv 10-powerline-symbols.conf /usr/share/fonts/
 [root@localhost ~]# mv PowerlineSymbols.otf /usr/share/fonts/
 #参考：https://www.jianshu.com/p/f0513d18742a/
+
+#VIM-REPL安装后需要进行的操作 ( 需要PYTHON3 )
+[root@localhost ~]# cd ~/.vim/bundle/vim-repl/ && bash ./install.sh
+[root@localhost ~]# cd ~/.vim/bundle/vim-async/ && bash ./install.sh
 
 #如果需要扩展YouCompleteMe的大部分语言补全功能，需要执行此操作
 [root@localhost ~]# cd ~/.vim/bundle/YouCompleteMe
