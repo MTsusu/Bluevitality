@@ -146,7 +146,6 @@ Plugin 'sillybun/vim-repl'      "运行终端
 Plugin 'sillybun/vim-async'     "配套
 Plugin 'sillybun/zytutil'       "配套
 call vundle#end()
-filetype plugin indent on
 # ........................................................
 ```
 
