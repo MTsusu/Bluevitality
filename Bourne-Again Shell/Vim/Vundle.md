@@ -1,32 +1,25 @@
 #### ~/.vimrc
 ```vim
 " ------------------------------ Default --------------------------------
-" 默认缩进数
-set tabstop=4
-" 状态栏标尺
-set ruler
-" 显示状态栏
-set laststatus=2
-" 实时显示搜索结果
-set incsearch
-" 高亮显示搜索文本
-set hlsearch
-" 语法高亮
-syntax on
-" 文件编码
-set fenc=utf-8
-" 将TAB转为4个字符
-set expandtab 
+set history=1000
+set backspace=2     " 启用退格键
+set tabstop=4       " 默认缩进数
+set ruler           " 状态栏标尺
+set laststatus=2    " 显示状态栏
+set incsearch       " 实时显示搜索结果
+set hlsearch        " 高亮显示搜索文本
+syntax on           " 语法高亮
+set fenc=utf-8      " 文件编码
+set expandtab       " 将TAB转为4个字符
 " 对搜索时的关键字高亮处理
 hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
 " 行号字体颜色与其背景颜色的设置，在控制台下使用cterm，否则使用gui关键字...
 highlight LineNr ctermfg=red
 highlight LineNr ctermbg=white
-" 多窗口环境下使用的边界分隔符
-set fillchars=vert:\|
-" 插入模式下写入当前时间
-" <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>
+set fillchars=vert:\|                       " 多窗口环境下使用的边界分隔符
+" <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>   " 插入模式下写入当前时间
 " --------------------------------- Map ---------------------------------
+" map <F8>  <ESC>:! python %              " 使用python解释器执行本文件
 " <F5> 运行脚本并分屏输出
 function! Exec()
     execute "w"
@@ -39,17 +32,10 @@ function! Exec()
 endfunction
 :nmap <F5> :call Exec()
 
-" 多窗口 "<c-w> + hjkl" 进行切换
-map <F6>  <ESC>:vsp #FileName
 
-" 多窗口模式下将当前窗口向右增加10列
-map <C-W>  <ESC>:vertical resize+10
-
-" 使用bash解释器执行本文件
-map <F7>  <ESC>:! bash %
-
-" 使用python解释器执行本文件
-map <F8>  <ESC>:! python %
+map <F6>  <ESC>:vsp #FileName           " 多窗口 "<c-w> + hjkl" 进行切换
+map <C-W>  <ESC>:vertical resize+10     " 多窗口模式下将当前窗口向右增加10列
+map <F7>  <ESC>:! bash %                " 使用bash解释器执行本文件
 ```
 #### Vundle Install VIM Plugin
 ```bash
