@@ -133,6 +133,34 @@ execute pathogen#infect()
 syntax on
 filetype plugin indent on 
 
+
+nnoremap <leader>r :REPLToggle<Cr>                "使用普通模式的\r代替命令模式的:REPLToggle
+let g:repl_width = None                           "窗口宽度
+let g:repl_height = None                          "窗口高度
+let g:sendtorepl_invoke_key = "<leader>w"         "传送代码快捷键，默认为<leader>w    注:<Leader>默认是\
+let g:repl_position = 0                           "0表示出现在下方，1表示出现在上方，2在左边，3在右边
+let g:repl_stayatrepl_when_open = 0               "打开REPL时是回到原文件（1）还是停留在REPL窗口中（0）
+
+" 指定REPL程序 （注意\可能导致VIM输入2个，另需注意python版本为3+）
+let g:repl_program = {
+\	"python": "python",
+\	"default": "bash"
+\	}
+
+" 指定退出命令
+let g:repl_exit_commands = {
+\	"python": "quit()",
+\	"bash": "exit",
+\	"zsh": "exit",
+\	"default": "exit",
+\	}
+
+" 打开REPL：:REPLToggle
+" 退出REPL：:REPLToggle
+" 如何向REPL中发送代码：
+"   在Normal模式下：按`<leader>w`，光标所在行（包括一个最后的回车）便会输入到REPL中。
+"   在Visual模式下：按`<leader>w`，对应的所有行（包括最后的回车）便会输入到REPL中。
+
 " 关于Vundle的一些设置，主要用于对插件进行管理
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
