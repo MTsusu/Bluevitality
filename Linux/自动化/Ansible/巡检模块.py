@@ -51,7 +51,7 @@ def exec_shell(args="sh -c \"%s\""):
     #print arguments.keys()
 
     for v in arguments:
-        if len(arguments) == 12:
+        if len(arguments) <= 12:
              print echo_json()
              return sys.exit(0)
     for arg in arguments:
