@@ -86,13 +86,17 @@ Resolving deltas: 100% (1105/1105), done.
 filetype off
 
 " 以下是vim-powerline插件需要的设置选项
-let g:Powerline_symbols = 'fancy'
-set encoding=utf-8
-set fillchars+=stl:\ ,stlnc:\
 set rtp+=~/.vim/bundle/Vundle.vim
 set laststatus=2
-let g:Powerline_symbols='unicode'
-set t_Co=256        "开启256色支持
+set encoding=utf-8
+set t_Co=256
+set fillchars+=stl:\ ,stlnc:\
+let g:Powerline_symbols = 'unicode'
+let g:airline_powerline_fonts = 1
+let g:Powerline_mode_V="V·LINE"
+let g:Powerline_mode_cv="V·BLOCK"
+let g:Powerline_mode_S="S·LINE"
+let g:Powerline_mode_cs="S·BLOCK"
 
 " jedi-vim插件需要的一些设置，用于语法TAB补齐
 let g:SuperTabDefaultCompletionType = "context"
