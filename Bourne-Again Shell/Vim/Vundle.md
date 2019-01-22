@@ -110,6 +110,13 @@ let g:jedi#popup_on_dot = 0
 set expandtab 
 set ts=4
 
+" YouCompleteMe
+let g:ycm_complete_in_comments = 1                                  "在注释输入中也能补全
+let g:ycm_complete_in_strings = 1                                   "在字符串输入中也能补全
+let g:ycm_collect_identifiers_from_comments_and_strings = 1         "注释和字符串中的文字也会被收入补全
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif             "离开插入模式后自动关闭预览窗口
+" nnoremap <c-j> :YcmCompleter GoToDefinitionElseDeclaration<CR>    "跳转到定义处
+
 " python-syntax 语法高亮
 let python_highlight_all = 1
 
@@ -233,6 +240,47 @@ call vundle#end()
 [root@localhost ~]# cd ~/.vim/bundle/jedi-vim/ && git submodule update --init
 #在vim中执行如下命令开始安装vundle中定义的插件
 :PluginInstall
+```
+#### 新建文件自动插入文件头
+```vimrc
+"新建.c,.h,.sh,.java文件，自动插入文件头 
+autocmd BufNewFile *.cpp,*.[ch],*.sh,*.java exec ":call SetTitle()" 
+
+"定义函数SetTitle，自动插入文件头 
+func SetTitle() 
+	if &filetype == 'sh' 
+		call setline(1, "##########################################################################") 
+		call append(line("."), "# File Name: ".expand("%")) 
+		call append(line(".")+1, "# Author: Wangyu") 
+		call append(line(".")+2, "# mail: inmoonlight@163.com") 
+		call append(line(".")+3, "# Created Time: ".strftime("%c")) 
+		call append(line(".")+4, "#########################################################################") 
+		call append(line(".")+5, "#!/bin/bash")
+		call append(line(".")+6, "")
+	else 
+		call setline(1, "/*************************************************************************") 
+		call append(line("."), "	> File Name: ".expand("%")) 
+		call append(line(".")+1, "	> Author: Wangyu") 
+		call append(line(".")+2, "	> Mail: inmoonlight@163.com") 
+		call append(line(".")+3, "	> Created Time: ".strftime("%c")) 
+		call append(line(".")+4, " ************************************************************************/") 
+		call append(line(".")+5, "")
+	endif
+	if &filetype == 'cpp'
+		call append(line(".")+6, "#include<iostream>")
+    	call append(line(".")+7, "using namespace std;")
+		call append(line(".")+8, "")
+	endif
+	if &filetype == 'c'
+		call append(line(".")+6, "#include<stdio.h>")
+		call append(line(".")+7, "")
+	endif
+	"	if &filetype == 'java'
+	"		call append(line(".")+6,"public class ".expand("%"))
+	"		call append(line(".")+7,"")
+	"	endif
+	autocmd BufNewFile * normal G   "新建文件后自动定位到文件末尾
+endfunc
 ```
 #### nerdtree 快捷键
 ```bash
