@@ -3,6 +3,15 @@
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 #当节点离开集群时主节点会暂时延迟碎片重分配以避免在重新平衡碎片中不必要地浪费资源，原因是原始节点能够在特定时间内（默认1m）恢复
 -------------------------------------------------------------------------------------------------------
+#查看节点ID：curl x.x.x.x:xx/_nodes/process
+
+#修改节点脱离集群后主节点等待时间，超过此时间之后将开始对unassigned状态的分配进行分配 （ 延时分配时间 ） 
+PUT /_all/_settings
+{
+  "settings": {
+    "index.unassigned.node_left.delayed_timeout": "3m"
+  }
+}
 
 #分片分配是分配分片给节点的处理过程。这可能发生在初始恢复、副本分配或再平衡过程中。也可能发生在添加或删除节点时
 #该值默认为2，意思是任何时间点只能有2个分片被移动
@@ -28,7 +37,6 @@ for line in $(curl -s "http://${IP_PORT}/_cat/shards" | fgrep UNASSIGNED); do
                 "shard": '$SHARD',  
                 "node": "'$NODE'",  
                 "allow_primary": true
-	#	"accept_data_loss": true	将主分片配给含陈旧副本的节点 (会导致所提供的分片ID发生数据丢失)
           }  
         }  
     ]  
@@ -54,6 +62,22 @@ POST /_cluster/reroute
           }
         }
     ]
+}
+
+#将主分片分配给含有陈旧副本分片的节点
+#此命令可能会导致所提供的分片ID发生数据丢失。如果稍后具有良好数据副本的节点重新加入群集，则该数据将被使用此命令强制分配的旧副本数据覆盖
+#为确保这些影响得到充分理解，需要accept_data_loss明确设置专用字段才能true使其工作
+{
+  "commands": [
+    {
+      "allocate_stale_primary": {
+        "index": "mail_store",
+        "shard": 1,
+        "node": "slave2",
+        "accept_data_loss": true
+      }
+    }
+  ]
 }
 
 #设置每个节点的磁盘写入速率，默认20MB/s
