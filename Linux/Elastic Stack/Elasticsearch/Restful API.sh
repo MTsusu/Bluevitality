@@ -1,9 +1,27 @@
-#分片多的话可以提升建立索引的能力，5~20个比较合适，分片数过少或过多都会导致检索比较慢。
-#分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
+#分片多的话可以提升建立索引的能力，5~20个比较合适，分片数过少或过多都会导致检索比较慢
+#分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
+#对于索引出现Unassigned 的情况，最好的解决办法是reroute,如果不能reroute，则考虑重建分片，通过number_of_replicas的修改进行恢复
+#如果上述两种情况都不能恢复，则考虑reindex
 #当节点离开集群时主节点会暂时延迟碎片重分配以避免在重新平衡碎片中不必要地浪费资源，原因是原始节点能够在特定时间内（默认1m）恢复
--------------------------------------------------------------------------------------------------------
+
 #查看节点ID：curl x.x.x.x:xx/_nodes/process
+#查看分片状态及原因：_cat/shards?h=index,shard,prirep,state,unassigned.reason | grep UNASSIGNED
+#分片状态原因解释如：
+#  1. INDEX_CREATED：由于创建索引的API导致未分配。
+#  2. CLUSTER_RECOVERED ：由于完全集群恢复导致未分配。
+#  3. INDEX_REOPENED ：由于打开open或关闭close一个索引导致未分配。
+#  4. DANGLING_INDEX_IMPORTED ：由于导入dangling索引的结果导致未分配。
+#  5. NEW_INDEX_RESTORED ：由于恢复到新索引导致未分配。
+#  6. EXISTING_INDEX_RESTORED ：由于恢复到已关闭的索引导致未分配。
+#  7. REPLICA_ADDED：由于显式添加副本分片导致未分配。
+#  8. ALLOCATION_FAILED ：由于分片分配失败导致未分配。
+#  9. NODE_LEFT ：由于承载该分片的节点离开集群导致未分配。
+#  10. REINITIALIZED ：由于当分片从开始移动到初始化时导致未分配（例如，使用影子shadow副本分片）。
+#  11. REROUTE_CANCELLED ：作为显式取消重新路由命令的结果取消分配。
+#  12. REALLOCATED_REPLICA ：确定更好的副本位置被标定使用，导致现有的副本分配被取消，出现未分配。
+
+--------------------------------------------------------------------------------------------------------------------
 
 #修改节点脱离集群后主节点等待时间，超过此时间之后将开始对unassigned状态的分配进行分配 （ 延时分配时间 ） 
 PUT /_all/_settings
@@ -91,6 +109,9 @@ PUT /_cluster/settings
 #如果你使用的是机械磁盘而非 SSD，需要添加下面配置到 elasticsearch.yml 里：
 #机械磁盘在并发 I/O 支持方面比较差，所以我们需要降低每个索引并发访问磁盘的线程数
 index.merge.scheduler.max_thread_count: 1
+
+#对段进行合并 Segments
+POST /applog-prod-2016.12.18/_forcemerge?max_num_segments=1
 
 #在Kibana执行数据迁移 ( 先创建Mapping )
 #必须使用该reindex.remote.whitelist属性在elasticsearch.yaml中将远程主机明确列入白名单
