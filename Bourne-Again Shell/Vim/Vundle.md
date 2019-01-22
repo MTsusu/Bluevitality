@@ -14,6 +14,7 @@ set hlsearch                                    " 高亮显示搜索文本
 syntax on                                       " 语法高亮
 set fenc=utf-8                                  " 文件编码
 set expandtab                                   " 将TAB转为4个字符
+" set paste                          " 粘贴文本时不自动追加缩进，取消：set nopaste 快捷键：set pastetoggle=<F9>
 
 " 对搜索时的关键字高亮处理
 hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
