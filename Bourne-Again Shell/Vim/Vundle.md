@@ -1,13 +1,15 @@
 ####  ~/.vimrc ( Vim8.1 + Python3 )
 ```vim
 " ---------------------------------------- Default ------------------------------------------
-" Status Line Setting
+" Status Line Setting Gather
 " set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L] 
+" set statusline=\ %<%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&fileformat}\ %{&encoding}\ %c:%l/%L%)\
+
+" let mapleader="\"         " 设置<leader>所代表的按键
 
 nmap <leader>s :w!<cr>      " 普通模式 \s 进行保存
 vmap <C-c> "+y              " 选中状态下 Ctrl+c 复制
-map <C-a> ggVGY             " 全选+复制 Ctrl+a
-map <C-v> p                 " 粘贴 Ctrl+v
+nmap <C-a> ggVGY            " 全选+复制 Ctrl+a
 
 set history=1000
 set backspace=2                                 " 启用退格键
