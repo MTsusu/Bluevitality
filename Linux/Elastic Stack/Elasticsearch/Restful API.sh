@@ -8,7 +8,7 @@
 cluster.routing.allocation.cluster_concurrent_rebalance:6
 
 #!/bin/bash
-#批量处理未注册的shard信息 (node对应的值需要更改为自己节点的名称)
+#批量处理未注册的shard信息 (node对应的值需要更改为自己节点的名称)   ------------ （应该是老版本）
 #建议先将群集设置为使用cluster.routing.allocation.enable为none设置禁用分配
 #如果禁用分配，那么将执行的唯一分配是使用reroute命令给出的显式分配，以及由于重新平衡而导致的后续分配
 IP_PORT=1.1.1.1:x.x
