@@ -33,7 +33,7 @@ Result=json.dumps({
       "/Data Total space"   : os.popen("df -h | grep /data | awk '{print $(NF-4)}'" + XARGS).read(),
       "Memory Total"        : os.popen("free -m | grep ^Mem | awk '{print $2\"M\"}'" + XARGS).read(),
       "Memory Use"          : os.popen("free -m | grep ^Mem | awk '{print $3\"M\"}'" + XARGS).read(),
-      "Memory Free"         : os.popen("free -m | awk '/^Mem/{print $3/$2*100\"%\"}'" + XARGS).read(),
+      "Memory Free"         : os.popen("free -m | awk '/^Mem/{print ($2-$3)/$2*100\"%\"}'" + XARGS).read(),
       "Host Run Time"       : os.popen("uptime | awk -F ',' '{print $1,$2}'" + XARGS).read(),
       "Host User List"      : os.popen("ls -l /home | awk 'NR>=2{print $NF}'| xargs -n 100 -I {} echo -n {}' '").read(),
       "Process Count"       : os.popen("ps -ef | wc -l" + XARGS).read(),
