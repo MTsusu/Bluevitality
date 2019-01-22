@@ -2,6 +2,56 @@
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
 -------------------------------------------------------------------------------------------------------
+
+#分片分配是分配分片给节点的处理过程。这可能发生在初始恢复、副本分配或再平衡过程中。也可能发生在添加或删除节点时
+#该值默认为2，意思是任何时间点只能有2个分片被移动
+cluster.routing.allocation.cluster_concurrent_rebalance:6
+
+#!/bin/bash
+#批量处理未注册的shard信息 (node对应的值需要更改为自己节点的名称)
+#建议先将群集设置为使用cluster.routing.allocation.enable为none设置禁用分配
+#如果禁用分配，那么将执行的唯一分配是使用reroute命令给出的显式分配，以及由于重新平衡而导致的后续分配
+IP_PORT=1.1.1.1:x.x
+NODE=oYZfyZ7MR2C996c58Wl9nw
+for index in $(curl -s 'http://${IP_PORT}/_cat/shards' | grep UNASSIGNED | awk '{print $1}' | sort | uniq); do
+  for shard in $(curl -s 'http://${IP_PORT}/_cat/shards' | grep UNASSIGNED | grep $index | awk '{print $2}' | sort | uniq); do
+      echo  $index $shard
+      curl -XPOST '${IP_PORT}/_cluster/reroute' -d "{
+          'commands' : [ {
+                'allocate' : {
+                    'index' : $index,
+                    'shard' : $shard,
+                    'node' :  "$NODE",
+                    'allow_primary' : true
+                }
+              }
+          ]
+      }"
+      sleep 5
+  done
+done
+
+#Elasticsearch Version 6.4 ( 支持 5.5.0 )
+#move 将已启动的分片从一个节点移动到另一个节点。接受索引名称和分片编号
+#allocate_replica 将未分配的副本分片分配给节点。接受索引名称和分片编号，以及node分配分片
+POST /_cluster/reroute
+{
+    "commands" : [
+        {
+            "move" : {
+                "index" : "test", "shard" : 0,
+                "from_node" : "node1", "to_node" : "node2"
+            }
+        },
+        {
+          "allocate_replica" : {
+                "index" : "test", "shard" : 1,
+                "node" : "node3"
+          }
+        }
+    ]
+}
+
 #设置每个节点的磁盘写入速率，默认20MB/s
 PUT /_cluster/settings
 {
