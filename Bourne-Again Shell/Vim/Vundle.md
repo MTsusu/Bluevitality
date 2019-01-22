@@ -4,6 +4,11 @@
 " Status Line Setting
 " set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L] 
 
+nmap <leader>s :w!<cr>      " 普通模式 \s 进行保存
+vmap <C-c> "+y              " 选中状态下 Ctrl+c 复制
+map <C-a> ggVGY             " 全选+复制 Ctrl+a
+map <C-v> p                 " 粘贴 Ctrl+v
+
 set history=1000
 set backspace=2                                 " 启用退格键
 set tabstop=4                                   " 默认缩进数
@@ -15,6 +20,13 @@ syntax on                                       " 语法高亮
 set fenc=utf-8                                  " 文件编码
 set expandtab                                   " 将TAB转为4个字符
 " set paste                          " 粘贴文本时不自动追加缩进，取消：set nopaste 快捷键：set pastetoggle=<F9>
+
+" 可以在buffer的任何地方使用鼠标
+set mouse=a
+set selection=exclusive
+set selectmode=mouse,key
+
+set completeopt=longest,menu    "打开文件类型检测, 加了这句才可以用智能补全
 
 " 对搜索时的关键字高亮处理
 hi Search cterm=NONE ctermfg=darkred ctermbg=yellow cterm=reverse
