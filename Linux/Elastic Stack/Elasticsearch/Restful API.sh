@@ -1,6 +1,7 @@
 #分片多的话可以提升建立索引的能力，5~20个比较合适，分片数过少或过多都会导致检索比较慢。
 #分片数过多会导致检索时打开较多文件，另外也会导致多台服务器间通讯，而分片数过少会导至单个分片索引过大，所以检索速度也会慢。
 #建议单个分片最多存储20G左右的索引数据，所以分片数量=数据总量/20G
+#当节点离开集群时主节点会暂时延迟碎片重分配以避免在重新平衡碎片中不必要地浪费资源，原因是原始节点能够在特定时间内（默认1m）恢复
 -------------------------------------------------------------------------------------------------------
 
 #分片分配是分配分片给节点的处理过程。这可能发生在初始恢复、副本分配或再平衡过程中。也可能发生在添加或删除节点时
@@ -8,28 +9,31 @@
 cluster.routing.allocation.cluster_concurrent_rebalance:6
 
 #!/bin/bash
-#批量处理未注册的shard信息 (node对应的值需要更改为自己节点的名称)   ------------ （应该是老版本）
+#批量处理未注册的shard信息 (node对应的值需要更改为自己节点的名称)   ------------ （ 5.0 可以使用）
 #建议先将群集设置为使用cluster.routing.allocation.enable为none设置禁用分配
 #如果禁用分配，那么将执行的唯一分配是使用reroute命令给出的显式分配，以及由于重新平衡而导致的后续分配
 IP_PORT=1.1.1.1:x.x
-NODE=oYZfyZ7MR2C996c58Wl9nw
-for index in $(curl -s 'http://${IP_PORT}/_cat/shards' | grep UNASSIGNED | awk '{print $1}' | sort | uniq); do
-  for shard in $(curl -s 'http://${IP_PORT}/_cat/shards' | grep UNASSIGNED | grep $index | awk '{print $2}' | sort | uniq); do
-      echo  $index $shard
-      curl -XPOST '${IP_PORT}/_cluster/reroute' -d "{
-          'commands' : [ {
-                'allocate' : {
-                    'index' : $index,
-                    'shard' : $shard,
-                    'node' :  "$NODE",
-                    'allow_primary' : true
-                }
-              }
-          ]
-      }"
-      sleep 5
-  done
-done
+NODE="node-client09"  
+IFS=$'\n'  
+for line in $(curl -s "http://${IP_PORT}/_cat/shards" | fgrep UNASSIGNED); do  
+  INDEX=$(echo $line | (awk '{print $1}'))  
+  SHARD=$(echo $line | (awk '{print $2}'))  
+  echo $INDEX
+  echo $SHARD
+  curl -XPOST 'http://${IP_PORT}/_cluster/reroute' -d '{  
+     "commands": [  
+        {  
+            "allocate_replica": {  
+                "index": "'$INDEX'",  
+                "shard": '$SHARD',  
+                "node": "'$NODE'",  
+                "allow_primary": true
+	#	"accept_data_loss": true	将主分片配给含陈旧副本的节点 (会导致所提供的分片ID发生数据丢失)
+          }  
+        }  
+    ]  
+  }'  
+done 
 
 #Elasticsearch Version 6.4 ( 支持 5.5.0 )
 #move 将已启动的分片从一个节点移动到另一个节点。接受索引名称和分片编号
