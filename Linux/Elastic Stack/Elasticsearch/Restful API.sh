@@ -453,7 +453,7 @@ $curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{
   }
 }
 
-#集群设置
+#集群设置 慢查询
 PUT /_cluster/settings
 {
     "transient" : {
@@ -462,7 +462,7 @@ PUT /_cluster/settings
     }
 }
 
-#索引级别（query：获取索引内的数据，fetch：ORZ....）
+#索引级别慢查询（query：获取索引内的数据，fetch：ORZ....）
 PUT /<INDEX>/_settings
 {
     "index.search.slowlog.threshold.query.warn": "10s",   #大于10s即属于WARN级别以上的
