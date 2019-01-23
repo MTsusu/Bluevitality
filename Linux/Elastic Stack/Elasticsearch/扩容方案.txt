@@ -1,12 +1,7 @@
-扩容Master节点：
 1 先部署master节点（不启动）
 2 关闭集群分片负载
 
 3 旧master节点下线转为data节点后启动   #重复执行，部署新master节点+改造旧master节点
-4 新master节点加入集群                 #
-5 开启集群分片负载                     #
+4 新master节点加入集群                 #   ? 不确定变更master为data节点后对集群和logstash有没有影响
+5 开启集群分片负载                     #   ? Master下线时有脑裂的可能
 6 查看集群状态是否正常                 #
-
-
-
-
