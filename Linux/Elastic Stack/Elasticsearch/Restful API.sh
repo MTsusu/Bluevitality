@@ -462,13 +462,15 @@ PUT /_cluster/settings
     }
 }
 
-#索引级别慢查询（query：获取索引内的数据，fetch：ORZ....）
+#索引级别慢查询（query：获取索引内的数据，fetch：ORZ....   如果需要取消这些设置，将它们的值设为-1即可）
 PUT /<INDEX>/_settings
 {
-    "index.search.slowlog.threshold.query.warn": "10s",   #大于10s即属于WARN级别以上的
-    "index.search.slowlog.threshold.query.info": "6s",    #...
-    "index.search.slowlog.threshold.fetch.warn": "1800ms", 
-    "index.search.slowlog.threshold.fetch.info": "1s" 
+    "index.search.slowlog.threshold.query.warn": "10s",   	#查询大于10s即属于WARN级别以上的
+    "index.search.slowlog.threshold.query.info": "6s",    	#查询大于6s属于INFO级别...
+    "index.search.slowlog.threshold.fetch.warn": "1800ms",	#获取数据大于1800ms属于WARN级别 	
+    "index.search.slowlog.threshold.fetch.info": "1s", 		#获取数据大于1s属于INFO级别
+    "index.indexing.slowlog.threshold.index.info": "5s",	#索引慢于5s属于INFO级别
+    "index.indexing.slowlog.threshold.index.warn": 10s		#超过10s属于WARN
 }
 
 #查看索引的数据在ES节点内执行段合并的信息（将小数据文件合并成大文件，提高查询效率）
