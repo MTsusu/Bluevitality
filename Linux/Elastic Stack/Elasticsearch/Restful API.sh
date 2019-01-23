@@ -313,17 +313,6 @@ host        ip          heap.percent ram.percent load node.role master name
   "active_shards_percent_as_number" : 100.0
 }
 
-#迁移节点分片
-curl -XPOST '172.18.1.22:9200/_cluster/reroute' -d  '{
-    "commands" : [
-        {
-            "move" : {
-                "index" : "info-test", "shard" : 3,
-                "from_node" : "172.18.1.26", "to_node" : "172.18.1.25"
-            }
-        }
-    ]
-}'
 #强制迁移主分片
 curl -XPOST 'localhost:9200/_cluster/reroute' -d '{
     "commands": [
