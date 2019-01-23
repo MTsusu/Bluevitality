@@ -22,6 +22,9 @@
 #  12. REALLOCATED_REPLICA ：确定更好的副本位置被标定使用，导致现有的副本分配被取消，出现未分配。
 
 --------------------------------------------------------------------------------------------------------------------
+#展示集群当前正在恢复的分片/副本进度信息
+curl -s 'X.X.X.X:XX/_cat/recovery?v&h=index,shard,time,type,stage,source_host,target_host,files,files_recovered,\
+files_percent,bytes_recovered,bytes_percent,bytes_total,translog_ops_percent' | grep -v 'done' | sort -rn -k 10
 
 #修改节点脱离集群后主节点等待时间，超过此时间之后将开始对unassigned状态的分配进行分配 （ 延时分配时间 ） 
 PUT /_all/_settings
@@ -31,7 +34,7 @@ PUT /_all/_settings
   }
 }
 
-#分片分配是分配分片给节点的处理过程。这可能发生在初始恢复、副本分配或再平衡过程中。也可能发生在添加或删除节点时
+#分片分配是分配分片给节点的处理过程，这可能发生在初始恢复、副本分配或再平衡的过程中，也可能发生在添加/删除节点时。
 #该值默认为2，意思是任何时间点只能有2个分片被移动
 cluster.routing.allocation.cluster_concurrent_rebalance:6
 
