@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    nephele/replicas: '2'
+    nephele/status: '3'
+    nephele/labels: ''
+    nephele/annotation: ''
+  labels:
+    harmonycloud.cn/bluegreen: iscopmscore-prod-1
+    harmonycloud.cn/projectId: ''
+  name: iscopmscore-prod
+spec:
+  paused: false
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iscopmscore-prod
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: iscopmscore-prod
+        harmonycloud.cn/bluegreen: iscopmscore-prod-1
+        harmonycloud.cn/projectId: ''
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: harmonycloud.cn/dwyw-znmj-znmj
+                operator: In
+                values:
+                - dwyw-znmj-znmj
+            weight: 50
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: []
+          requiredDuringSchedulingIgnoredDuringExecution: []
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - -jar
+        - -Dserver.port=20880
+        - -Dcmos.instance.id=iscopms-core
+        - -Dcmos.system.id=isc
+        - -Dfile.encoding=utf-8
+        - /usr/local/iscopms-service-impl/iscopms-core.jar
+        command:
+        - java
+        env:
+        - name: JAVA_TOOL_OPTION
+          value: -Xmx1024m
+        - name: TZ
+          value: Asia/Shanghai
+        image: znmj-ha-app-prd-1/iscopms-core-prod:v20181122_1.5
+        imagePullPolicy: IfNotPresent
+        name: iscopms-core-prod
+        ports:
+        - containerPort: 20880
+          protocol: TCP
+        resources:
+          limits:
+            memory: 1024Mi
+            cpu: 2000m
+          requests:
+            memory: 1024Mi
+            cpu: 1000m
+        stdin: false
+        stdinOnce: false
+        tty: false
+        volumeMounts: []
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      hostname: ''
+      imagePullSecrets:
+      - name: admin-secret
+      restartPolicy: Always
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: iscopmscore-prod
+  name: iscopmscore-prod
+spec:
+  ports:
+  - name: iscopms-core-prod-port0
+    port: 20880
+    protocol: TCP
+  publishNotReadyAddresses: false
+  selector:
+    app: iscopmscore-prod
+    harmonycloud.cn/bluegreen: iscopmscore-prod-1
+
