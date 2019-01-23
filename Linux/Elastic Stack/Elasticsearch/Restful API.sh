@@ -188,12 +188,16 @@ curl -XPUT 'localhost:9200/_cluster/settings' -d
     }
 }'
 
-#修改集群数据节点宕机后延迟等待节点恢复，当失败时再分配分片的时间（默认1分钟）
-curl -XPUT 'localhost:9200/<INDEX_NAME>/_settings' -d '
+#更新磁盘阈值限制
+curl -XPUT "http://localhost:9200/_cluster/settings" -d'
 {
-    "settings": {
-      "index.unassigned.node_left.delayed_timeout": "30s"
+  "persistent": {
+    "cluster": {
+      "routing": {
+        "allocation.disk.threshold_enabled": false
+      }
     }
+  }
 }'
 
 #index/分片数 / 主分片还是副本分片 / 是否处于 unassigned 状态 / unassigned 的原因
@@ -204,7 +208,6 @@ curl -XGET -s  '192.168.157.11:9212/_cat/shards?v&h=index,shard,prirep,state,una
 frontanalysis_2018_12_29       8     r      UNASSIGNED INDEX_CREATED
 frontanalysis_2018_12_29       4     r      UNASSIGNED INDEX_CREATED
 frontanalysis_2018_12_29       9     r      UNASSIGNED INDEX_CREATED
-
 
 #显示集群系统信息,包括CPU JVM等等
 [wangyu@localhost Test]$ curl -XGET 10.116.182.65:9200/_cluster/stats?pretty=true
