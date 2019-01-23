@@ -72,7 +72,7 @@
 │   │   │   ├── Harbor
 │   │   │   └── Swarm
 │   │   ├── Kubernetes
-│   │   │   ├── yaml.conf
+│   │   │   ├── YAML
 │   │   │   ├── 软件
 │   │   │   └── 资料
 │   │   ├── KVM
