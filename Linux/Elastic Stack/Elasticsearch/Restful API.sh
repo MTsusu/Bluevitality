@@ -22,7 +22,7 @@
 #  12. REALLOCATED_REPLICA ：确定更好的副本位置被标定使用，导致现有的副本分配被取消，出现未分配。
 
 --------------------------------------------------------------------------------------------------------------------
-#展示集群当前正在恢复的分片/副本进度信息
+#展示集群当前正在恢复的分片/副本进度信息 （INIT状态的）
 curl -s 'X.X.X.X:XX/_cat/recovery?v&h=index,shard,time,type,stage,source_host,target_host,files,files_recovered,\
 files_percent,bytes_recovered,bytes_percent,bytes_total,translog_ops_percent' | grep -v 'done' | sort -rn -k 10
 
