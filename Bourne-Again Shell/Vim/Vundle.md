@@ -25,8 +25,8 @@ set expandtab                                   " 将TAB转为4个字符
 
 " 可以在buffer的任何地方使用鼠标
 set mouse=a
-set selection=exclusive
-set selectmode=mouse,key
+" set selection=exclusive
+" set selectmode=mouse,key
 
 set completeopt=longest,menu    "打开文件类型检测, 加了这句才可以用智能补全
 
