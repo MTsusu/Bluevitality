@@ -8,8 +8,8 @@
 " let mapleader="\"         " 设置<leader>所代表的按键
 
 nmap <leader>s :w!<cr>      " 普通模式 \s 进行保存
-vmap <C-c> "+y              " 选中状态下 Ctrl+c 复制
-nmap <C-a> ggVGY            " 全选+复制 Ctrl+a
+" vmap <C-c> "+y            " 选中状态下 Ctrl+c 复制
+nmap <leader>c ggVGY        " 全选+复制 Ctrl+a
 
 set history=1000
 set backspace=2                                 " 启用退格键
