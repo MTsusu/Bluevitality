@@ -17,6 +17,7 @@ set tabstop=4                                   " 默认缩进数
 set ruler                                       " 状态栏标尺
 set laststatus=2                                " 显示状态栏
 set incsearch                                   " 实时显示搜索结果
+set ignorecase					" 搜索时忽略大小写
 set hlsearch                                    " 高亮显示搜索文本
 syntax on                                       " 语法高亮
 set fenc=utf-8                                  " 文件编码
