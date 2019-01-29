@@ -4,6 +4,8 @@
 #对于索引出现Unassigned 的情况，最好的解决办法是reroute,如果不能reroute，则考虑重建分片，通过number_of_replicas的修改进行恢复
 #如果上述两种情况都不能恢复，则考虑reindex
 #当节点离开集群时主节点会暂时延迟碎片重分配以避免在重新平衡碎片中不必要地浪费资源，原因是原始节点能够在特定时间内（默认1m）恢复
+#段合并的计算量庞大，而且还要吃掉大量磁盘 I/O。合并在后台定期操作，因为他们可能要很长时间才能完成，尤其是比较大的段。
+#这个通常来说都没问题，因为大规模段合并的概率是很小的。
 
 #查看节点ID：curl x.x.x.x:xx/_nodes/process
 #查看分片状态及原因：_cat/shards?h=index,shard,prirep,state,unassigned.reason | grep UNASSIGNED
