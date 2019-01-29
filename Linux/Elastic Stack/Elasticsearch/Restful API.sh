@@ -615,3 +615,6 @@ curl -XPOST http://localhost:9200/_bulk --d '
 { "update": { "_index": "blogs", "_type": "normal", "_id": "format-bulk-doc-001" } }
 { "doc": { "create_at": "2017-07-19" } }
 { "delete": { "_index": "blogs", "_type": "normal", "_id": "format-doc-002" } }
+
+#查看某字段的Mapping
+GET /your_index/_mapping/your_type/field/your_field_name
