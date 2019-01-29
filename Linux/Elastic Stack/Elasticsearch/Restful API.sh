@@ -29,7 +29,7 @@ _cat/shards?h=index,shard,prirep,state,unassigned.reason | grep UNASSIGNED
 curl -s 'X.X.X.X:XX/_cat/recovery?v&h=index,shard,time,type,stage,source_host,target_host,files,files_recovered,\
 files_percent,bytes_recovered,bytes_percent,bytes_total,translog_ops_percent' | grep -v 'done' | sort -rn -k 10
 
-#修改节点脱离集群后主节点等待时间，超过此时间之后将开始对unassigned状态的分配进行分配 （ 延时分配时间 ） 
+#修改节点脱离集群后主节点等待时间，超过此时间之后将开始对unassigned状态的分配进行分配 （ 延时分配时间，默认为1分钟 ） 
 PUT /_all/_settings
 {
   "settings": {
