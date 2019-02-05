@@ -8,7 +8,7 @@
 
 #### 2018.4.22~2019.12.12学习规划
 ```txt
-jenkins、redis、Kafka、Logstash、Elasticsearch、Kibana、kubernetes、Tomcat
+jenkins、redis、RabbitMQ、ELK、kubernetes、Tomcat
 Hadoop：hive、Hbase、spark、Yarn、HDFS-HA
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh、stunnel
 VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
