@@ -16,4 +16,8 @@ VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 书、视频、笔记
 ----------------------------------
 Python Develop
+
+----------------------------------
+其他：
+  抽时间,咸鱼APP,二手汇总拍卖Linux+书 + 基金定投
 ```
