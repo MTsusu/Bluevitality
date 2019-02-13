@@ -11,7 +11,7 @@
 jenkins、redis、RabbitMQ、ELK、kubernetes、Tomcat
 [了解] Hadoop：hive、Hbase、spark、Yarn、HDFS-HA
 Corosync + Pacemaker + GFS2 + LVM2 + crmsh
-[完善] CSFSSL + stunnel
+[完善] CSFSSL + stunnel + K8S二进制部署完善的笔记
 VIM： https://www.w3cschool.cn/vim/cjtr1pu3.html、VIM脚本
 前端+开发：HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
 书、视频、笔记
