@@ -51,11 +51,6 @@
 │   ├── xml
 │   └── 资料
 │       └── 文档
-├── Linux
-│   ├── Elastic Stack
-│   │   └── Elasticsearch
-│   └── Virtualization
-│       └── Kubernetes
 ├── Message Queue
 │   ├── Active MQ
 │   │   ├── Setup 5.6.0
@@ -377,4 +372,4 @@
             ├── Asiainfo
             └── Images
 
-377 directories
+372 directories
