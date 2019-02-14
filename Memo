@@ -5,7 +5,7 @@
 │   ├── Vim
 │   │   └── vimrc
 │   └── 收集
-├── Cluster
+├── Cluster - HA
 │   ├── Corosync+Pacemaker
 │   │   ├── 软件
 │   │   └── 资料
