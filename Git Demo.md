@@ -302,3 +302,23 @@ git push不会推送标签，除非使用–tags选项：
 ![git-diff](http://marklodato.github.io/visual-git-guide/diff.svg)
 #### 附
 ![img](Tmp/Git.png)
+
+#### Windows BASH Git Scripts
+```bash
+#!/bin/bash
+
+export LC_ALL="zh_CN.UTF-8"
+
+(cd github/my/; tree . -d -L 4 ;) > /mnt/c/Users/bluevitality/github/my/'Memo'
+set -e
+set -x
+read -p "提交信息：" info
+cd  /mnt/c/Users/bluevitality/github/my
+git pull origin
+git add -A
+git commit -m "${info}"
+git push origin master:master
+git push origin --tags
+[[ "$?" == "0" ]] && echo "\n\n\n     提交成功！..."
+
+```
