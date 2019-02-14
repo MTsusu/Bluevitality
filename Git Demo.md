@@ -301,7 +301,7 @@ git push不会推送标签，除非使用–tags选项：
 #### Diff
 ![git-diff](http://marklodato.github.io/visual-git-guide/diff.svg)
 #### 附
-![img](My Tools/Git.png)
+![img](My%20Tools/Git.png)
 
 #### Windows BASH Git Scripts
 ```bash
