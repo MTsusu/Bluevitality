@@ -226,7 +226,6 @@
 │   │       ├── apt_ftp
 │   │       └── rpm_ftp
 │   └── 分区脚本
-├── 防火墙
 ├── 服务发现
 │   ├── Consul
 │   │   ├── 软件
@@ -329,13 +328,10 @@
 │       │   └── 软件
 │       ├── 脚本
 │       └── 资料
-├── 数字证书
-│   ├── CFSSL
-│   │   └── 软件
-│   ├── Openssl  demo
-│   └── Setup
-├── 网络相关
+├── 网络 - 防火墙
 │   ├── DHCP
+│   ├── DNS
+│   │   └── conf
 │   ├── Hydra
 │   ├── IP Tunnel
 │   ├── NTP
@@ -348,13 +344,17 @@
 │   │       └── Service
 │   ├── SSH
 │   ├── Stunnel - 有问题(CFSSL)
-│   └── Zxarps
-│       └── 资料
+│   ├── Zxarps
+│   │   └── 资料
+│   ├── 防火墙
+│   └── 数字证书
+│       ├── CFSSL
+│       │   └── 软件
+│       ├── Openssl  demo
+│       └── Setup
 ├── 压测
 │   ├── Iperf
 │   └── Tcpcopy
-├── 域名
-│   └── conf
 └── 自动化
     ├── Ansible
     │   ├── Ansible-cmdb
