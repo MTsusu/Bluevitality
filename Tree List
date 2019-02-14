@@ -51,6 +51,22 @@
 │   ├── xml
 │   └── 资料
 │       └── 文档
+├── Kubernets
+│   ├── Docker
+│   │   ├── Application
+│   │   ├── Harbor
+│   │   │   └── 资料
+│   │   └── Swarm
+│   │       └── 资料
+│   ├── Kubernetes
+│   │   ├── YAML
+│   │   ├── 软件
+│   │   └── 资料
+│   ├── KVM
+│   │   └── 资料
+│   │       └── 摘自其他项目
+│   └── OpenStack
+│       └── 资料
 ├── Message Queue
 │   ├── Active MQ
 │   │   ├── Setup 5.6.0
@@ -150,22 +166,6 @@
 │   │   └── conf
 │   └── Xinetd
 │       └── conf
-├── Virtualization
-│   ├── Docker
-│   │   ├── Application
-│   │   ├── Harbor
-│   │   │   └── 资料
-│   │   └── Swarm
-│   │       └── 资料
-│   ├── Kubernetes
-│   │   ├── YAML
-│   │   ├── 软件
-│   │   └── 资料
-│   ├── KVM
-│   │   └── 资料
-│   │       └── 摘自其他项目
-│   └── OpenStack
-│       └── 资料
 ├── WEB
 │   ├── Apache
 │   │   ├── Configs
@@ -231,7 +231,7 @@
 │   │   └── 资料
 │   └── Zookeeper
 │       └── 资料
-├── 监控&日志
+├── 监控 - 日志
 │   ├── Logrotate
 │   ├── Mutt + Mstmp
 │   ├── Rsyslog
