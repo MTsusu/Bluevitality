@@ -1,3 +1,3 @@
 #### Notice
--  "Setup \<version\>" 含当前软件的"Install.sh" & tar
--  "RADEME" 含软件/项目简单描述/备忘，保持更新 ...
+-  Setup 含当前软的"Install.sh" & tar
+-  RADEME 含软件/项目描述/备忘
