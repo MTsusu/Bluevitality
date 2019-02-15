@@ -61,6 +61,9 @@ Dirty:                 0 kB 	#页缓存下的脏页数据使用掉的容量
 #  12. REALLOCATED_REPLICA ：确定更好的副本位置被标定使用，导致现有的副本分配被取消，出现未分配。
 
 --------------------------------------------------------------------------------------------------------------------
+#查看集群进行分片迁移的原因：
+GET _cluster/allocation/explain
+
 #展示集群未分配的分片数量 （UNASSIGNED状态的）
 _cat/shards?h=index,shard,prirep,state,unassigned.reason | grep UNASSIGNED
 
