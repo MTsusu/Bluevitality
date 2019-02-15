@@ -28,6 +28,7 @@ cluster.routing.allocation.enable
 	/sbin/sysctl -w vm.dirty_background_ratio=5
 	echo noop > /sys/block/sda/queue/scheduler
 	/sbin/sysctl -w kernel.hung_task_timeout_secs = 0
+	sudo sh -c 'echo "0">/proc/sys/vm/swappiness'	#禁止使用Swap内存，防止脏数据落入Swap
 #第1个方案是调整缓存占内存的比例，降到10%，这样的话较少的缓存内容会被比较频繁地写到硬盘上，IO写会比较平稳
 #第2个方案是修改系统的IO调度策略，使用noop的方式，这是一种基于FIFO的最简单的调度方式
 #第3个方案是不让系统有那个120秒的时间限制，希望就是我慢就慢点，你等着吧，实际上操作系统是将这个变量设为长整形的最大值
