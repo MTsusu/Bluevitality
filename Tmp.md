@@ -1,7 +1,7 @@
 
 # Memo
 
-- [ ] SHELL,Python,VIM,kubernets
+- [ ] SHELL,Python,VIM,kubernets,Elastic
 
 #### 2018.4.22~2019.12.12学习规划
 ```txt
