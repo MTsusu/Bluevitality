@@ -11,9 +11,8 @@
   jenkins,Tomcat
   Logstash,Elastic stack,kibana
   Ansible,Zabbix
-  Python,前端.....
-  前端+开发：HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
-  Corosync + Pacemaker + GFS2 + LVM2 + crmsh
+  Python,前端+开发：HTML5、CSS3、Jquery、Javascript、VUE、Django、Flask
+  #研究：Corosync + Pacemaker + GFS2 + LVM2 + crmsh
   VIM
 
 [了解] Hadoop：hive、Hbase、spark、Yarn、HDFS-HA
