@@ -64,6 +64,77 @@ users:
     password: some-password
     username: exp
 ```
+#### 使用 Secrit 传递加密信息及私有仓库验证信息
+```bash
+#方式一：
+#定义私有仓库验证时使用的对象信息
+kubectl create secret docker-registry kubesystemsecret -n kube-system \
+--docker-server=1.2.3.4:8123 --docker-username=admin --docker-password=admin123 --docker-email=xx@xxx.com
+################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-envars-test-pod
+spec:
+  containers:
+  - name: envars-test-container
+    image: 10.30.30.126:8123/library/nginx:latest
+    env:
+    - name: SECRET_USERNAME         #变量名称
+      valueFrom:
+        secretKeyRef:
+          name: opaque              #opaque即进行模糊处理
+          key: username             #值
+    - name: SECRET_PASSWORD         #
+      valueFrom:
+        secretKeyRef:
+          name: opaque              #
+          key: password             #
+  imagePullSecrets:
+  - name: kubesystemsecret          #拉取时携带的认证信息 (调用 docker-registry 资源的 kubesystemsecret 对象)
+
+#查看环境变量信息：kubectl exec -it secret-envars-test-pod -- /bin/bash -c "printenv"
+SECRET_USERNAME=admin
+SECRET_PASSWORD=admin123
+
+#方式二：
+#先将变量使用Base64进行编码方式的加密:
+echo -n admin| base64  >> YWRtaW4=
+echo -n admin123 | base64  >> YWRtaW4xMjM=
+#以上操作可以改为如下的命令行方式进行：
+kubectl create secret generic mysecret --from-literal=username=admin --from-literal=password=admin123
+
+#将编码信息写入 "secret.yaml" 并执行 kubectl create -f secret.yaml ( 使用 kubectl create secret 则直接忽略此步骤)
+apiVersion: v1
+kind: Secret
+metadata:
+    name: mysecret
+type: Opaque
+data:
+    password: YWRtaW4xMjM=
+    username: YWRtaW4=
+
+#cat nginx-mount.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: 10.30.30.126:8123/library/nginx:latest
+      volumeMounts:
+          - name: secret-volume             #调用volumes中定义的secret-volume标识
+            mountPath: /etc/secret-volume   #Secret资源中的值会以文件形式存在于/etc/secret-volume下 (文件名是key)
+  imagePullSecrets:
+    - name: kubesystemsecret                #拉取镜像时携带的认证信息
+  volumes:
+    - name: secret-volume                   #对volumes资源定义的secret-volume标识
+      secret:
+        secretName: mysecret                #调用secret资源下的mysecret对象，其携带了username/password变量
+
+#验证执行：kubectl exec secret-test-pod cat /etc/secret-volume/password  -->>  将输出： admin123
+```
 #### 创建私有仓库
 ```bash
 #第一种方式：
