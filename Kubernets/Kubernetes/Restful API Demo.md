@@ -64,7 +64,7 @@ users:
     password: some-password
     username: exp
 ```
-#### 使用 Secrit 传递加密信息及私有仓库验证信息
+#### 使用 Secret 传递加密信息及私有仓库验证信息
 ```yaml
 #方式一：
 #定义私有仓库验证时使用的对象信息
