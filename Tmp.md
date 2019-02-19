@@ -11,7 +11,7 @@
   jenkins,Tomcat
   Logstash,Elastic stack,kibana
   Ansible,Zabbix
-  Python,前端+开发：HTML5/CSS3、Javascript、VUE、Django、Flask
+  Python,前端+开发：HTML5/CSS3/Javascript/VUE、Django+Flask
   #研究：Corosync + Pacemaker + GFS2 + LVM2 + crmsh
   VIM
 
