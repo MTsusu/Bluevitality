@@ -64,6 +64,144 @@ users:
     password: some-password
     username: exp
 ```
+#### 基于 "RBAC" 的: 认证 授权 准入控制
+```bash
+#RoleBinding 把角色映射到用户从而让这些用户继承角色在 namespace 中的权限
+#ClusterRoleBinding 让用户继承 ClusterRole 在整个集群中的权限
+#系统角色 "System Roles" 很容易识别，一般具有前缀 "system:"
+
+➜  kubectl get clusterroles -n kube-system
+NAME                    KIND
+admin                   ClusterRole.v1beta1.rbac.authorization.k8s.io
+cluster-admin           ClusterRole.v1beta1.rbac.authorization.k8s.io
+edit                    ClusterRole.v1beta1.rbac.authorization.k8s.io
+kubelet-api-admin       ClusterRole.v1beta1.rbac.authorization.k8s.io
+system:auth-delegator   ClusterRole.v1beta1.rbac.authorization.k8s.io
+system:basic-user       ClusterRole.v1beta1.rbac.authorization.k8s.io
+system:controller:attachdetach-controller ClusterRole.v1beta1.rbac.authorization.k8s.io
+system:controller:certificate-controller ClusterRole.v1beta1.rbac.authorization.k8s.io
+
+#创建用户
+[root@master1 ~]# ls /etc/kubernetes/pki/       #需要用到APIServer自有的CA私钥进行签名
+apiserver.crt                 ca-config.json  devuser-csr.json    front-proxy-ca.key      sa.pub
+apiserver.key                 ca.crt          devuser-key.pem     front-proxy-client.crt
+apiserver-kubelet-client.crt  ca.key          devuser.pem         front-proxy-client.key
+apiserver-kubelet-client.key  devuser.csr     front-proxy-ca.crt  sa.key
+
+#创建ca-config.json文件
+[root@master1 ~]# cat > ca-config.json <<EOF   
+{
+  "signing": {
+    "default": {
+      "expiry": "87600h"
+    },
+    "profiles": {
+      "kubernetes": {
+        "usages": [
+            "signing",
+            "key encipherment",
+            "server auth",
+            "client auth"
+        ],
+        "expiry": "87600h"
+      }
+    }
+  }
+}
+EOF
+
+#用户名从CN上获取。 组从O上获取（用户或者组用于后面的角色绑定）
+[root@master1 ~]# cat > devuser-csr.json <<EOF 
+{
+  "CN": "devuser",
+  "hosts": [],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "BeiJing",
+      "L": "BeiJing",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
+}
+EOF
+
+#生成user的证书：( 将生成如下文件：devuser.csr devuser-key.pem devuser.pem )
+[root@master1 ~]# cfssl gencert -ca=ca.crt -ca-key=ca.key -config=ca-config.json \
+-profile=kubernetes devuser-csr.json | cfssljson -bare devuser
+#校验证书：cfssl-certinfo -cert kubernetes.pem
+
+#生成config文件（使用现成的admin.conf来进行部分的配置修改）
+cp /etc/kubernetes/admin.conf devuser.kubeconfig
+#设置客户端认证参数:
+kubectl config set-credentials devuser \
+--client-certificate=/etc/kubernetes/ssl/devuser.pem \
+--client-key=/etc/kubernetes/ssl/devuser-key.pem \
+--embed-certs=true --kubeconfig=devuser.kubeconfig
+#设置上下文参数：
+kubectl config set-context kubernetes \
+--cluster=kubernetes \
+--user=devuser \
+--namespace=kube-system \
+--kubeconfig=devuser.kubeconfig
+#设置默认上下文：
+kubectl config use-context kubernetes --kubeconfig=devuser.kubeconfig
+
+#cluster:   集群信息，包含集群地址与公钥
+#user:      用户信息，客户端证书与私钥，正真的信息是从证书里读取出来的，人能看到的只是给人看的。
+#context:   维护三元组：namespace cluster 与 user
+
+#创建一个标识为"pod-reader"的角色 ( 执行：kubectl create -f pod-reader.yaml )
+[root@master1 ~]# cat pod-reader.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: pod-reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+
+#创建角色绑定，将上面创建的pod-reader角色绑定到使用CFSSL生成的devuser用户上：
+[root@master1 ~]# cat devuser-role-bind.yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-pods
+  namespace: kube-system
+subjects:
+- kind: User
+  name: devuser   # 目标用户
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader  # 角色信息
+  apiGroup: rbac.authorization.k8s.io
+#执行：kubectl create -f devuser-role-bind.yaml
+
+#使用新的config文件：
+[root@master1 ~]# cp -f devuser.kubeconfig .kube/config
+
+#效果, 已没有别的namespace的权限了，也不能访问node信息了：
+[root@master1 ~]# kubectl get node
+Error from server (Forbidden): nodes is forbidden: User "devuser" cannot list nodes at the cluster scope
+
+[root@master1 ~]# kubectl get pod -n kube-system
+NAME                                       READY     STATUS    RESTARTS   AGE
+calico-kube-controllers-55449f8d88-74x8f   1/1       Running   0          8d
+calico-node-clpqr                          2/2       Running   0          8d
+kube-apiserver-master1                     1/1       Running   2          8d
+kube-controller-manager-master1            1/1       Running   1          8d
+kube-dns-545bc4bfd4-p6trj                  3/3       Running   0          8d
+kube-proxy-tln54                           1/1       Running   0          8d
+kube-scheduler-master1                     1/1       Running   1          8d
+```
 #### 使用 Secret 传递加密信息及私有仓库验证信息
 ```yaml
 #方式一：
