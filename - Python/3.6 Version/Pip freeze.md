@@ -1,6 +1,6 @@
 #### 简介
 ```txt
-Python项目中必须包含有 requirements.txt 文件，其用于记录所有依赖包及其精确的版本号，以便新环境的部署。
+Python项目中必须包含 requirements.txt ，其用于记录所有依赖包及其精确的版本号，以便新环境的部署。
 
 Demo:
 pip freeze > requirements.txt     #根据当前项目自动生成 requirements.txt
