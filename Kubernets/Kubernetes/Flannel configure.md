@@ -1,4 +1,13 @@
 #### Flannel 网络设置
+```txt
+--public-ip="": IP accessible by other nodes for inter-host communication. Defaults to the IP of the interface being used for communication.
+--etcd-endpoints=http://127.0.0.1:4001: a comma-delimited list of etcd endpoints.
+--etcd-prefix=/coreos.com/network: etcd prefix.
+--etcd-keyfile="": SSL key file used to secure etcd communication.
+--etcd-certfile="": SSL certification file used to secure etcd communication.
+--etcd-cafile="": SSL Certificate Authority file used to secure etcd communication.
+-v=0: log level for V logs. Set to 1 to see messages related to data path.
+```
 ```bash
 systemctl stop firewalld.service
 
