@@ -1,0 +1,54 @@
+PUT _template/cmosgis_assembly_poiinfo_template
+{
+  "template": "cmosgis_assembly_poiinfo*",
+  "mappings": {
+   "assembly_poiinfo": {
+ "dynamic": "false",
+     "properties": { 
+        "poiId": { 
+          "type": "keyword"
+        },
+        "poiName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "poixy": { 
+          "type": "geo_point"
+        },
+        "address": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "status": { 
+          "type": "keyword"
+        },
+        "city": { 
+          "type": "keyword"
+        },
+        "country": { 
+          "type": "keyword"
+        },
+        "coordtype": { 
+          "type": "keyword"
+        },
+        "poitags": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "polygons": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "createTime": { 
+          "type": "date"
+          ,"format": "yyyy-MM-dd HH:mm:ss"
+       }
+     }
+   }
+},
+  "settings": {
+  "refresh_interval": "60s",
+    "number_of_shards": 3,
+    "number_of_replicas": 0
+  } 
+}

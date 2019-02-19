@@ -1,0 +1,68 @@
+PUT _template/cmosgis_main_poiinfo_template
+{
+  "template": "cmosgis_main_poiinfo*",
+  "mappings": {
+   "main_poiinfo": {
+ "dynamic": "false",
+     "properties": { 
+        "poiId": { 
+          "type": "keyword"
+        },
+        "poiName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "poixy": { 
+          "type": "geo_point"
+        },
+        "address": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "status": { 
+          "type": "keyword"
+        },
+        "provinceCode": { 
+          "type": "keyword"
+        },
+        "cityCode": { 
+          "type": "keyword"
+        },
+        "countryCode": { 
+          "type": "keyword"
+        },
+        "provinceName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "cityName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "countryName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "createTime": { 
+          "type": "date"
+          ,"format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "buinessKey": { 
+          "type": "keyword"
+        },
+        "poiResourceId": { 
+          "type": "keyword"
+        },
+        "updateTime": { 
+          "type": "date"
+          ,"format": "yyyy-MM-dd HH:mm:ss"
+       }
+     }
+   }
+},
+  "settings": {
+  "refresh_interval": "60s",
+    "number_of_shards": 3,
+    "number_of_replicas": 0
+  } 
+}

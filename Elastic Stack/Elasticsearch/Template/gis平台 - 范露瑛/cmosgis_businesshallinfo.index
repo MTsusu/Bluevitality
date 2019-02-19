@@ -1,0 +1,112 @@
+PUT _template/cmosgis_businesshallinfo_template
+{
+  "template": "cmosgis_businesshallinfo*",
+  "mappings": {
+   "businesshallinfo": {
+ "dynamic": "false",
+     "properties": { 
+        "poiId": { 
+          "type": "keyword"
+        },
+        "poiName": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "poiType": { 
+          "type": "text"
+        },
+        "sepecialService": { 
+          "type": "text"
+        },
+        "businessStatus": { 
+          "type": "keyword"
+        },
+        "stopBuinessTime": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "preOpenTime": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "stopBuinessRemark": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "area": { 
+          "type": "keyword"
+        },
+        "address": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "scopeOfAccept": { 
+          "type": "text"
+        },
+        "minReachargeAmount": { 
+          "type": "double"
+        },
+        "openTime": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "landmarkBuilding": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "servicePhone": { 
+          "type": "keyword"
+        },
+        "remark": { 
+          "type": "text"
+          ,"index": "false"
+        },
+        "district": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "district2": { 
+          "type": "text"
+          ,"analyzer": "ik_max_word"
+        },
+        "selfTerminalFlag": { 
+          "type": "boolean"
+        },
+        "selfRechargeFlag": { 
+          "type": "boolean"
+        },
+        "selfOnlineFlag": { 
+          "type": "boolean"
+        },
+        "selfSelectionFlag": { 
+          "type": "boolean"
+        },
+        "poixy": { 
+          "type": "geo_point"
+        },
+        "officalMsg": { 
+          "type": "keyword"
+          ,"index": "false"
+        },
+        "telephone": { 
+          "type": "keyword"
+        },
+        "directorInfo": { 
+          "type": "keyword"
+        },
+        "createTime": { 
+          "type": "date"
+          ,"format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "status": { 
+          "type": "keyword"
+       }
+     }
+   }
+},
+  "settings": {
+  "refresh_interval": "60s",
+    "number_of_shards": 3,
+    "number_of_replicas": 0
+  } 
+}
