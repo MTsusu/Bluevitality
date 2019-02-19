@@ -1,13 +1,21 @@
 #### 使用 kubectl 配置 ~/.kube/config
 ```bash
-kubectl config set-cluster development --server=https://1.2.3.4 --certificate-authority=fake-ca-file    #添加集群及其对应的公钥
-kubectl config set-cluster scratch --server=https://5.6.7.8 --insecure-skip-tls-verify                  #
+kubectl config set-cluster development \
+--server=https://1.2.3.4 --certificate-authority=fake-ca-file       #添加集群及其对应的公钥
 
-kubectl config set-credentials developer --client-certificate=fake-cert-file --client-key=fake-key-seefile  #将用户详细信息添加到配置文件
-kubectl config set-credentials experimenter --username=exp --password=some-password                         #
+kubectl config set-cluster scratch \
+--server=https://5.6.7.8 --insecure-skip-tls-verify                 #
+
+kubectl config set-credentials developer \
+--client-certificate=fake-cert-file --client-key=fake-key-seefile   #将用户详细信息添加到配置文件
+
+kubectl config set-credentials experimenter \
+--username=exp --password=some-password                             #
 
 #添加上下文信息
-kubectl config set-context dev-frontend --cluster=development --namespace=frontend --user=developer     #上下文主要定义用户与集群及命名空间的绑定关系
+kubectl config set-context dev-frontend \
+--cluster=development --namespace=frontend --user=developer         #上下文主要定义用户与集群及命名空间的绑定关系
+
 kubectl config set-context dev-storage --cluster=development --namespace=storage --user=developer
 kubectl config set-context exp-scratch --cluster=scratch --namespace=default --user=experimenter
 
