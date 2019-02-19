@@ -18,7 +18,7 @@ cluster.routing.allocation.enable
     all             允许为所有类型的分片分配分片（默认）
     primaries       仅允许主分片的分片分配
     new_primaries   仅允许为新索引的主分片分配分片
-    none            任何索引都不允许任何类型的分片
+    none            任何索引都不允许任何类型的分片 
 --------------------------------------------------------------------------------------------------------------------  
 #处理脏页数据导致主机夯死：
 [root@localhost ~]# cat /proc/meminfo | grep -E '^(Cached|Dirty)'
