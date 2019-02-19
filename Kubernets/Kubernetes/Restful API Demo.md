@@ -202,7 +202,7 @@ kube-dns-545bc4bfd4-p6trj                  3/3       Running   0          8d
 kube-proxy-tln54                           1/1       Running   0          8d
 kube-scheduler-master1                     1/1       Running   1          8d
 ```
-#### dashboard授权访问Kubernets集群
+#### 授权 dashboard 访问 Kubernets 集群
 ```bash
 #先创建ServiceAccount账号
 apiVersion: v1
