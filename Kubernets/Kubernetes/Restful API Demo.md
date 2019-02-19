@@ -202,6 +202,54 @@ kube-dns-545bc4bfd4-p6trj                  3/3       Running   0          8d
 kube-proxy-tln54                           1/1       Running   0          8d
 kube-scheduler-master1                     1/1       Running   1          8d
 ```
+#### dashboard授权访问Kubernets集群
+```bash
+#先创建ServiceAccount账号
+apiVersion: v1
+kind: ServiceAccount                    #资源类型
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard       #标签
+  name: kubernetes-dashboard            #账号名称（ServiceAccount资源下的实例对象名称）
+  namespace: kube-system                #所属命名空间
+
+#绑定角色到名为Cluster-admin的Role实例
+╰─➤  cat dashboard-admin.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard            #ClusterRoleBinding标识
+  labels:
+    k8s-app: kubernetes-dashboard       #定义标签
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole                     #使用的资源类型为ClusterRole
+  name: cluster-admin                   #调用此ClusterRole资源下的cluster-admin实例
+subjects:
+- kind: ServiceAccount                  #关联的用户类型为ServiceAccount
+  name: kubernetes-dashboard            #关联此关联的用户类型为ServiceAccount资源下的kubernetes-dashboard角色
+  namespace: kube-system                #讲此绑定限制在kube-system命名空间
+
+#查看 (cluster-admin实例的权限相当于Root身份)
+[root@master1 ~]# kubectl describe clusterrole cluster-admin -n kube-system
+Name:         cluster-admin
+Labels:       kubernetes.io/bootstrapping=rbac-defaults
+Annotations:  rbac.authorization.kubernetes.io/autoupdate=true
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+             [*]                []              [*]
+  *.*        []                 []              [*]
+
+#在dashboard 的 deployment.yaml 中直接指定 service account
+      volumes:
+      - name: kubernetes-dashboard-certs
+        secret:
+          secretName: kubernetes-dashboard-certs
+      - name: tmp-volume
+        emptyDir: {}
+      serviceAccountName: kubernetes-dashboard          #<------- 此处直接调用已经绑定角色的serviceAccount用户
+```
 #### 使用 Secret 传递加密信息及私有仓库验证信息
 ```yaml
 #方式一：
