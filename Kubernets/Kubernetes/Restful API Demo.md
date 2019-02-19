@@ -65,7 +65,7 @@ users:
     username: exp
 ```
 #### 使用 Secrit 传递加密信息及私有仓库验证信息
-```bash
+```yaml
 #方式一：
 #定义私有仓库验证时使用的对象信息
 kubectl create secret docker-registry kubesystemsecret -n kube-system \
