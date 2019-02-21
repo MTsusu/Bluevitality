@@ -37,3 +37,5 @@
 ![jenkins-img](资料/Images/12构建输出.png)
 #### 使用Git Parameter插件获取GIt标签
 ![Git-Parameter](资料/Images/GitParameter.gif)
+#### Branch_or_tag for Git Checkout
+![Branch_or_tag](资料/Images/Branch_or_tag.png)
