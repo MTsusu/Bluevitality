@@ -224,8 +224,9 @@ M: 594b75b044062def0f91b8f0b7b39f85d50c5554 192.168.133.131:21302
 >>> Check slots coverage...
 [OK] All 16384 slots covered.
 
-#查看集群的状态，会出现3个M和3个S，及主备关系和分片。
-./redis-trib.rb check 192.168.133.128:21301
+#查看集群状态，会出现3个M和3个S，及主备关系和分片范围分配信息：
+./redis-trib.rb check 192.168.133.128:21301     
+#或：echo 'cluster nodes' | redis -h 192.168.133.128 -p 21302 -c 
 ```
 
 #### redis-trib 命令备忘
