@@ -39,3 +39,8 @@
 ![Git-Parameter](资料/Images/GitParameter.gif)
 #### Branch_or_tag for Git Checkout
 ![Branch_or_tag](资料/Images/Branch_or_tag.png)
+#### 上面的Git Parameter参数需添加如下脚本判断
+```bash
+#判断是否存在此变量，若存在则进行分支/TAG的检出操作
+[ ! -z $BUILD_BRANCH ] && git checkout $BUILD_BRANCH || exit 1
+```
