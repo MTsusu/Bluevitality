@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk-hs   #zk-hs.default.svc.cluster.local  ---> 无头服务
+  labels:
+    app: zk
+spec:
+  ports:
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  clusterIP: None
+  selector:
+    app: zk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk-cs
+  labels:
+    app: zk
+spec:
+  ports:
+  - port: 2181
+    name: client
+  selector:
+    app: zk
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+#设置应用POD集群处于运行状态最低个数，也可以设置应用POD集群处于运行状态的最低百分比
+#这样可以保证在主动销毁应用POD的时候，不会一次性销毁太多的应用POD，从而保证业务不中断或业务SLA不降级
+metadata:
+  name: zk-pdb
+spec:
+  selector:
+    matchLabels:
+      app: zk
+  maxUnavailable: 1
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zk  
+  #zk-0.zk-hs.default.svc.cluster.local
+  #zk-1.zk-hs.default.svc.cluster.local
+  #zk-2.zk-hs.default.svc.cluster.local
+spec:
+  selector:
+    matchLabels:
+      app: zk
+  serviceName: zk-hs
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: zk
+    spec:
+      affinity:
+        podAntiAffinity:      #Pod亲缘性
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - zk
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: kubernetes-zookeeper
+        imagePullPolicy: Always
+        image: "k8s.gcr.io/kubernetes-zookeeper:1.0-3.4.10"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+        command:
+        - sh
+        - -c
+        - "start-zookeeper \
+          --servers=3 \
+          --data_dir=/var/lib/zookeeper/data \
+          --data_log_dir=/var/lib/zookeeper/data/log \
+          --conf_dir=/opt/zookeeper/conf \
+          --client_port=2181 \
+          --election_port=3888 \
+          --server_port=2888 \
+          --tick_time=2000 \
+          --init_limit=10 \
+          --sync_limit=5 \
+          --heap=512M \
+          --max_client_cnxns=60 \
+          --snap_retain_count=3 \
+          --purge_interval=12 \
+          --max_session_timeout=40000 \
+          --min_session_timeout=4000 \
+          --log_level=INFO"
+        readinessProbe:   #服务可用性检查
+          exec:
+            command:
+            - sh
+            - -c
+            - "zookeeper-ready 2181"
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:    #Pod可用性检查
+          exec:
+            command:
+            - sh
+            - -c
+            - "zookeeper-ready 2181"
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: datadir
+          mountPath: /var/lib/zookeeper
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
+#cat /opt/zookeeper/conf
+#clientPort=2181
+#dataDir=/var/lib/zookeeper/data
+#dataLogDir=/var/lib/zookeeper/log
+#tickTime=2000
+#initLimit=10
+#syncLimit=2000
+#maxClientCnxns=60
+#minSessionTimeout= 4000
+#maxSessionTimeout= 40000
+#autopurge.snapRetainCount=3
+#autopurge.purgeInterval=0
+#server.1=zk-0.zk-hs.default.svc.cluster.local:2888:3888
+#server.2=zk-1.zk-hs.default.svc.cluster.local:2888:3888
+#server.3=zk-2.zk-hs.default.svc.cluster.local:2888:3888
+
+#注！
+#在Zookeeper的Dockerfile中的RUN指令内将获取主机名中的数字部分赋值给myid变量并：echo $myid > var/lib/zookeeper/data/myid
