@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx
+  name: nginx   #nginx.default.svc.cluster.local
   labels:
     app: nginx
 spec:
@@ -15,11 +15,11 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: web
+  name: web     #web-{0,1}.nginx.default.svc.cluster.local
 spec:
   serviceName: "nginx"
-  replicas: 2   #对于具有N个副本的StatefulSet，当部署Pod时，将按顺序从{0..N-1}开始创建它们。
-  selector:
+  replicas: 2   #对于具有N个副本的StatefulSet，当部署Pod时，将按顺序从{0..N-1}开始创建它们
+  selector:     #控制器1次删除1个Pod，与其序数顺序相反，并且在删除下个前等待每个Pod完全关闭
     matchLabels:
       app: nginx
   template:
@@ -50,3 +50,21 @@ spec:
 #for i in 0 1; do kubectl exec web-$i -- sh -c 'hostname'; done
 #web-0
 #web-1
+
+#写入稳定存储，获取PersistentVolumeClaims的web-0和web-1:
+#kubectl get pvc -l app=nginx
+#NAME        STATUS    VOLUME                                     CAPACITY   ACCESSMODES   AGE
+#www-web-0   Bound     pvc-15c268c7-b507-11e6-932f-42010a800002   1Gi        RWO           48s
+#www-web-1   Bound     pvc-15c79307-b507-11e6-932f-42010a800002   1Gi        RWO           48s
+
+#滚动更新：
+#kubectl patch statefulset web --type='json' \
+#-p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value":"gcr.io/google_containers/nginx-slim:0.8"}]
+
+#分区更新：
+#kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":3}}}}'
+#kubectl patch statefulset web --type='json' \
+#-p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value":"k8s.gcr.io/nginx-slim:0.7"}]'
+#kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":2}}}}'
+#kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":1}}}}'
+#kubectl patch statefulset web -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":0}}}}'
