@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    # FIXME: use the right IP
+    server: 172.16.8.35
+    path: "/vmfs/a0"
+
+--- #Demo:
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+
+--- #Demo:
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: task-pv-pod
+spec:
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+       claimName: task-pv-claim
+  containers:
+    - name: task-pv-container
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: task-pv-storage
+
+
+#使用组ID（GID）配置的存储允许仅使用相同GID的Pod进行写入。GID不匹配或丢失会导致权限被拒绝。
+#为了减少与用户协调的需要，管理员可以使用GID注释PersistentVolume。然后，GID会自动添加到使用PersistentVolume的任何Pod中。
+#当Pod使用具有GID注释的PersistentVolume时，带注释的GID将应用于Pod中的所有Container，其方式与Pod的安全上下文中指定的GID相同。
+#每个GID，无论是源自PersistentVolume注释还是Pod的规范，都应用于每个Container中的第一个进程。
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv1
+  annotations:
+    pv.beta.kubernetes.io/gid: "1234"
+
+--- #使用projected将secret、configmap、downwardAPI 、serviceAccountToken 类型的资源挂载到同一个目录中：
+
+# Create files containing the username and password:
+   echo -n "admin" > ./username.txt
+   echo -n "1f2d1e2e67df" > ./password.txt
+# Package these files into secrets:
+   kubectl create secret generic user --from-file=./username.txt
+   kubectl create secret generic pass --from-file=./password.txt
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-projected-volume
+spec:
+  containers:
+  - name: test-projected-volume
+    image: busybox
+    args:
+    - sleep
+    - "86400"
+    volumeMounts:
+    - name: all-in-one
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: all-in-one
+    projected:
+      sources:
+      - secret:
+          name: user
+      - secret:
+          name: pass
+
+--- #Example:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-test
+spec:
+  containers:
+  - name: container-test
+    image: busybox
+    volumeMounts:
+    - name: all-in-one
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: all-in-one
+    projected:
+      sources:
+      - secret:
+          name: mysecret
+          items:
+            - key: username
+              path: my-group/my-username
+      - downwardAPI:
+          items:
+            - path: "labels"
+              fieldRef:
+                fieldPath: metadata.labels
+            - path: "cpu_limit"
+              resourceFieldRef:
+                containerName: container-test
+                resource: limits.cpu
+      - configMap:
+          name: myconfigmap
+          items:
+            - key: config
+              path: my-group/my-config
