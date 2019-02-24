@@ -1,0 +1,171 @@
+#mkdir -p configure-pod-container/configmap/kubectl/
+#wget https://k8s.io/docs/tasks/configure-pod-container/configmap/kubectl/game.properties -O configure-pod-container/configmap/kubectl/game.properties
+#wget https://k8s.io/docs/tasks/configure-pod-container/configmap/kubectl/ui.properties -O configure-pod-container/configmap/kubectl/ui.properties
+#kubectl create configmap game-config --from-file=configure-pod-container/configmap/kubectl/
+
+#查看configure-pod-container/configmap/kubectl/目录的内容
+#ls configure-pod-container/configmap/kubectl/
+#game.properties
+#ui.properties
+
+#kubectl describe configmaps game-config
+#Name:           game-config
+#Namespace:      default
+#Labels:         <none>
+#Annotations:    <none>
+
+#Data
+#====
+#game.properties:        158 bytes
+#ui.properties:          83 bytes
+
+#kubectl get configmaps game-config -o yaml
+#apiVersion: v1
+#data:
+#  game.properties: |
+#    enemies=aliens
+#    lives=3
+#    enemies.cheat=true
+#    enemies.cheat.level=noGoodRotten
+#    secret.code.passphrase=UUDDLRLRBABAS
+#    secret.code.allowed=true
+#    secret.code.lives=30
+#  ui.properties: |
+#    color.good=purple
+#    color.bad=yellow
+#    allow.textmode=true
+#    how.nice.to.look=fairlyNice
+#kind: ConfigMap
+#metadata:
+#  creationTimestamp: 2016-02-18T18:52:05Z
+#  name: game-config
+#  namespace: default
+#  resourceVersion: "516"
+#  selfLink: /api/v1/namespaces/default/configmaps/game-config
+#  uid: b4952dc3-d670-11e5-8cd0-68f728db1985
+
+#格式：
+#kubectl create configmap <map-name> <data-source>
+#kubectl create configmap <map-name> --from-file=kubectl/game.properties
+#kubectl create configmap <map-name> --from-file=<my-key-name>=<path-to-file>
+
+#kubectl create configmap game-config-env-file \
+# --from-env-file=configure-pod-container/configmap/kubectl/game-env-file.properties
+#cat configure-pod-container/configmap/kubectl/game-env-file.properties
+#enemies=aliens
+#lives=3
+#allowed="true"
+
+#kubectl get configmap game-config-env-file -o yaml
+#apiVersion: v1
+#data:
+#  allowed: '"true"'
+#  enemies: aliens
+#  lives: "3"
+#kind: ConfigMap
+#metadata:
+#  creationTimestamp: 2017-12-27T18:36:28Z
+#  name: game-config-env-file
+#  namespace: default
+#  resourceVersion: "809965"
+#  selfLink: /api/v1/namespaces/default/configmaps/game-config-env-file
+#  uid: d9d1ca5b-eb34-11e7-887b-42010a8002b8
+
+
+#kubectl create configmap special-config --from-literal=special.how=very --from-literal=special.type=charm
+#kubectl get configmaps special-config -o yaml
+#apiVersion: v1
+#data:
+#  special.how: very
+#  special.type: charm
+#kind: ConfigMap
+#metadata:
+#  creationTimestamp: 2016-02-18T19:14:38Z
+#  name: special-config
+#  namespace: default
+#  resourceVersion: "651"
+#  selfLink: /api/v1/namespaces/default/configmaps/special-config
+#  uid: dadce046-d673-11e5-8cd0-68f728db1985
+
+
+#环境变量方式：
+#kubectl create configmap special-config --from-literal=special.how=very
+#kubectl edit pod dapi-test-pod
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: dapi-test-pod
+#spec:
+#  containers:
+#    - name: test-container
+#      image: k8s.gcr.io/busybox
+#      command: [ "/bin/sh", "-c", "env" ]
+#      env:
+#        # Define the environment variable
+#        - name: SPECIAL_LEVEL_KEY
+#          valueFrom:
+#            configMapKeyRef:
+#              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+#              name: special-config
+#              # Specify the key associated with the value
+#              key: special.how
+#  restartPolicy: Never
+
+
+#将ConfigMap数据添加到卷
+#apiVersion: v1
+#kind: ConfigMap
+#metadata:
+#  name: special-config
+#  namespace: default
+#data:
+#  special.level: very
+#  special.type: charm
+#---
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: dapi-test-pod
+#spec:
+#  containers:
+#    - name: test-container
+#      image: k8s.gcr.io/busybox
+#      command: [ "/bin/sh", "-c", "ls /etc/config/" ]
+#      volumeMounts:
+#      - name: config-volume
+#        mountPath: /etc/config
+#  volumes:
+#    - name: config-volume
+#      configMap:
+#        # Provide the name of the ConfigMap containing the files you want
+#        # to add to the container
+#        name: special-config
+#  restartPolicy: Never
+
+#pod运行时，command（"ls /etc/config/"）生成以下输出：
+#special.level
+#special.type
+
+#将ConfigMap数据添加到卷中的特定路径
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      command: [ "/bin/sh","-c","cat /etc/config/keys" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: special-config
+        items:
+        - key: special.level
+          path: keys  #该字段为特定ConfigMap项指定所需的文件路径。在这种情况下该special.level项目将安装在config-volume卷中/etc/config/keys
+  restartPolicy: Never
+#pod运行时，command（"cat /etc/config/keys"）生成以下输出：
+#very

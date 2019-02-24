@@ -205,6 +205,7 @@ kube-scheduler-master1                     1/1       Running   1          8d
 #### 授权 dashboard 访问 Kubernets 集群
 ```bash
 #先创建ServiceAccount账号
+kubectl create -f - <<EOF
 apiVersion: v1
 kind: ServiceAccount                    #资源类型
 metadata:
@@ -212,6 +213,7 @@ metadata:
     k8s-app: kubernetes-dashboard       #标签
   name: kubernetes-dashboard            #账号名称（ServiceAccount资源下的实例对象名称）
   namespace: kube-system                #所属命名空间
+EOF
 
 #绑定角色到名为Cluster-admin的Role实例
 ╰─➤  cat dashboard-admin.yaml
@@ -248,14 +250,18 @@ PolicyRule:
           secretName: kubernetes-dashboard-certs
       - name: tmp-volume
         emptyDir: {}
-      serviceAccountName: kubernetes-dashboard          #<------- 此处直接调用已经绑定角色的serviceAccount用户
+      serviceAccountName: kubernetes-dashboard    #使用非默认服务帐户，将spec.serviceAccountName设为服务帐户名称即可
 ```
-#### 使用 Secret 传递加密信息及私有仓库验证信息
+#### 使用 Secret 传递加密信息、设置Pod私有仓库的验证信息
 ```yaml
 #方式一：
 #定义私有仓库验证时使用的对象信息
-kubectl create secret docker-registry kubesystemsecret -n kube-system \
---docker-server=1.2.3.4:8123 --docker-username=admin --docker-password=admin123 --docker-email=xx@xxx.com
+kubectl create secret docker-registry kubesystemsecret \
+-n kube-system \
+--docker-server=1.2.3.4:8123 \
+--docker-username=admin \
+--docker-password=admin123 \
+--docker-email=xx@xxx.com
 ################
 apiVersion: v1
 kind: Pod
@@ -368,4 +374,24 @@ secrets:
 - name: build-robot-token
 imagePullSecrets:
 - name: myregistrykey
+```
+#### 设置不sysctl.conf
+```yaml
+#先为kubectl设置启动参数允许修改sysctl.conf:
+#kubelet --allowed-unsafe-sysctls  'kernel.msg*,net.ipv4.route.min_pmtu' ...
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sysctl-example
+spec:
+  securityContext:
+    sysctls:
+    - name: kernel.shm_rmid_forced
+      value: "0"
+    - name: net.ipv4.route.min_pmtu
+      value: "552"
+    - name: kernel.msgmax
+      value: "65536"
+  ...
 ```

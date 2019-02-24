@@ -1,0 +1,106 @@
+#没有选择器的服务
+#服务通常抽象访问Kubernetes Pods，但它们也可以抽象其他类型的后端。例如：
+#您希望在生产中拥有外部数据库集群，但在测试中您使用自己的数据库。
+#您希望将服务指向另一个Namespace或另一个群集上的服务 。
+#您正在将工作负载迁移到Kubernetes，并且您的一些后端在Kubernetes之外运行。
+
+#在任何这些场景中，您都可以定义不带选择器的服务：
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-service
+spec:           #可以指定自己的群集IP地址作为Service创建请求的一部分。为此请设置.spec.clusterIP字段
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376
+#由于此服务没有选择器，因此Endpoints不会创建相应的对象。您可以手动将服务映射到您自己的特定端点：
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: my-service
+subsets:        #流量将路由到用户定义的端点
+  - addresses:
+      - ip: 1.2.3.4
+    ports:
+      - port: 9376
+
+#Kubernetes支持Service对象的多个端口定义。使用多个端口时，必须提供所有端口名称，以便可以消除端点的歧义:
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 9376
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 9377
+
+#环境变量
+#{SVCNAME}_SERVICE_HOST和{SVCNAME}_SERVICE_PORT
+#例如，"redis-master"公开TCP端口6379并已分配群集IP地址10.0.0.11的服务会生成以下环境变量：
+REDIS_MASTER_SERVICE_HOST=10.0.0.11
+REDIS_MASTER_SERVICE_PORT=6379
+REDIS_MASTER_PORT=tcp://10.0.0.11:6379
+REDIS_MASTER_PORT_6379_TCP=tcp://10.0.0.11:6379
+REDIS_MASTER_PORT_6379_TCP_PROTO=tcp
+REDIS_MASTER_PORT_6379_TCP_PORT=6379
+REDIS_MASTER_PORT_6379_TCP_ADDR=10.0.0.11
+
+#Kubernetes还支持命名端口的DNS SRV（服务）记录。
+#如果 "my-service.my-ns" Service具有"http"以协议命名的端口，则可执行DNS SRV查询"_http._tcp.my-service.my-ns"以发现其端口号
+
+#有时您不需要或不需要负载平衡和单个服务IP。在这种情况下，您可以通过指定"None"群集IP（.spec.clusterIP）来创建“无头”服务。
+
+
+#externalIPs (通过svc创建,在指定的node上监听端口)
+#适用场景: 想通过svc来负载,但要求某台指定的node上监听,而非像nodeport所有节点监听.
+#[root@n1 external-ip]# cat nginx-deployment.yaml 
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+
+#[root@n1 external-ip]# cat nginx-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+  externalIPs: 
+    - 192.168.2.12 #这是我的一台node的ip
+
+    
+#- 这个端口是kube-proxy来启动的,所以只有运行kube-proxy的    
+#[root@n2 ~]# netstat -ntulp       
+#tcp        0      0 192.168.2.12:80         0.0.0.0:*               LISTEN      11465/kube-proxy 

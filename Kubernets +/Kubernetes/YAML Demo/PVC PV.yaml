@@ -98,9 +98,16 @@ kind: Pod
 metadata:
   name: volume-test
 spec:
+  securityContext:    #Pod级别安全上下文
+    runAsUser: 1000   #指定对于Pod中的任何Container，第一个进程使用用户ID 1000运行
+    fsGroup: 2000     #指定组ID 2000与Pod中的所有Container关联。组ID 2000还与创建的任何文件、安装的卷相关联
   containers:
   - name: container-test
     image: busybox
+    securityContext:  #容器级别安全上下文
+      runAsUser: 2000
+      allowPrivilegeEscalation: false
+      #为Container指定的安全设置仅适用于单个Container，并且当重叠时会覆盖Pod级别的设置。容器设置不会影响Pod的卷
     volumeMounts:
     - name: all-in-one
       mountPath: "/projected-volume"

@@ -1,0 +1,535 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    nephele/replicas: '2'
+    nephele/status: '3'
+    nephele/labels: ''
+    nephele/annotation: ''
+  labels:
+    harmonycloud.cn/bluegreen: iscopmscore-prod-1
+    harmonycloud.cn/projectId: ''
+  name: iscopmscore-prod
+spec:
+  paused: false
+  replicas: 2
+  selector:
+    matchLabels:
+      app: iscopmscore-prod
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: iscopmscore-prod
+        harmonycloud.cn/bluegreen: iscopmscore-prod-1
+        harmonycloud.cn/projectId: ''
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: harmonycloud.cn/dwyw-znmj-znmj
+                operator: In
+                values:
+                - dwyw-znmj-znmj
+            weight: 50
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: []
+          requiredDuringSchedulingIgnoredDuringExecution: []
+      automountServiceAccountToken: false
+      containers:
+        livenessProbe:
+          initialDelaySeconds: 5    #在执行第1次探测之前等待5秒
+          periodSeconds: 5          #每5秒执行1次活跃度探测  
+          exec:
+            command:
+              - cat
+              - /tmp/healthy
+          httpGet:
+            path: /healthz
+            port: 8080
+            httpHeaders:
+              - name: Custom-Header
+                value: Awesome
+          tcpSocket:
+            port: 8080
+        readinessProbe: #准备探针的配置与活性探针类似。唯一区别是使用readinessProbe字段而不是livenessProbe
+            exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        - args:
+        - -jar
+        - -Dserver.port=20880
+        - -Dcmos.instance.id=iscopms-core
+        - -Dcmos.system.id=isc
+        - -Dfile.encoding=utf-8
+        - /usr/local/iscopms-service-impl/iscopms-core.jar
+        command:
+        - java
+        env:
+        - name: JAVA_TOOL_OPTION
+          value: -Xmx1024m
+        - name: TZ
+          value: Asia/Shanghai
+        image: znmj-ha-app-prd-1/iscopms-core-prod:v20181122_1.5
+        imagePullPolicy: IfNotPresent
+        name: iscopms-core-prod
+        ports:
+        - containerPort: 20880
+          protocol: TCP
+        resources:
+          limits:
+            memory: 1024Mi
+            cpu: 2000m
+          requests:
+            memory: 1024Mi
+            cpu: 1000m
+        stdin: false
+        stdinOnce: false
+        tty: false
+        volumeMounts: []
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      hostname: ''
+      imagePullSecrets:
+      - name: admin-secret
+      restartPolicy: Always
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: iscopmscore-prod
+  name: iscopmscore-prod
+spec:
+  ports:
+  - name: iscopms-core-prod-port0
+    port: 20880
+    protocol: TCP
+  publishNotReadyAddresses: false
+  selector:
+    app: iscopmscore-prod
+    harmonycloud.cn/bluegreen: iscopmscore-prod-1
+
+#注：可以使用命名的 ContainerPort 进行HTTP或TCP活动检查
+    ports:
+    - name: liveness-port
+      containerPort: 8080
+      hostPort: 8080
+
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: liveness-port
+
+--- #init容器在应用程序容器启动之前运行完成： 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: workdir
+      mountPath: /usr/share/nginx/html
+  # These containers are run during pod initialization
+  initContainers:
+  - name: install
+    image: busybox
+    command:
+    - wget
+    - "-O"
+    - "/work-dir/index.html"
+    - http://kubernetes.io
+    volumeMounts:
+    - name: workdir
+      mountPath: "/work-dir"    #init容器将挂载共享卷/work-dir，并且应用程序容器将挂载共享卷/usr/share/nginx/html
+  dnsPolicy: Default
+  volumes:
+  - name: workdir
+    emptyDir: {}
+
+--- #Kubernetes支持postStart和preStop事件。
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-demo
+spec:
+  containers:
+  - name: lifecycle-demo-container
+    image: nginx
+    lifecycle:
+      postStart:    #启动Container后立即发送postStart事件
+        exec:
+          command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+      preStop:      #在Container终止前立即发送preStop事件
+        exec:
+          command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
+
+--- 
+#启用进程命名空间共享后，容器中的进程对该pod中的所有其他容器可见，可使用此功能配置协作容器（例如日志处理程序边车容器）
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  shareProcessNamespace: true #使用ShareProcessNamespace字段 启用进程名称空间共享
+  containers:
+  - name: nginx
+    image: nginx
+  - name: shell
+    image: busybox
+    securityContext:
+      capabilities:
+        add:
+        - SYS_PTRACE
+    stdin: true
+    tty: true
+#附加到shell容器并运行ps：
+```
+kubectl attach -it nginx -c shell
+```
+If you don't see a command prompt, try pressing enter.
+```
+/ # ps ax
+PID   USER     TIME  COMMAND
+    1 root      0:00 /pause
+    8 root      0:00 nginx: master process nginx -g daemon off;
+   14 101       0:00 nginx: worker process
+   15 root      0:00 sh
+   21 root      0:00 ps ax
+```
+
+--- #将配置文件切换到新的API版本，使用kubectl convert命令在不同的API版本之间转换配置文件。
+# kubectl convert -f pod.yaml --output-version v1
+
+
+--- #为Pod指定自定义的调度程序
+$ kubectl edit clusterrole system:kube-scheduler
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system:kube-scheduler
+  rules:
+  - apiGroups:
+    - ""
+    resourceNames:
+    - kube-scheduler
+    - my-scheduler
+    resources:
+    - endpoints
+    verbs:
+    - delete
+    - get
+    - patch
+    - update
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-scheduler
+  namespace: kube-system
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-scheduler-as-kube-scheduler
+subjects:
+- kind: ServiceAccount
+  name: my-scheduler
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: system:kube-scheduler
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: scheduler
+    tier: control-plane
+  name: my-scheduler
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      component: scheduler
+      tier: control-plane
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: scheduler
+        tier: control-plane
+        version: second
+    spec:
+      serviceAccountName: my-scheduler
+      containers:
+      - command:
+        - /usr/local/bin/kube-scheduler
+        - --address=0.0.0.0
+        - --leader-elect=false
+        - --scheduler-name=my-scheduler
+        image: gcr.io/my-gcp-project/my-kube-scheduler:1.0
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10251
+          initialDelaySeconds: 15
+        name: kube-second-scheduler
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 10251
+        resources:
+          requests:
+            cpu: '0.1'
+        securityContext:
+          privileged: false
+        volumeMounts: []
+      hostNetwork: false
+      hostPID: false
+      volumes: []
+
+#使用环境变量定义启动参数
+#这意味着可使用任何可用于定义环境变量的技术(包括ConfigMaps、Secrets)为Pod定义参数 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: print-greeting
+spec:
+  containers:
+  - name: env-print-demo
+    image: bash
+    env:
+    - name: GREETING
+      value: "Warm greetings to"
+    - name: HONORIFIC
+      value: "The Most Honorable"
+    - name: NAME
+      value: "Kubernetes"
+    command: ["echo"]
+    args: ["$(GREETING) $(HONORIFIC) $(NAME)"]
+
+#通过环境变量将Pod信息暴露给容器
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-envars-fieldref
+spec:
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      command: [ "sh", "-c"]
+      args:
+      - while true; do
+          echo -en '\n';
+          printenv MY_NODE_NAME MY_POD_NAME MY_POD_NAMESPACE;
+          printenv MY_POD_IP MY_POD_SERVICE_ACCOUNT;
+          sleep 10;
+        done;
+      env:
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:   
+              fieldPath: spec.nodeName    #从Pod的spec.nodeName字段中获取其值
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: MY_POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+  restartPolicy: Never
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-envars-resourcefieldref
+spec:
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox:1.24
+      command: [ "sh", "-c"]
+      args:
+      - while true; do
+          echo -en '\n';
+          printenv MY_CPU_REQUEST MY_CPU_LIMIT;
+          printenv MY_MEM_REQUEST MY_MEM_LIMIT;
+          sleep 10;
+        done;
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      env:
+        - name: MY_CPU_REQUEST
+          valueFrom:
+            resourceFieldRef:   #指定MY_CPU_REQUEST环境变量从名为容器名为test-container的Spec字段中获取requests.cpu的值 获取其值
+              containerName: test-container
+              resource: requests.cpu    
+        - name: MY_CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: test-container
+              resource: limits.cpu
+        - name: MY_MEM_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              containerName: test-container
+              resource: requests.memory
+        - name: MY_MEM_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: test-container
+              resource: limits.memory
+  restartPolicy: Never
+
+--- #将Pod信息存储到文件中
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-downwardapi-volume-example
+  labels:
+    zone: us-est-coast
+    cluster: test-cluster1
+    rack: rack-22
+  annotations:
+    build: two
+    builder: john-doe
+spec:
+  containers:
+    - name: client-container
+      image: k8s.gcr.io/busybox
+      command: ["sh", "-c"]
+      args:
+      - while true; do
+          if [[ -e /etc/podinfo/labels ]]; then
+            echo -en '\n\n'; cat /etc/podinfo/labels; fi;
+          if [[ -e /etc/podinfo/annotations ]]; then
+            echo -en '\n\n'; cat /etc/podinfo/annotations; fi;
+          sleep 5;
+        done;
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+          readOnly: false
+  volumes:
+    - name: podinfo           #此处调用Pod字段
+      downwardAPI:
+        items:
+          - path: "labels"
+            fieldRef:
+              fieldPath: metadata.labels
+          - path: "annotations"
+            fieldRef:
+              fieldPath: metadata.annotations
+
+--- #例：
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-downwardapi-volume-example-2
+spec:
+  containers:
+    - name: client-container
+      image: k8s.gcr.io/busybox:1.24
+      command: ["sh", "-c"]
+      args:
+      - while true; do
+          echo -en '\n';
+          if [[ -e /etc/podinfo/cpu_limit ]]; then
+            echo -en '\n'; cat /etc/podinfo/cpu_limit; fi;
+          if [[ -e /etc/podinfo/cpu_request ]]; then
+            echo -en '\n'; cat /etc/podinfo/cpu_request; fi;
+          if [[ -e /etc/podinfo/mem_limit ]]; then
+            echo -en '\n'; cat /etc/podinfo/mem_limit; fi;
+          if [[ -e /etc/podinfo/mem_request ]]; then
+            echo -en '\n'; cat /etc/podinfo/mem_request; fi;
+          sleep 5;
+        done;
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+          readOnly: false
+  volumes:
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: "cpu_limit"
+            resourceFieldRef:
+              containerName: client-container   #此处调用容器字段
+              resource: limits.cpu
+              divisor: 1m
+          - path: "cpu_request"
+            resourceFieldRef:
+              containerName: client-container
+              resource: requests.cpu
+              divisor: 1m
+          - path: "mem_limit"
+            resourceFieldRef:
+              containerName: client-container
+              resource: limits.memory
+              divisor: 1Mi
+          - path: "mem_request"
+            resourceFieldRef:
+              containerName: client-container
+              resource: requests.memory
+              divisor: 1Mi
+
+
+#可用的字段信息：
+
+Information available via fieldRef:
+spec.nodeName - the node’s name
+status.hostIP - the node’s IP
+metadata.name - the pod’s name
+metadata.namespace - the pod’s namespace
+status.podIP - the pod’s IP address
+spec.serviceAccountName - the pod’s service account name
+metadata.uid - the pod’s UID
+metadata.labels['<KEY>'] - the value of the pod’s label <KEY> (for example, metadata.labels['mylabel']); available in Kubernetes 1.9+
+metadata.annotations['<KEY>'] - the value of the pod’s annotation <KEY> (for example, metadata.annotations['myannotation']); available in Kubernetes 1.9
+
+Information available via resourceFieldRef:
+A Container’s CPU limit
+A Container’s CPU request
+A Container’s memory limit
+A Container’s memory request
