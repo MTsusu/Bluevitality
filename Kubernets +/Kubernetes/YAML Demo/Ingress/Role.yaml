@@ -1,24 +1,22 @@
-#创建namespace
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ingress-nginx
+  name: ingress-nginx     #创建namespace
 
-#创建role
 ---
 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: nginx-ingress-serviceaccount
-  namespace: ingress-nginx
+  name: nginx-ingress-serviceaccount    #创建Pod使用的ServiceAccount账号
+  namespace: ingress-nginx              #该账号所属名称空间
 
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
+kind: ClusterRole                       #集群Role级别
 metadata:
-  name: nginx-ingress-clusterrole
+  name: nginx-ingress-clusterrole       #创建role
 rules:
   - apiGroups:
       - ""
@@ -70,10 +68,10 @@ rules:
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
+kind: Role                          #名称空间级别Role规则
 metadata:
-  name: nginx-ingress-role
-  namespace: ingress-nginx
+  name: nginx-ingress-role          #Role名称
+  namespace: ingress-nginx          #所属名称空间
 rules:
   - apiGroups:
       - ""
@@ -113,36 +111,36 @@ rules:
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
+kind: RoleBinding                             #进行用户和角色的绑定
 metadata:
   name: nginx-ingress-role-nisa-binding
   namespace: ingress-nginx
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-ingress-role
+  kind: Role         
+  name: nginx-ingress-role                    #Role名称
 subjects:
-  - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
+  - kind: ServiceAccount                      
+    name: nginx-ingress-serviceaccount        #Pod账户
     namespace: ingress-nginx
 
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: ClusterRoleBinding                             #进行集群用户和角色的绑定
 metadata:
   name: nginx-ingress-clusterrole-nisa-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-ingress-clusterrole
+  kind: ClusterRole     
+  name: nginx-ingress-clusterrole                    #ClusterRole名称
 subjects:
   - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
+    name: nginx-ingress-serviceaccount              #Pod账户
     namespace: ingress-nginx
 
 ---
-#创建confmap
+#创建ConfigMap
 kind: ConfigMap
 apiVersion: v1
 metadata:
