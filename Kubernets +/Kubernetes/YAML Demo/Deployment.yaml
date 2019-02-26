@@ -523,7 +523,7 @@ status.hostIP - the node’s IP
 metadata.name - the pod’s name
 metadata.namespace - the pod’s namespace
 status.podIP - the pod’s IP address
-spec.serviceAccountName - the pod’s service account name
+spec.serviceAccountName - the pod’s service account name  #在pod中定位apiserver的推荐方法是用kubernetes.default.svcDNS名称，其解析为服务IP，此IP将路由到apiserver
 metadata.uid - the pod’s UID
 metadata.labels['<KEY>'] - the value of the pod’s label <KEY> (for example, metadata.labels['mylabel']); available in Kubernetes 1.9+
 metadata.annotations['<KEY>'] - the value of the pod’s annotation <KEY> (for example, metadata.annotations['myannotation']); available in Kubernetes 1.9

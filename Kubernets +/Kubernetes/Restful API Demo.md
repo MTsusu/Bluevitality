@@ -7,7 +7,7 @@ kubectl config set-cluster scratch \
 --server=https://5.6.7.8 --insecure-skip-tls-verify                 #
 
 kubectl config set-credentials developer \
---client-certificate=fake-cert-file --client-key=fake-key-seefile   #将用户详细信息添加到配置文件
+--client-certificate=fake-cert-file --client-key=fake-key-seefile   #将用户详细信息添加到配置文件，包含证书和私钥
 
 kubectl config set-credentials experimenter \
 --username=exp --password=some-password                             #
@@ -81,7 +81,7 @@ system:basic-user       ClusterRole.v1beta1.rbac.authorization.k8s.io
 system:controller:attachdetach-controller ClusterRole.v1beta1.rbac.authorization.k8s.io
 system:controller:certificate-controller ClusterRole.v1beta1.rbac.authorization.k8s.io
 
-#创建用户
+#创建用户 ( K8S安装后其默认的证书/私钥位于：~/.kube )
 [root@master1 ~]# ls /etc/kubernetes/pki/       #需要用到APIServer自有的CA私钥进行签名
 apiserver.crt                 ca-config.json  devuser-csr.json    front-proxy-ca.key      sa.pub
 apiserver.key                 ca.crt          devuser-key.pem     front-proxy-client.crt

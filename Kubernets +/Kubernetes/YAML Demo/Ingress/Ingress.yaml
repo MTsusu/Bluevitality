@@ -1,0 +1,134 @@
+#$ kubectl create -f nginx-ingress-controller-rbac.yml 
+#serviceaccount "nginx-ingress-serviceaccount" created
+#clusterrole "nginx-ingress-clusterrole" created
+#role "nginx-ingress-role" created
+#rolebinding "nginx-ingress-role-nisa-binding" created
+#clusterrolebinding "nginx-ingress-clusterrole-nisa-binding" created
+
+#创建Ingress及Ingress Controller环境
+
+#下载并部署：
+#wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+#default-http-backend默认镜像使用：gcr.io/google_containers/defaultbackend:1.4
+#因被墙的原因，改为：registry.cn-hangzhou.aliyuncs.com/google_containers/defaultbackend:1.4
+#kubectl apply -f mandatory.yaml
+
+#创建Nodeport:   NodePort ---> Ingress-controller[监听Ingress资源的对象] ---> service-ip ---> Pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx     #定义标签，用于被下面的NodePort匹配转发流量到Ingress-controller
+    app.kubernetes.io/part-of: ingress-nginx  #
+spec:
+  type: NodePort      #增加nodePort设置，将随机端口固定
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+    nodePort: 30080
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+    nodePort: 30443
+  selector:
+    app.kubernetes.io/name: ingress-nginx     #将NodePort上的流量转发到此标签的Service中（这里配置有问题）
+    app.kubernetes.io/part-of: ingress-nginx  #此处应该代理到后端的Ingress-controller（这里配置有问题）
+
+---
+#配置Ingress，将服务暴露（定义Nginx的路由规则）
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-myapp
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: www.ok.com          #基于主机名的负载
+    http: 
+      paths:
+      - path:                 #URL地址
+        backend:
+          serviceName: tomcat #代理到后端服务tomcat
+          servicePort: 80 
+
+#配置https：
+# openssl genrsa -out tls.key 2048
+# openssl req -new -x509 -key tls.key -out tls.crt -subj /C=CN/ST=Beijing/L=Beijing/O=DevOps/CN=tomcat.ok.com
+# kubectl create secret tls tomcat-ingress-secret --cert=tls.crt --key=tls.key
+# kubectl get secret
+# kubectl describe secret tomcat-ingress-secret
+
+---
+#部署Tomcat的集群地址及其对应的Pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat            #定义代理Tomcat的: Service-IP
+  namespace: default
+spec:
+  selector:
+    app: tomcat           #匹配Tomcat
+    release: canary       #
+  ports:
+  - name: http
+    targetPort: 8080
+    port: 8080
+  - name: ajp
+    targetPort: 8009
+    port: 8009
+---
+apiVersion: apps/v1
+kind: Deployment          #部署Tomcat
+metadata:
+  name: tomcat-deploy
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tomcat         #匹配Tomcat
+      release: canary     #
+  template:
+    metadata:
+      labels:
+        app: tomcat       #Tomcat标签
+        release: canary   #
+    spec:
+      containers:
+      - name: tomcat
+        image: tomcat:latest
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: ajp
+          containerPort: 8009
+
+---
+#ingress-tomcat-tls.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-tomcat-tls
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:                                    #使用TLS
+  - hosts:
+    - tomcat.ok.com
+    secretName: tomcat-ingress-secret     #载入Secret类型的证书信息对象tomcat-ingress-secret
+  rules:
+  - host: tomcat.ok.com
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: tomcat
+          servicePort: 8080 
