@@ -13,7 +13,11 @@
 #因被墙的原因，改为：registry.cn-hangzhou.aliyuncs.com/google_containers/defaultbackend:1.4
 #kubectl apply -f mandatory.yaml
 
-#创建Nodeport:   NodePort ---> Ingress-controller[监听Ingress资源的对象] ---> service-ip ---> Pods
+#流程：
+#
+#   【NodePort】 <---> 【Ingress-controllers[载入Ingress资源对象] Pods】 <---> 【Cluster-ip】 ---> 【Pods】
+
+#创建Nodeport:   
 apiVersion: v1
 kind: Service
 metadata:
@@ -117,7 +121,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-            
+
 ---
 
 #配置Ingress，将服务暴露（定义Nginx的路由规则）
@@ -135,10 +139,10 @@ spec:
       paths:
       - path:                 #URL地址
         backend:
-          serviceName: tomcat #代理到后端服务tomcat
+          serviceName: tomcat #代理到后端服务tomcat （ 指定此URL对应的后端Pod列表的ServerName，即：Cluster_IP）
           servicePort: 80 
 
-#配置https：
+#配置https证书：
 # openssl genrsa -out tls.key 2048
 # openssl req -new -x509 -key tls.key -out tls.crt -subj /C=CN/ST=Beijing/L=Beijing/O=DevOps/CN=tomcat.ok.com
 # kubectl create secret tls tomcat-ingress-secret --cert=tls.crt --key=tls.key
@@ -148,7 +152,7 @@ spec:
 ---
 #部署Tomcat的集群地址及其对应的Pod
 apiVersion: v1
-kind: Service
+kind: Service         
 metadata:
   name: tomcat            #定义代理Tomcat的: Service-IP
   namespace: default
