@@ -1,0 +1,56 @@
+#污点和容忍一起工作以确保不将pod安排到不适当的节点。将一或多个污点应用于节点标志着节点不应该接受任何不能容忍污点的pod
+
+#为节点添加污点：kubectl taint nodes <NodeName> key=value:NoSchedule
+#污点效果：
+#NoSchedule：除非它具有匹配的容忍度，否则任何pod都无法安排
+#NoExecute：如果一个有效的污点NoExecute被添加到一个节点，那么任何不能容忍污染的豆荚都会被立即驱逐（除非使用"pod.spec.tolerations.tolerationSeconds"）
+#
+
+#删除污点：
+#kubectl taint nodes <NodeName>  key:NoSchedule-
+
+#允许上面定义的污点：( 在Pod.spec中定义 )
+
+tolerations:
+- key: "key"
+  operator: "Equal"
+  value: "value"
+  effect: "NoSchedule"
+
+#OR:
+
+tolerations:
+- key: "key"
+  operator: "Exists"
+  effect: "NoSchedule"
+
+#Kubernetes 1.6引入了alpha支持来表示节点问题。换句话说，当某些条件为真时，节点控制器自动污染节点。内置以下污点：
+#node.kubernetes.io/not-ready：节点尚未就绪。这对应于NodeCondition Ready为“ False”。
+#node.kubernetes.io/unreachable：节点无法从节点控制器访问。这对应于NodeCondition Ready为“ Unknown”。
+#node.kubernetes.io/out-of-disk：节点变得磁盘不足。
+#node.kubernetes.io/memory-pressure：节点有内存压力。
+#node.kubernetes.io/disk-pressure：节点有磁盘压力。
+#node.kubernetes.io/network-unavailable：节点的网络不可用。
+#node.kubernetes.io/unschedulable：节点是不可调度的。
+#node.cloudprovider.kubernetes.io/uninitialized：当使用外部云提供程序启动kubelet时，会在节点上设置此污点以将其标记为不可用。在cloud-controller-manager的控制器初始化此节点后，kubelet将删除此污点。
+
+#  假设您污染了这样的节点：
+
+#  kubectl taint nodes node1 key1=value1:NoSchedule
+#  kubectl taint nodes node1 key1=value1:NoExecute
+#  kubectl taint nodes node1 key2=value2:NoSchedule
+
+#  pod有两种容忍度：
+
+#  tolerations:
+#  - key: "key1"
+#    operator: "Equal"
+#    value: "value1"
+#    effect: "NoSchedule"
+#  - key: "key1"
+#    operator: "Equal"
+#    value: "value1"
+#    effect: "NoExecute"
+
+#  在这种情况下，pod将无法安排到节点上，因为没有容忍匹配第三个污点。
+#  但是，如果在添加污点时已经在节点上运行，它将能够继续运行，因为第三种污染是容器中不能容忍的三种污染中唯一的一种。

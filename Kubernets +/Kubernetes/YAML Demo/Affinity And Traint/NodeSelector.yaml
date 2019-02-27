@@ -1,0 +1,27 @@
+#kubectl label nodes <NodeName> disktype=ssd
+#查看：kubectl get nodes --show-labels
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    disktype: ssd       #调度到拥有此标签的节点
+
+---
+
+#内置标签：
+#kubernetes.io/hostname
+#failure-domain.beta.kubernetes.io/zone
+#failure-domain.beta.kubernetes.io/region
+#beta.kubernetes.io/instance-type
+#beta.kubernetes.io/os
+#beta.kubernetes.io/arch

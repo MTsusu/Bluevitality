@@ -1,0 +1,159 @@
+#Pod亲和性调度使用：podAffinity，非亲和性调度使用：podAntiAffinity
+
+#requiredDuringSchedulingIgnoredDuringExecution:
+#   硬约束，一定要满足，Pod的亲和性调度必须要满足后续定义的约束条件。
+#preferredDuringSchedulingIgnoredDuringExecution
+#   软约束，不一定满足，Pod的亲和性调度会尽量满足后续定义的约束条件。
+#topologyKey
+#   定义度时作用于特指域，这是通过Node节点的标签来实现的，例如指定为kubernetes.io/hostname，那就是以Node节点为区分范围，
+#   如果指定为beta.kubernetes.io/os,则以Node节点的操作系统类型来区分
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-affinity-example
+  labels:
+    app: test-pod
+spec:
+  affinity:           #亲和性
+    podAntiAffinity:      #Pod间反亲和
+        preferredDuringSchedulingIgnoredDuringExecution:  #期望
+        - weight: 100       #分配的权重
+          podAffinityTerm:    #反亲和条件
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - test-pod
+            topologyKey: kubernetes.io/hostname   #以相同Node节点作为调度选则的判断域，此处即Pod之间不能在相同节点上运行
+        requiredDuringSchedulingIgnoredDuringExecution:   #必须
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: 
+                - test-pod
+          topologyKey: "kubernetes.io/hostname"
+  containers:
+  - name: example
+    image: gcr.io/google_containers/pause:2.0
+
+--- 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: k8s.gcr.io/pause:2.0
+
+#此窗格上的亲缘关系定义了一个窗格关联性规则和一个窗格反关联性规则。
+#在这个例子中， podAffinity是requiredDuringSchedulingIgnoredDuringExecution 同时podAntiAffinity是preferredDuringSchedulingIgnoredDuringExecution。
+#pod关联性规则表示只有当该节点与至少一个已经运行的pod具有相同区域时，该pod才能被安排到节点上，该pod具有带有“security”和“S1”键的标签。
+#更准确地说，如果节点N具有带键的标签failure-domain.beta.kubernetes.io/zone和某个值V，则该节点有资格在节点N上运行
+#使得群集中至少有一个节点具有键failure-domain.beta.kubernetes.io/zone和值V，该节点正在运行具有标签的窗格具有关键“安全性”和值“S1”。
+#pod反关联性规则表示如果该节点已经在运行具有密钥“security”和值“S2”的标签的pod，则该pod更不希望被安排到节点上。
+#如果topologyKey分别failure-domain.beta.kubernetes.io/zone那就意味着荚不能按期到一个节点，如果该节点是在同一区域与具有密钥“安全”和值“S2”的标签荚）
+
+--- 
+#始终位于同一节点
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+spec:
+  selector:
+    matchLabels:
+      app: store
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: store
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: redis-server
+        image: redis:3.2-alpine
+
+---
+#这通知调度程序其所有副本将与具有选择器标签的pod共存app=store。这还将确保每个Web服务器副本不在单个节点上共存。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  selector:
+    matchLabels:
+      app: web-store 
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: web-store      #Nginx的标签为 app=web-store
+    spec:
+      affinity:
+        podAntiAffinity:    #反亲和
+          requiredDuringSchedulingIgnoredDuringExecution:   #必须不与app=web-store的Pod在一起（基于Node范围的）即不与本Nginx的Pod在一个节点
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web-store
+            topologyKey: "kubernetes.io/hostname"
+        podAffinity:        #亲和
+          requiredDuringSchedulingIgnoredDuringExecution:   #必须与app=store的Pod在一起（基于Node范围的）
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: web-app
+        image: nginx:1.12-alpine
+
+#所有3个副本web-server都按预期自动与缓存共存。
+#$ kubectl get pods -o wide
+# NAME                           READY     STATUS    RESTARTS   AGE       IP           NODE
+# redis-cache-1450370735-6dzlj   1/1       Running   0          8m        10.192.4.2   kube-node-3
+# redis-cache-1450370735-j2j96   1/1       Running   0          8m        10.192.2.2   kube-node-1
+# redis-cache-1450370735-z73mh   1/1       Running   0          8m        10.192.3.1   kube-node-2
+# web-server-1287567482-5d4dz    1/1       Running   0          7m        10.192.2.3   kube-node-1
+# web-server-1287567482-6f7v5    1/1       Running   0          7m        10.192.4.3   kube-node-3
+# web-server-1287567482-s330j    1/1       Running   0          7m        10.192.3.2   kube-node-2
