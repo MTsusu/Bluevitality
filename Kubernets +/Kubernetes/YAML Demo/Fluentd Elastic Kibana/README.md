@@ -1,0 +1,9 @@
+#### 资源清单列表
+```txt
+es-service.yaml
+es-statefulset.yaml
+fluentd-es-configmap.yaml
+fluentd-es-ds.yaml
+kibana-deployment.yaml
+kibana-service.yaml
+```

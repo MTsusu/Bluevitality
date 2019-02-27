@@ -455,7 +455,7 @@ spec:
             fieldRef:
               fieldPath: metadata.annotations
 
---- #例：
+--- #例：       获取容器状态 eg：kubectl get pod <pod-name> --template '{{.status.initContainerStatuses}}'
 apiVersion: v1
 kind: Pod
 metadata:
@@ -464,7 +464,7 @@ spec:
   containers:
     - name: client-container
       image: k8s.gcr.io/busybox:1.24
-      command: ["sh", "-c"]
+      command: ["sh", "-c"]       #风闻容器日志 eg: kubectl logs <pod-name> -c <init-container>
       args:
       - while true; do
           echo -en '\n';
