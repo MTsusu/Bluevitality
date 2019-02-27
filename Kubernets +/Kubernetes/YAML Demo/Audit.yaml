@@ -1,0 +1,131 @@
+#审计配置：/etc/kubernetes/audit-policy.yaml
+
+apiVersion: audit.k8s.io/v1 # This is required.
+kind: Policy
+# Don't generate audit events for all requests in RequestReceived stage.
+omitStages:
+  - "RequestReceived"
+rules:
+  # Log pod changes at RequestResponse level
+  - level: RequestResponse
+    resources:
+    - group: ""
+      # Resource "pods" doesn't match requests to any subresource of pods,
+      # which is consistent with the RBAC policy.
+      resources: ["pods"]
+  # Log "pods/log", "pods/status" at Metadata level
+  - level: Metadata
+    resources:
+    - group: ""
+      resources: ["pods/log", "pods/status"]
+
+  # Don't log requests to a configmap called "controller-leader"
+  - level: None
+    resources:
+    - group: ""
+      resources: ["configmaps"]
+      resourceNames: ["controller-leader"]
+
+  # Don't log watch requests by the "system:kube-proxy" on endpoints or services
+  - level: None
+    users: ["system:kube-proxy"]
+    verbs: ["watch"]
+    resources:
+    - group: "" # core API group
+      resources: ["endpoints", "services"]
+
+  # Don't log authenticated requests to certain non-resource URL paths.
+  - level: None
+    userGroups: ["system:authenticated"]
+    nonResourceURLs:
+    - "/api*" # Wildcard matching.
+    - "/version"
+
+  # Log the request body of configmap changes in kube-system.
+  - level: Request
+    resources:
+    - group: "" # core API group
+      resources: ["configmaps"]
+    # This rule only applies to resources in the "kube-system" namespace.
+    # The empty string "" can be used to select non-namespaced resources.
+    namespaces: ["kube-system"]
+
+  # Log configmap and secret changes in all other namespaces at the Metadata level.
+  - level: Metadata
+    resources:
+    - group: "" # core API group
+      resources: ["secrets", "configmaps"]
+
+  # Log all other resources in core and extensions at the Request level.
+  - level: Request
+    resources:
+    - group: "" # core API group
+    - group: "extensions" # Version of group should NOT be included.
+
+  # A catch-all rule to log all other requests at the Metadata level.
+  - level: Metadata
+    # Long-running requests like watches that fall under this rule will not
+    # generate an audit event in RequestReceived.
+    omitStages:
+      - "RequestReceived"
+
+--- #审计输出到本地日志
+
+#重启APIServer，添加如下参数: ( 日志后端将审核事件写入JSON格式的文件，可使用以下kube-apiserver标志配置日志审计后端 )
+# --audit-log-path  指定日志后端用于写入审核事件的日志文件路径。不指定此标志会禁用日志后端。- 意味着标准输出
+# --audit-log-maxage  定义了保留旧审核日志文件的最大天数
+# --audit-log-maxbackup 定义要保留的最大审核日志文件数
+# --audit-log-maxsize 在轮换之前定义审计日志文件的最大大小（以兆为单位）
+
+--- #审计输出到Logstash
+
+$ cat <<EOF > /etc/kubernetes/audit-webhook-kubeconfig
+apiVersion: v1
+clusters:
+- cluster:
+    server: http://<ip_of_logstash>:8888
+  name: logstash
+contexts:
+- context:
+    cluster: logstash
+    user: ""
+  name: default-context
+current-context: default-context
+kind: Config
+preferences: {}
+users: []
+EOF
+
+#使用以下选项启动kube-apiserver：
+--audit-policy-file=/etc/kubernetes/audit-policy.yaml --audit-webhook-config-file=/etc/kubernetes/audit-webhook-kubeconfig
+
+#配置Logstash:
+$ cat <<EOF > /etc/logstash/config
+input{
+    http{
+        #TODO, figure out a way to use kubeconfig file to authenticate to logstash
+        #https://www.elastic.co/guide/en/logstash/current/plugins-inputs-http.html#plugins-inputs-http-ssl
+        port=>8888
+    }
+}
+filter{
+    split{
+        # Webhook audit backend sends several events together with EventList
+        # split each event here.
+        field=>[items]
+        # We only need event subelement, remove others.
+        remove_field=>[headers, metadata, apiVersion, "@timestamp", kind, "@version", host]
+    }
+    mutate{
+        rename => {items=>event}
+    }
+}
+output{
+    file{
+        path=>"/var/log/kube-audit-%{[event][user][username]}/audit"
+    }
+}
+EOF
+
+#启动Logstash:
+$ bin/logstash -f /etc/logstash/config --path.settings /etc/logstash/
