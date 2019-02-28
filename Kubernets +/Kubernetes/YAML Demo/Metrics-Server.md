@@ -36,7 +36,7 @@ Metrics API 只可查询当前的度量数据，并不保存历史数据。URI�
 [root@master ~]# scp metrics-server*.pem  192.168.1.8:/etc/kubernetess/ssl/
 
 [root@master ~]# git clone https://github.com/kubernetes-incubator/metrics-server && cd metrics-server/deploy/1.8+
-[root@master ~]# vim metrics-server-deployment.yaml
+[root@master ~]# vim metrics-server-deployment.yaml   #此配置文件需要先修改后执行 ( 另外还有其他配置文件，暂时使用默认即可 )
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -72,6 +72,8 @@ spec:
         - /metrics-server
         - --kubelet-insecure-tls                #添加参数
         - --kubelet-preferred-address-types=InternalIP    #添加参数
+        #- --tls-cert-file=
+        #- --tls-private-key-file=
         volumeMounts:
         - name: tmp-dir
           mountPath: /tmp
@@ -88,7 +90,6 @@ spec:
   --proxy-client-cert-file=/etc/kubernetes/ssl/metrics-server.pem \
   --proxy-client-key-file=/etc/kubernetes/ssl/metrics-server-key.pem \
   --runtime-config=api/all=true
-
 #--requestheader-XXX、--proxy-client-XXX:
 #     是 kube-apiserver 的 aggregator layer 相关的配置参数，metrics-server & HPA 需要使用；
 #--requestheader-client-ca-file：
@@ -97,7 +98,7 @@ spec:
 #注意 requestheader-client-ca-file 指定的 CA 证书，必须具有 client auth and server auth
 
 #对kube-controller-manager添加如下配置参数：
---horizontal-pod-autoscaler-use-rest-clients=true   #用于配置 HPA 控制器使用 REST 客户端获取 metrics 数据
+#--horizontal-pod-autoscaler-use-rest-clients=true   #用于配置 HPA 控制器使用 REST 客户端获取 metrics 数据
 
 #执行
 [root@master ~]# kubectl apply  .

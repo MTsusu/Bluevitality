@@ -1,0 +1,105 @@
+#CustomResourceDefinition (CRD) 是v1.7+新增的无需改变代码就可以扩展Kubernetes API的机制，用来管理自定义对象。
+#自定义资源是对Kubernetes API的扩展，在一个运行中的集群内，自定义资源可以通过动态注册出现和消失，集群管理员可以独立于集群本身更新自定义资源。
+
+--- #创建kind为Foo的CRD类型:
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: foos.samplecontroller.k8s.io
+spec:
+  group: samplecontroller.k8s.io    #定义所属组
+  version: v1alpha1                 #定义组版本
+  names:
+    kind: Foo                       #属于此组的资源名称 "Foo" ( 在没修改任何内核代码条件下仅通过定义 CRD 类型就完成了! )
+    plural: foos                    #复数形式
+    singular: Foo                   #单数形式
+    shortNames:                     #短名称
+      - fo    
+  scope: Namespaced                 #该资源隶属于名称空间级别 ( Namespaced or Cluster )
+
+#这样新的命名空间 RESTful API 端点就创建了，以上示例的自定义资源地址为: /apis/samplecontroller.k8s.io/v1alpha1/namespaces/*/foos/...
+
+--- #针对新建的Foo资源创建一个实例对象 ( 自定义对象实例可以类似K8S的常用对象如 Deployment、Service、Pod 等进行相同的CURD操作 )
+    #自定义对象可以包含自定义的字段，这些字段可以包含任意的JSON，具体的字段要根据对象去定义，主要是spec域!
+
+apiVersion: samplecontroller.k8s.io/v1alpha1    #组/版本
+kind: Foo                           #组/版本下支持的类型
+metadata:
+  name: example-foo                 #实例名称
+spec:
+  deploymentName: example-foo
+  replicas: 1
+
+# $ kubectl describe pod/example-foo-d74cd7fbc-2dnwn
+# Events:
+#   Type    Reason                 Age   From               Message
+#   ----    ------                 ----  ----               -------
+#   Normal  Scheduled              1m    default-scheduler  Successfully assigned example-foo-d74cd7fbc-2dnwn to minikube
+#   Normal  SuccessfulMountVolume  1m    kubelet, minikube  MountVolume.SetUp succeeded for volume "default-token-rnj54"
+#   Normal  Pulling                1m    kubelet, minikube  pulling image "nginx:latest"
+#   Normal  Pulled                 4s    kubelet, minikube  Successfully pulled image "nginx:latest"
+#   Normal  Created                4s    kubelet, minikube  Created container
+#   Normal  Started                4s    kubelet, minikube  Started container
+
+#不过这里有人会有疑问，该 yaml 文件没有指定 Deployment 类型，
+#只是指定了 deploymentName 就创建了名称为 example-foo 的 Deployment，而且通过详情可以看到实际上该 Deployment 指定了 nginx:latest 的镜像容器。
+
+#ref： https://blog.csdn.net/aixiaoyang168/article/details/81875907
+
+
+--- #定义这个种类的CRD的验证schema:
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: foos.samplecontroller.k8s.io
+spec:
+  group: samplecontroller.k8s.io
+  version: v1alpha1
+  names:
+    kind: Foo
+    plural: foos
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            replicas:
+              type: integer
+              minimum: 1
+              maximum: 10
+
+--- #查询所有CRD:
+# kubectl  get crd
+
+--- # demo :
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: crontabs.stable.example.com
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: stable.example.com
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: crontabs
+    # singular name to be used as an alias on the CLI and for display
+    singular: crontab
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: CronTab
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+    - ct

@@ -1,0 +1,62 @@
+#配置聚合层：( 配置聚合层允许使用其他API扩展Kubernetes apiserver，这些API不是核心Kubernetes API的一部分。 )
+#通过以下kube-apiserver标志启用聚合层。它们可能已由提供商处理。
+  --requestheader-client-ca-file=<path to aggregator CA cert>
+  --requestheader-allowed-names=front-proxy-client
+  --requestheader-extra-headers-prefix=X-Remote-Extra-
+  --requestheader-group-headers=X-Remote-Group
+  --requestheader-username-headers=X-Remote-User
+  --proxy-client-cert-file=<path to aggregator proxy cert>
+  --proxy-client-key-file=<path to aggregator proxy key>
+
+#如果未在运行API服务器的主机上运行kube-proxy，则必须确保使用以下kube-apiserver标志启用系统：
+--enable-aggregator-routing=true
+
+
+
+#ApiService通常被extension-apiserver实现，extension-apiserver运行在集群中的一个Pod里。
+#APIService表示特定的GroupVersion的中的server
+
+--- #资源聚合接口:
+
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService    #资源类型为APIService
+metadata:
+  name: v1alpha1.custom-metrics.metrics.k8s.io    #该API的名字
+spec:
+  insecureSkipTLSVerify: true     #当与该服务通信时禁用TLS证书认证
+  group: custom-metrics.metrics.k8s.io
+  groupPriorityMinimum: 1000    #该组API的处理优先级，主要排序是基于groupPriorityMinimum，该数字越大表明优先级越高
+  versionPriority: 15   #控制其组内的API版本的顺序。必须大于零
+  service:
+    name: api   #与该APIService通信时引用的service，其中要注明service的名字 "api" 和所属的namespace "custom-metrics"
+    namespace: custom-metrics #命名空间
+  version: v1alpha1
+
+# 查看使用上面的yaml文件创建的APIService:
+# kubectl get apiservice v1alpha1.custom-metrics.metrics.k8s.io -o yaml
+
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  creationTimestamp: 2017-12-14T08:27:35Z
+  name: v1alpha1.custom-metrics.metrics.k8s.io
+  resourceVersion: "35194598"
+  selfLink: /apis/apiregistration.k8s.io/v1beta1/apiservices/v1alpha1.custom-metrics.metrics.k8s.io
+  uid: a31a3412-e0a8-11e7-9fa4-f4e9d49f8ed0
+spec:
+  caBundle: null
+  group: custom-metrics.metrics.k8s.io
+  groupPriorityMinimum: 1000
+  insecureSkipTLSVerify: true
+  service:
+    name: api
+    namespace: custom-metrics
+  version: v1alpha1
+  versionPriority: 5
+status:
+  conditions:
+  - lastTransitionTime: 2017-12-14T08:27:38Z
+    message: all checks passed
+    reason: Passed
+    status: "True"
+    type: Available

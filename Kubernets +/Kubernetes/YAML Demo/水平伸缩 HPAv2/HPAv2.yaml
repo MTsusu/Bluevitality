@@ -1,0 +1,45 @@
+#hpa支持三种指标：
+#Object：描述k8s对象的某种指标，譬如ingress的hits-per-second。
+#Pods：pod的平均指标，譬如transactions-processed-per-second，描述每个pod的事务每秒事务数
+#Resource：描述pod资源用量，譬如CPU或者内存。
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: podinfo
+spec:
+  scaleTargetRef:       #针对哪个资源的哪个对象
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: podinfo
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource      #基于标准资源的HPA：Resource/{cpu,memory}
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: 200Mi
+  
+---
+
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2alpha1
+metadata:
+  name: wordpress
+  namespace: default
+spec:
+  scaleTargetRef:       #针对哪个资源的哪个对象
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: wordpress
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Pods          #使用自定义资源指标：Pods/memory_usage_bytes
+    pods:
+      metricName: memory_usage_bytes
+      targetAverageValue: 100000
