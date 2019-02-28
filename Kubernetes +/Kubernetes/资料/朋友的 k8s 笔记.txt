@@ -1,0 +1,1331 @@
+https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
+https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS158x+2T2017/courseware/386d98d616a44757bbc389012e4c2f6a/f27240d5efe748d286b6155ceadbd450/?child=first
+什么是Kubernetes？
+       Kubernetes是一个开放源代码的系统，可以自动化集装箱化应用程序的部署，扩展和管理。Kubernetes也被称为k8s，因为k和s之间有8个字符。
+Kubernets功能:
+       Kubernetes为容器编排提供了一套非常丰富的功能。一些完全支持的功能是：
+             自动binpacking
+                    Kubernetes会根据资源使用情况和约束自动调度容器，而不会牺牲可用性。
+             自我修复
+                    Kubernetes自动替换并重新安排来自失败节点的容器。它还根据现有的规则/策略杀死并重新启动对健康检查无反应的容器。
+             水平缩放
+                    Kubernetes可以根据资源使用情况（如CPU和内存）自动缩放应用程序。在某些情况下，它也支持基于客户度量的动态扩展。
+             服务发现和负载平衡
+                    Kubernetes将一组容器分组，并通过DNS名称引用它们。这个DNS名称也被称为Kubernetes service。Kubernetes可以自动发现这些service，并负载平衡给定service的容器之间的请求。
+       一些其他完全支持的Kubernetes功能是：
+             自动发布和回滚
+                    Kubernetes可以推出并回滚应用程序的新版本/配置，而不会引入任何停机时间。
+            Secrets和配置管理
+                    Kubernetes可以管理应用程序的Secrets和配置细节，而无需重新构建相应的images。有了Secrets，我们可以将机密信息分享给我们的应用程序，而不必将其暴露给堆栈配置，就像在GitHub上一样。
+            存储编排
+                    借助Kubernetes及其插件，我们可以基于软件定义存储（SDS）以无缝方式自动将本地，外部和存储解决方案安装到容器中。
+            批量执行
+                    除了长时间运行的作业外，Kubernetes还支持批量执行。
+ 
+Kubernetes主要组成部分：
+	一个或多个主节点
+	一个或多个工作节点
+	分布式键值存储，如etcd。
+
+架构图及说明：
+	主节点：
+		概念：负责管理Kubernetes集群，它是所有管理任务的入口点。
+					我们可以通过CLI，GUI（仪表板）或通过API与主节点进行通信。			
+			  出于容错的目的，集群中可以有多个主节点。
+			  如果我们有多个主节点，它们将处于HA（高可用性）模式，
+					并且只有其中一个将成为领导者，执行所有操作。其余的主节点将成为追随者。
+		组件：			
+			API服务器(apiserver)：所有管理任务均通过主节点内的API服务器执行。
+									   用户/操作员将REST命令发送到API服务器，然后验证和处理请求。
+									   在执行请求之后，集群的结果状态被存储在分布式键值存储器中。
+			调度程序(scheduler)： 将任务调度到不同的工作节点。调度程序具有每个工作节点的资源使用信息。
+									   在调度工作之前，调度程序还会考虑服务需求的质量，数据位置，亲和性，
+									   反亲和性等。调度程序根据Pod和服务来调度工作。
+			控制器管理器(controller manager)：控制器管理器管理不同的非终止控制循环，这些控制循环调节Kubernetes集群的状态	   
+										这些控制回路中的每一个都知道它管理的对象的期望状态，
+										并通过API服务器监视它们的当前状态。在控制回路中，
+										如果它所管理的对象的当前状态不符合所需的状态，
+										则控制回路将采取纠正措施，以确保当前状态与所需状态相同。					   					   					   					   					   					   					   							   
+			存储(etcd)：为了管理集群状态，Kubernetes使用etcd，并且所有主节点连接到它。
+							etcd是一个分布式的键值存储,键值存储可以是主节点的一部分。
+							它也可以在外部配置，在这种情况下，主节点将连接到它。
+	
+	工作节点：	
+		概念：	工作节点是一个使用Pod运行应用程序并由主节点控制的机器（VM，物理服务器等）。
+					并使用pod来运行应用程序。
+				pods在工作节点上,这些节点使用特定工具来运行和连接他们。
+					pod是kubernetes的调度单元，是一个或多个容器的逻辑组合
+		
+		组件：	
+			container runtime:：为了运行容器，我们需要container runtime在工作节点上
+							默认k8s使用docker来配置并运行容器,也可以用rkt来运行
+			kubelet：kubelet是在每个工作 节点上运行并与主节点通信的代理
+							它通过各种方式接收Pod定义(主要通过API服务器)，并运行与Pod相关的容器
+							也能确保pod在任何时候的健康	
+					kubelet连接Container Runtimes以运行容器
+			kube-proxy：我们不直接连接到pod来访问应用程序，而是使用一个称为服务的逻辑结构作为连接端点。
+							使用负载均衡的方式来访问这些pod
+					kube-proxy是在每个工作节点上运行的网络代理，并监听每个服务端点创建/删除的API服务器
+							对于每个服务端点，kube - proxy都设置了路由，使其能够到达它
+
+		节点信息：
+				Addresses：这些字段的使用情况取决于您的云提供商或裸机配置
+						HostName：节点内核报告的主机名。可以通过kubelet --hostname-override参数重写。
+						ExternalIP：通常是外部可路由的节点的IP地址（可从群集外部获得）。
+						InternalIP：通常是仅在集群内可路由的节点的IP地址。
+				Condition：该conditions字段描述所有Running节点的状态。
+						节点状况			描述
+						OutOfDisk			True 如果节点上没有足够的可用空间用于添加新Pod，否则 False
+						Ready				True如果节点健康且准备好接受pod，False如果节点不健康并且不接受pod，并且Unknown节点控制器在最近40秒内没有从节点听到
+						MemoryPressure		True如果节点内存存在压力 - 也就是说，如果节点内存过少; 除此以外False
+						DiskPressure		True如果磁盘空间上存在压力 - 也就是说磁盘空间不足，除此以外False
+						NetworkUnavailable	True 如果该节点的网络没有正确配置，则不然 False
+					以下是一个json格式表示了一个正常状态的节点	
+							"conditions": [
+							  {
+								"kind": "Ready",
+								"status": "True"
+							  }
+							]
+					如果ready状态为unknow或者false的时间超过pod-eviction-timeout，则将参数传递给
+							kube-controller-manager，并且该节点上的所有Pod将被节点控制器删除。		
+							默认驱逐时间是五分钟。在某些情况下，当节点不可达时，apiserver无法与其上的kubelet进行通信。
+							删除pod的决定不能传达给kubelet，直到它重新建立与apiserver的通信。同时，计划删除的Pod可以继续在分区节点上运行。
+					1.8版本引入了一个alpha特征，根据条件自动创建taints，要启用此行为，
+							--feature-gates=...,TaintNodesByCondition=true 请将额外的功能门标志传递给
+							API服务器，控制器管理器和调度程序。当TaintNodesByCondition启用时，
+							调度考虑一个节点时，忽略条件; 而是看Node的taints和Pod的tolerations。
+					
+				Capacity：介绍节点上可用的资源：CPU，内存以及可以调度到节点上的最大Pod数量。
+				Info：有关节点的一般信息，如内核版本，Kubernetes版本（kubelet和kube-proxy版本），
+							Docker版本（如果使用），操作系统名称。信息由Kubelet从节点收集
+
+			Node Controller
+					节点控制器是一个Kubernetes主组件，它管理节点的各个方面。
+					节点控制器在一个节点的生命中有多个角色：
+							第一个是在注册时将一个CIDR块分配给节点(如果CIDR分配被打开)。
+							其次是使节点控制器的内部节点列表与云提供商的可用机器列表保持同步。
+									在云环境中运行时，只要节点不健康，节点控制器就会向云提供者
+									询问该节点的VM是否仍然可用。否则，节点控制器从其节点列表中删除该节点。
+					第三是监测节点的健康。当节点变得不可达时，节点控制器负责将NodeStatus的NodeReady
+							条件更新为ConditionUnknown（即，由于某种原因，例如由于节点关闭，
+							节点控制器停止接收心跳），然后逐渐从节点驱逐所有的Pod （使用正常终止）
+							如果节点继续不可达。（默认超时时间是40 --node-monitor-period秒，
+							开始报告ConditionUnknown，之后5秒开始逐出Pod。）节点控制器每秒钟检查每个节点的状态。
+					从1.4开始，节点控制器在决定集群驱逐时会查看集群中所有节点的状态。
+					在大多数情况下，节点控制器将驱逐速率限制为每秒 --node-eviction-rate（默认0.1），
+							这意味着它不会从每10秒钟超过1个节点驱逐窗口。
+					当给定可用性区域中的节点变得不健康时，节点踢出的行为会发生变化。	
+							节点控制器同时检查区域中的节点的不健康的百分比（NodeReady条件是ConditionUnknown或ConditionFalse）。
+							如果不健康节点的比例至少为 --unhealthy-zone-threshold0.55（默认为0.55），
+							那么驱逐率就会降低：如果集群很小（即小于或等于 --large-cluster-size-threshold节点 - 默认50），
+							那么驱逐就会停止，否则驱逐率会降低到 --secondary-node-eviction-rate（默认为0.01）每秒。
+							这些策略在每个可用区域实施的原因是，一个可用区域可能会与主区域分区，
+							而其他区域则保持连接状态。如果您的群集不跨越多个云提供商可用性区域，
+							则只有一个可用区域（整个群集）。
+					将节点分布到可用区域的一个关键原因是，当一个整个区域出现故障时，可以将工作负载转移到健康区域。
+							因此，如果一个区域内的所有节点都不健康，那么节点控制器将以正常速率消失--node-eviction-rate。
+							角落案例是所有区域完全不健康（即在群集中没有健康的节点）。在这种情况下，
+							节点控制器假定主连接存在一些问题，并停止所有驱逐，直到某些连接恢复。
+
+
+			节点的自我注册
+					当kubelet标志--register-node为true（默认）时，kubelet将尝试向API服务器注册自己。
+							这是大多数发行版使用的首选模式。为了自我注册，kubelet开始有以下选择：	
+									--kubeconfig - 凭据的路径，以向apiserver进行身份验证。
+									--cloud-provider - 如何与云提供商交谈，以读取有关自身的元数据。
+									--register-node - 自动注册到API服务器。
+									--register-with-taints- 注册给定的列表（以逗号分隔<key>=<value>:<effect>）的节点。没有操作如果register-node是假的。
+									--node-ip - 节点的IP地址。
+									--node-labels - 在群集中注册节点时添加的标签。
+									--node-status-update-frequency - 指定kubelet将节点状态发布到主节点的频率。	
+			
+					目前，任何kubelet都有权创建/修改任何节点资源，但实际上它只能创建/修改自己的节点资源。
+			
+			手动节点管理
+					群集管理员可以创建和修改节点对象。
+					如果管理员希望手动创建节点对象，请设置kubelet标志 --register-node=false。
+					管理员可以修改节点资源（不管其设置如何--register-node）。修改包括在节点上设置标签并将其标记为不可修改的。	
+					节点上的标签可以与Pod上的节点选择器一起使用，以控制调度，例如，将一个Pod限制为只能在节点的子集上运行。
+					将节点标记为不可调度将阻止将新的pod调度到该节点，但不会影响该节点上的任何现有pod。
+							这在重启节点之前作为准备工作很有用。例如，要标记节点不可修改，请运行以下命令：
+									kubectl cordon $NODENAME
+					请注意，由DaemonSet控制器创建的pod绕过了Kubernetes调度程序，并且不遵守节点上的不可调度属性。
+							假设守护进程属于机器，即使正在耗尽应用程序以准备重新启动。
+				
+			节点容量：
+					节点的容量（cpus数量和内存数量）是节点对象的一部分。通常情况下，节点注册自己并在创建节点对象时报告其容量。
+							如果您正在执行手动节点管理，则需要在添加节点时设置节点容量。
+					Kubernetes调度程序确保节点上的所有Pod有足够的资源。它检查节点上容器的请求总和不大于节点容量。
+							它包括由kubelet启动的所有容器，但不包括由Docker直接启动的容器，也不在容器中进行处理。
+							如果要显式地为非pod进程预留资源，可以创建一个占位符窗格。使用以下模板：
+									apiVersion: v1
+									kind: Pod
+									metadata:
+									  name: resource-reserver
+									spec:
+									  containers:
+									  - name: sleep-forever
+										image: gcr.io/google_containers/pause:0.8.0
+										resources:
+										  requests:
+											cpu: 100m
+											memory: 100Mi
+												
+					将值cpu和memory值设置为要保留的资源量。将文件放在清单目录（--config=DIRkubelet的标志）。
+							在您想要预留资源的每个kubelet上执行此操作。							
+			
+			Master ---> Node：
+					Cluster ---> Master：
+							从集群到主机的所有通信路径均在apiserver终止（其他主要组件都不用于公开远程服务）。
+									在典型的部署中，apiserver被配置为在安全HTTPS端口（443）上侦听远程连接，
+									启用一种或多种形式的客户端认证。应该启用一种或多种授权形式，尤其是
+									在允许匿名请求或 服务帐户令牌的情况下。
+							应为集群配置节点的public的root证书，以便它们可以连同有效的客户端凭证一起安全地连接到apiserver。
+									例如，在默认的GCE部署中，提供给kubelet的客户端凭证采用客户端证书的形式。
+							希望连接到apiserver的Pod可以通过利用服务帐户安全地进行安装，
+									以便Kubernetes在实例化时自动将公共根证书和有效的不记名令牌插入到Pod中。
+									该kubernetes服务（在所有命名空间中）都配置有一个虚拟IP地址，
+									该IP地址通过kube-proxy重定向到apiserver上的HTTPS端点。
+							主组件通过不安全（未加密或已验证）端口与集群apiserver进行通信。
+									此端口通常只在主机的本地主机接口上公开，以便所有在同一台机器上运行
+									的主组件都可以与集群apiserver进行通信。随着时间的推移，主组件将被
+									迁移到使用具有认证和授权的安全端口
+							因此，从群集（在节点上运行的节点和群集）到主机的连接的默认操作模式默认是安全的，并且可以在不可信和/或公共网络上运行。
+			
+					Master ---> Cluster：
+							从主（apiserver）到集群有两个主要的通信路径。首先是从apiserver到集群中
+									每个节点上运行的kubelet进程。第二种是通过apiserver的代理功能从
+									apiserver到任何节点，pod或服务。
+							apiserver - > kubelet：
+									从apiserver到kubelet的连接用于：
+									获取豆荚的日志。
+									附加（通过kubectl）运行豆荚。
+									提供kubelet的端口转发功能。
+							这些连接终止于kubelet的HTTPS端点。默认情况下，apiserver不验证kubelet的服务证书，
+									这使得连接受到中间人攻击，并且 不安全地运行在不受信任的和/或公共网络上		
+							要验证此连接，请使用该--kubelet-certificate-authority标志为apiserver提供一个根证书包，
+									用于验证kubelet的服务证书。如果不可行，请使用 apisever和kubelet之间的SSH隧道
+									（如果需要），以避免连接到不受信任的或公共网络。最后， 应该启用Kubelet认证和/或授权来保护kubelet API
+					apiserver ---> nodes, pods, and services
+							从apiserver到节点，pod或服务的连接默认为普通的HTTP连接，因此既不通过身份验证也不加密。
+									它们可以通过https:在API URL中的节点，pod或服务名称前缀来运行在安全的HTTPS连接上，
+									但是它们不会验证由HTTPS端点提供的证书，也不会提供客户端证书，因此连接将被加密，
+									将不提供任何诚信的保证。这些连接目前不安全地运行在不受信任的和/或公共网络上
+					SSH隧道：
+							Google Kubernetes引擎使用SSH隧道来保护主 - >群集通信路径。在此配置中，
+									apiserver会启动到群集中每个节点的SSH隧道（连接到侦听端口22的ssh服务器），
+									并通过隧道传递指向kubelet，节点，pod或服务的所有流量。
+									此通道可确保通信不会暴露在运行集群的专用GCE网络之外	
+		
+	https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+			
+
+
+							etcd的状态管理：
+			Kubernetes使用etcd来存储集群状态，etcd是基于Raft一致性算法的分布式键值存储。
+			raft运行一系列机器作为，可以在一些成员的失败中幸免于难。在任何时候，组中的一个节点将成为主人，
+					其余的人将成为追随者。任何节点都可以被当作主人。
+			在Kubernetes中，除了存储集群状态之外，etcd还用于存储配置细节，如子网，ConfigMaps，Secrets等。 
+		
+	网络设置：
+			一个完整的k8s集群，我们需要确保以下内容：
+					一个唯一的IP被分配给每个Pod
+					Pod中的容器可以相互通信
+					Pod能够与集群中的其他Pod进行通信
+					如果进行了配置，则可以从外部访问部署在Pod中的应用程序。
+			为每个pod分配唯一的一个ip地址,对于容器联网,有两种规范：
+					容器网络模型(CNM),docker提出的
+					容器网络接口(CNI),coreOS提出的
+				k8s使用CNI来为每个pod分配ip地址
+			Container Runtime将IP分配到CNI，CNI连接到底层配置的插件（如Bridge或MACvlan），
+					以获取IP地址。一旦IP地址由相应的插件提供，CNI将其转发回请求的容器运行时。
+	容器间的通信：	
+			在一个pod中，容器之间的通信：
+					在底层主机操作系统的帮助下，所有容器运行时通常为每个容器启动一个独立的网络实体。
+					在Linux上，该实体被称为网络命名空间。这些网络名称空间可以通过容器共享，也可以与主机操作系统共享。		
+					在Pod中，容器共享网络命名空间，以便它们可以通过本地主机与对方联系。		
+							
+			跨节点的pod到pod之间的通信：
+					在集群环境中，可以在任何节点上调度Pod。我们需要确保Pod可以通过节点进行通信，
+					并且所有的节点都应该能够到达任何Pod。Kubernetes还提出，
+					在跨主机进行Pod-to-Pod通信时，不应该有任何网络地址转换
+				实现方式：
+					可路由的Pod和节点，使用基础的物理基础设施，如Google Container Engine
+					使用软件定义的网络，如 Flannel, Weave, Calico.
+			
+			外部与pod间的通信：
+					通过使用kube-proxy将我们的服务暴露给外部世界，我们可以从群集外部访问我们的应用程序
+					
+					
+	K8S配置：
+			Kubernetes可以使用不同的配置进行安装。下面简要介绍四种主要的安装类型：
+				一体化的单节点安装：
+						所有的主组件和工作节点都安装在一个节点上
+				单节点etcd，单主节点和多工作节点安装：
+						有一个主节点，它也将运行单节点etcd实例。多个工作节点连接到主节点。
+				单节点etcd，多主节点和多工作节点安装：
+						有多个主节点，这将在HA模式下工作，但是我们将有一个单节点etcd实例。多个工作节点连接到主节点。
+				多节点etcd，多主节点和多工作节点安装：
+						etcd在集群模式下配置，位于Kubernetes集群外部，节点连接到该节点。
+						主节点都配置为HA模式，连接到多个工作节点。
+						
+		K8S安装的基础架构：
+				基础设施选择：
+						我们是否应该在裸机，公共云或私有云上设置Kubernetes？
+						我们应该使用哪个底层系统？我们应该选择RHEL，CoreOS，CentOS还是其他的？	
+						我们应该使用哪种网络解决方案
+						等等
+						
+				本地主机安装：
+						我们的工作站/笔记本电脑上部署单节点或多节点Kubernetes群集：
+								Minikube
+								在LXD上的Ubuntu
+							Minikube是创建一体化Kubernetes设置的首选和推荐方式
+				本地安装：Kubernetes可以安装在虚拟机和裸机上。						
+								内部部署虚拟机：
+											Kubernetes可以安装在通过Vagrant，
+											VMware vSphere，KVM等创建的虚拟机上
+								
+								内部裸机：
+											Kubernetes可以安装在内部裸机上，在RHEL，
+											CoreOS，CentOS，Fedora，Ubuntu等不同的操作系统之上。	
+								
+				云环境安装：Kubernetes可以在任何云环境中安装和管理。
+								托管解决方案：任何给定的软件都由供应商完全管理。
+											用户只需要支付托管和管理费用。
+								一站式云解决方案：通过几条命令部署解决方案或软件。
+								裸机：Kubernetes可以安装在由不同云提供商提供的Bare Metal上。
+												
+		安装说明及相关工具和资源：
+				kubeadm：kubeadm  是Kubernetes生态系统的首推工具
+						这是引导Kubernetes集群的安全和推荐的方法
+						它有一组构建块来设置群集，但可以轻松扩展以添加更多功能。
+						请注意，kubeadm不支持配置机器。
+				
+				Kubespray：Kubespray可以在AWS，GCE，Azure，OpenStack或
+						   Bare Metal上安装高可用性Kubernetes集群
+				Kops: 	使用Kops，我们可以从命令行创建，销毁，升级和维护生产级
+						高可用性的Kubernetes集群。它也可以配置这些机器。
+						
+						
+		运行Minikube的要求：
+				kubectl：kubectl是一个访问任何Kubernetes集群的二进制文件。
+						一般来说，它是在启动minikube之前安装的，但是以后也可以安装。
+						如果kubectl在安装minikube没有找到，我们会得到一个警告消息，
+						您可以放心地忽略（只记得，我们将不得不安装kubectl更高版本）。
+						
+				在macOS ：
+						xhyve驱动程序，VirtualBox  或VMware Fusion  管理程序
+				在Linux ：
+						VirtualBox  或KVM  管理程序上
+				在Windows ：
+						VirtualBox  或Hyper-V  管理程序上
+				必须在BIOS中启用VT-x / AMD-v虚拟化
+				互联网连接第一次运行。		
+				
+				ubuntu安装：
+						sudo apt-get install virtualbox
+						curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.23.0/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+						minikube start
+						minikube status
+						minikube stop
+						
+	kubectl安装：
+			下载最新的稳定kubectl二进制文件：
+						curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+			添加执行权限：
+						chmod +x ./kubectl
+			将kubectl二进制文件移动到PATH :
+						sudo mv ./kubectl /usr/local/bin/kubectl
+	
+	访问正常运行的k8s集群：
+			命令行(CLI):	kubectl是用于管理Kubernetes群集资源和应用程序的CLI工具。
+			图形用户界面(GUI):	Kubernetes仪表板提供了与其资源和集装箱化应用程序进行交互的GUI。								
+			API:  使用API​​端点直接连接到API服务器并发送命令，只要我们可以访问主节点并拥有正确的凭证即可。									
+						
+	kubectl配置文件:
+			要连接到Kubernetes群集，kubectl需要主节点端点和凭证才能连接到它。
+					启动minikube时，默认情况下，启动过程会在驻留在用户主目录中的.kube 
+					目录内创建一个配置文件config
+			默认情况下，kubectl二进制文件访问这个文件以找到主节点的连接端点以及凭据。
+					要查看连接详细信息，我们可以看到~/.kube/config（Linux）  文件的内容，
+			或者运行以下命令：kubectl config view 
+						apiVersion: v1
+						clusters:
+						- cluster:
+							certificate-authority: /home/exper/.minikube/ca.crt
+							server: https://192.168.99.100:8443
+						  name: minikube
+						contexts:
+						- context:
+							cluster: minikube
+							user: minikube
+						  name: minikube
+						current-context: minikube
+						kind: Config
+						preferences: {}
+						users:
+						- name: minikube
+						  user:
+							client-certificate: /home/exper/.minikube/client.crt
+							client-key: /home/exper/.minikube/client.key
+
+
+			一旦安装了kubectl，我们可以通过kubectl cluster-info命令获得有关minikube集群的信息： 
+							kubectl cluster-info 
+							
+							Kubernetes master is running at https://192.168.99.100:8443
+
+
+			使用minikube dashboard命令：
+						 Kubernetes Dashboard  为Kubernetes集群提供了用户界面。
+						 要访问Minikube的仪表板minikube dashboard命令
+			使用kubectl proxy命令：
+						kubectl可以通过主节点上的API服务器进行认证，并使得仪表板在http//localhost:8001/ui上可用。
+						kubectl proxy
+			API - 使用“kubectl代理”:
+						当配置kubectl代理时，我们可以在代理端口上向localhost发送请求：
+								curl http://localhost:8001/
+						通过上面的curl请求，我们请求了来自API服务器的所有API端点。
+			API - 没有“kubectl代理”:
+						没有kubectl代理配置，我们可以使用kubectl得到承载的令牌，然后通过API请求发送。
+						承载令牌是由认证服务器（主节点上的API服务器）生成并返回给客户机的访问令牌。
+						使用令牌，客户端可以连接到Kubernetes API服务器没有提供进一步的认证细节，然后访问资源。
+				获取令牌：
+						TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+				获取API服务器端点：
+						APISERVER=$(kubectl config view | grep https | cut -f 2- -d ":" | tr -d " ")
+				使用curl命令访问API服务器：
+						curl $APISERVER --header "Authorization: Bearer $TOKEN" --insecure
+						
+						
+	K8S对象模型：Kubernetes有一个非常丰富的对象模型，它代表了Kubernetes集群中不同的持久实体。这些实体描述：
+							使用什么容器，并在哪个节点上运行
+							应用的资源消耗
+							与应用程序相关的不同策略，如重启/升级，容错等
+						
+				对于每个对象，我们使用spec字段声明我们的意图或期望状态。Kubernetes系统管理对象的状态
+							字段，记录对象的实际状态。在任何给定的时间点，Kubernetes控制平面都会尝试
+							将对象的实际状态与对象所需的状态进行匹配。			
+				Kubernetes对象的例子是Pods，Deployments，ReplicaSets等等		
+				要创建对象，我们需要向Kubernetes API服务器提供spec字段。spec字段描述了所需的状态，
+							以及一些基本信息，比如名称。创建对象的API请求必须具有JSON格式的spec字段以及其他详细信息。		
+				我们在a中提供一个对象的定义。yaml文件，通过JSON负载中的kubectl进行转换并发送到API服务器。		
+						
+				比如：
+							apiVersion: apps/v1beta1
+							kind: Deployment
+							metadata:
+							  name: nginx-deployment
+							spec:
+								replicas: 3
+							  template:
+								metadata:
+								  labels:
+									app: nginx
+								spec:
+								  containers:
+										 - name: nginx
+									image: nginx:1.7.9
+									ports:
+									- containerPort: 80
+						
+				通过上面的示例中的apiVersion 字段，我们连接到所需的API服务器上的API端点。				
+						在kind字段中，例如使用Deployment。在metadata字段中，我们将基本信息附加到对象，如名称。
+						上例中有两个spec字段(spec 和 spec.template.spec)。
+						在spec字段中，我们定义了所需的 deployment的状态。在上例中,我们通过spec.template中
+						定义的pod模板创建了3个pod来确保任何时候都有至少3个pod在运行
+						在spec.template.spec中，我们定义pod的所需状态,在这里我们创建了nginx1.7.9的pod
+					一旦对象被创建,K8s就会给对象添加状态字段
+						
+	pod：
+			pod是最小最简单的K8s对象。他是K8S的部署单元，代表应用程序的单个实例
+			pod是一个或者多个容器的逻辑集合，特点：
+					被调度到同一个主机上
+					共享相同的网络名称空间
+					挂载相同的外部存储(volumes)	
+			pod本质上是短暂的,没有自我修复能力,所以需要结合控制器(controllers)一起使用。
+					这些控制器可以处理Pod的复制，容错，自我修复等.例如：Deployments, 
+					ReplicaSets, ReplicationControllers等
+					我们使用Pod模板将Pod的字段附加到其他对象	
+						
+	Labels：
+			labels是可以附加到任何Kubernetes对象（例如Pod）的键值对。
+					标签用于根据需要组织和选择对象的子集。许多对象可以有相同的标签。
+					标签不提供对象的唯一性。  	
+	
+	Label Selectors	：				
+			使用标签选择器，我们可以选择一个对象的子集。Kubernetes支持两种类型的选择器：			
+					Equality-Based Selectors：允许基于标签键和值过滤对象。使用这种类型的选择器，
+										我们可以使用=,==,或者!=。例如，使用env == dev，
+										我们选择env标签设置为dev的对象。 
+					Set-Based Selectors：允许基于一组值来过滤对象。使用这种类型的选择器，仅针对于key符号
+										我们可以使用in,notin,和exist 。我们选择env标签设置为dev或qa的对象。
+			例如：
+							environment = production
+							tier != frontend
+					第一个选择所有key等于 environment 值为 production 的资源。
+					后一种选择所有key为 tier 值不等于 frontend 的资源，和那些没有key为 tier 的label的资源。
+					要过滤所有处于 production 但不是 frontend 的资源，可以使用逗号操作符，
+							frontend：environment=production,tier!=frontend
+
+							environment in (production, qa)
+							tier notin (frontend, backend)
+							partition
+							!partition						
+					第一个例子，选择所有key等于 environment ，且value等于 production 或者 qa 的资源							
+					第二个例子，选择所有key等于 tier 且值是除了 frontend 和 backend 之外的资源，和那些没有标签的key是 tier 的资源。
+					第三个例子，选择所有有一个标签的key为partition的资源，value是什么不会被检查	
+					第四个例子，选择所有的没有lable的key名为 partition 的资源；value是什么不会被检查。
+						类似的，逗号操作符相当于一个AND操作符。因而要使用一个 partition 键（不管value是什么），
+								并且 environment 不是 qa 过滤资源可以用 partition,environment notin (qa) 。
+						Set-based 的选择器是一个相等性的宽泛的形式，因为 environment=production 
+								相当于environment in (production) ，与 != and notin 类似。
+						Set-based的条件可以与Equality-based的条件结合。例如， partition in (customerA,customerB),environment!=qa 。		
+	
+	
+	Replication Controllers：使用ReplicationController控制器来创建和管理Pod
+			ReplicationController（RC）是一个控制器，该控制器是主节点的控制器管理器的一部分	
+					它确保Pod的指定数量的副本在任何给定的时间点运行：
+								如果Pod数量超过所需计数，则ReplicationController将终止额外的Pod，如果Pod数量少，
+								则ReplicationController将创建更多Pod以匹配所需计数
+	
+	ReplicaSets：
+			ReplicaSet(RS)是下一代ReplicationController。ReplicaSets支持基于等式和基于集合的选择器，
+					而ReplicationController只支持基于等式的选择器。
+			例如： 
+					desired replicas = 3
+					current replicas = 3
+					current == desired 
+			如果其中一个pod挂了,则现在状态不符合期望状态了, current != desired ,此种情况下，
+					副本集将检测到当前状态不再匹配所需的状态。因此，在我们的给定的情况下，
+					副本集将创建一个更多的Pod，从而确保当前状态匹配所需的状态。
+			ReplicaSets可以独立使用，但主要由Deployments使用它们来编排Pod的创建，
+					删除和更新。部署自动创建ReplicaSets
+
+	Deployments：使用Deployment来创建ReplicaSet。ReplicaSet在后台创建pod
+			Deployments这个对象提供给对Pod和ReplicaSets的声明性更新
+					DeploymentController是主节点的控制器管理器的一部分，它确保当前状态始终匹配所需的状态。
+			例如：我们使用deployments来创建一个ReplicaSets A。ReplicaSets A创建3个pod
+					原来镜像是1.7.9的nginx，更新到1.9.1.修改新的模板，创建一个新的ReplicaSetB,
+						这个过程叫做Deployment rollout.一旦ReplicaSetB准备就绪，Deployment开始指向它
+					只有在更新部署的pod模板时，才会触发部署，像扩展部署这样的操作不会触发部署
+					在ReplicaSets之上，Deployment提供了部署记录等功能，如果出现问题，我们可以回滚到之前已知的状态。
+
+	Namespaces：在名称空间中创建的资源/对象的名称是惟一的，但不能跨越名称空间。
+			列出所有的名称空间：
+					kubectl get namespaces
+			通常，Kubernetes会创建两个默认的名称空间：
+					kube-system：包含由Kubernetes系统创建的对象
+					default：包含属于任何其他名称空间的对象
+			默认情况下，我们连接到default名称空间	
+			kube- public是一个特殊的名称空间，它可以被所有用户读取并用于特殊目的，比如引导集群。
+			
+			使用资源配额(Resource Quotas),我们可以在命名空间内划分群集资源。
+			
+	用户连接到pod：
+			要访问应用程序，用户/客户端需要连接到Pod。由于Pod本身是短暂的，分配给它的IP地址等
+					资源不能是静态的。pod可能会突然死亡或根据现有的要求重新安排。
+			如果用户或者客户端使用其ip地址连接到pod，一旦某个pod挂掉后，新建的pod的ip地址会改变
+					用户将访问的还是挂掉的pod而不是新的pod，因此需要一个类似于dns的服务来使用域名访问
+					这个服务就叫service，它将Pod 和一个策略进行逻辑分组，以访问它们。
+					这个分组是通过标签和选择器来实现的
+			
+	Service：	https://prod-edxapp.edx-cdn.org/assets/courseware/v1/47d192f22db724bcb2cef495e0a6f80a/asset-v1:LinuxFoundationX+LFS158x+2T2017+type@asset+block/service-3.png	
+			使用app关键字作为Label，并将前端和db用作不同Pod的值。
+
+					app==frontend 		app:frontend
+					app==db				app:db
+			使用选择器，我们可以将它们分成两个逻辑组：一个有三个Pod，一个只有一个Pod。
+			我们可以为逻辑分组指定一个名称，称为服务名称(service name)
+						我们创建了两个服务，分别是frontend-svc和db-svc，它们分别具有
+						app == frontend和app == db Selectors。
+			
+			例如：
+						kind: Service
+						apiVersion: v1
+						metadata:
+						  name: frontend-svc
+						spec:
+						  selector:
+							app: frontend
+						  ports:
+							- protocol: TCP
+							  port: 80
+							  targetPort: 5000
+	
+			我们创建了一个frontend-svc通过选择所具有标签pod的app设置为frontend,默认情况下，
+					每个服务都有一个IP地址，改地址仅在集群内部路由
+			我们的frontend-svc和db-svc服务的IP地址分别为172.17.0.4和172.17.0.5。
+					附加到每个service的IP地址也被称为该服务的ClusterIP。
+			
+			用户/客户端现在通过IP地址连接到服务，它将流量转发给附加到它的一个pod
+					服务在选择用于转发数据/流量的pod时执行负载平衡。
+			在转发来自服务的流量时，我们可以选择pod上的目标端口,对于frontend-svc，我们将来自
+					80端口上的用户或者客户端的请求，然后我们将这些请求转发给端口为5000的一个pod上
+					如果目标端口没有明确定义，将会被转发到服务接受流量的端口上的pods
+			一组pod、IP地址以及targetPort被称为服务端点。在我们的例子中，
+					frontend - svc有3个端点:10.0.1.3:5000、10.0.1.4:5000和10.0.1.5:5000。
+
+
+	kube-proxy:
+			所有的工作节点都运行一个名为kube-proxy的守护进程，
+					它监视主节点上的API服务器以添加和删除服务和端点。
+			对于每个新服务，在每个节点上，kube-proxy配置IPtables规则以捕获其ClusterIP的流量，
+					并将其转发到其中一个端点。当服务被移除时，kube-proxy也会删除所有节点上的IPtables规则。
+
+	Service Discovery(服务发现)：
+			由于服务是Kubernetes通信的主要模式，我们需要在运行时发现它们的方法。
+					Kubernetes支持两种发现服务的方法:
+							Environment Variables：只要Pod在任何工作节点上启动，运行在该节点上的kubelet
+													守护进程就会在Pod中为所有活动的服务添加一组环境变量。
+								例如：如果我们有一个名为redis-master的活动服务，它公开了端口6379，
+									  并且它的ClusterIP是172.17.0.6，那么在新创建的Pod上，
+									我们可以看到以下环境变量：	
+											REDIS_MASTER_SERVICE_HOST=172.17.0.6
+											REDIS_MASTER_SERVICE_PORT=6379
+											REDIS_MASTER_PORT=tcp://172.17.0.6:6379
+											REDIS_MASTER_PORT_6379_TCP=tcp://172.17.0.6:6379
+											REDIS_MASTER_PORT_6379_TCP_PROTO=tcp
+											REDIS_MASTER_PORT_6379_TCP_PORT=6379
+											REDIS_MASTER_PORT_6379_TCP_ADDR=172.17.0.6
+							对于这种方案，我们在订购服务时需要特别小心，因为这些pods没有为创建pod后创建的服务设置环境变量。
+
+
+
+									  
+							DNS：K8S有一个附加的dns，为每个service创建一个dns记录,
+									他的格式就像my-svc.my-namespace.svc.cluster.local
+								相同命名空间内的服务可以使用其名称来访问其他服务。
+									例如，如果我们 在my-ns  命名空间中添加一个服务redis-master，
+											那么同一命名空间中的所有Pod只需使用其名称redis-master即可到达redis服务。
+									来自其他命名空间的Pod可以通过添加各自的命名空间作为后缀来访问该服务，如redis-master.my-ns。  
+						
+	Service Type：在定义服务的同时，我们也可以选择其访问范围
+				只能在群集内访问
+				可以从集群和外部访问
+				映射到驻留在群集外部的外部实体。
+				访问范围由ServiceType决定，可以在创建服务时说明。	
+					
+	ServiceType - ClusterIP和NodePort：
+				ClusterIP是默认的ServiceType。服务使用ClusterIP获取其虚拟IP地址。
+							该IP地址用于与服务通信，并且只能在群集内访问。 
+				NodePort服务类型，除了创建一个ClusterIP之外，除了创建ClusterIP之外，
+					在所有的工作节点中，从30000- 32767的范围映射到相应的服务。
+					例如，如果为服务frontend-SVC映射NodePort是32233，那么，
+					如果我们连接到任何工作节点上的端口32233，节点将所有
+					流量重定向到指定的ClusterIP - 172.17.0.4。
+				默认情况下，在暴露NodePort时，Kubernetes Master从端口范围30000-32767
+					自动选择一个随机端口。如果我们不想为NodePort分配一个动态的端口值，
+					那么在创建服务的同时，我们也可以从早期的特定范围给出一个端口号。 
+			当我们想要使我们的服务可以从外部世界访问时，NodePort 服务类型是有用的。
+					最终用户连接到指定端口上的工作节点，该工作节点将流量转发到集群内运行的应用程序。
+					要从外部访问应用程序，管理员可以在Kubernetes集群外部配置反向代理，
+					并将特定端点映射到工作节点上的相应端口。 
+
+	ServiceType - LoadBalancer:
+					使用LoadBalancer ServiceType：
+							NodePort和ClusterIP服务自动创建，外部负载均衡器将路由到它们
+							服务暴露在每个工作节点的静态端口上
+							该服务使用基础云提供商的负载均衡器功能从外部公开。
+	ServiceType - ExternalIP:
+					如果服务可以路由到一个或多个工作节点，则可以将其映射到ExternalIP地址。
+							通过Service端口上的ExternalIP（作为目标IP）进入群集的流量将被路由到其中一个服务端点。	
+				请注意，ExternalIPs不由Kubernetes管理。群集管理员已经配置路由，将ExternalIP地址映射到其中一个节点。
+
+	ServiceType - ExternalName:
+				xternalName是一个特殊的ServiceType，它没有选择器，也没有定义任何端点。
+							在群集内访问时，它会返回外部配置服务的CNAME记录。
+				此ServiceType的主要用例是在集群内部使用外部配置的服务（如my-database.example.com），
+							仅使用名称（如my-database）将名称与名称空间内的其他服务配合使用。
+	
+	命令行查看Deployments, ReplicaSets, 和 Pods：
+				列出Deployments:
+									kubectl get deployments
+				列出ReplicaSets:
+									kubectl get replicasets
+				列出pods：
+									kubectl get pods
+	
+	
+	Labels and Selectors： 
+				查看pod详细描述：
+							kubectl describe pod webserver-3101375161-jzk57
+				
+				列出pod及其附带的标签：
+							通过使用kubectl get pods命令的-L选项，我们可以在输出中添加额外的列来列出具有
+								附加标签及其值的Pod。在以下示例中，我们将使用Labels app和label2列出  Pod ：  
+									kubectl get pods -L app,label2
+							所有的Pod都被列出，因为每个Pod都有一个标签app，它的值被设置为webserver。
+							我们可以从APP列中看到。由于所有的pod都没有label2标签，所以value 列在label2列下。
+				列出指定标签的pod：
+							要使用kubectl get pods命令使用选择器，我们可以使用-l选项。在以下示例中，
+							我们选择了将app Label的值设置为webserver的所有Pod：
+									kubectl get pods -l app=webserver
+										NAME                         READY   STATUS    RESTARTS   AGE
+								webserver-3101375161-jzk57   1/1     Running   0          16m  
+								webserver-3101375161-vxw2g   1/1     Running   0          16m 
+								webserver-3101375161-w1flz   1/1     Running   0          16m
+							我们列出了我们创建的所有Pod，因为它们都具有app Label，其值被设置为webserver		
+	
+							在下一个示例中，我们使用app = webserver1作为选择器：
+									kubectl get pods -l app=webserver1
+										No resources found.
+				
+				删除我们之前创建的Deployment:使用kubectl delete命令删除任何对象。
+				
+								kubectl delete deployments webserver
+									deployment "webserver" deleted
+				
+								删除deployments还会删除我们创建的副本服务器和Pod：
+								kubectl get replicasets
+									No resources found.
+								kubectl get pods
+									No resources found.
+				
+				用yaml文件创建一个deployments：
+						apiVersion: extensions/v1beta1
+						kind: Deployment
+						metadata:
+						  name: webserver
+						spec:
+						  replicas: 3
+						  template:
+							metadata:
+							  labels:
+								app: webserver
+							spec:
+							  containers:
+							  - name: webserver
+								image: nginx:alpine
+								ports:
+								- containerPort: 80
+				
+			使用kubectl，我们将从YAML文件创建Deployment。使用kubectl create命令的-f 选项，
+				我们可以传递一个YAML文件作为对象的规范。
+				在下面的例子中，我们正在创建一个webserver部署：			
+					kubectl create -f webserver.yaml
+						deployment "webserver" created
+				
+	
+使用nodeport创建service并将其暴露给外部
+	
+			用不同的ServiceTypes来定义给定service的访问方法，对于给定的service，使用nodeport
+				Service Type，k8s在所有的工作节点上打开一个静态端口。如果从任意节点连接到该端口，
+				我们将转发到相应的服务，例如，我们使用NodePort ServiceType并创建一个service
+			以下是创建一个webserver-svc.yml文件：
+					apiVersion: v1
+					kind: Service
+					metadata:
+					  name: web-service
+					  labels:
+						run: web-service
+					spec:
+					  type: NodePort
+					  ports:
+					  - port: 80
+						protocol: TCP
+					  selector:
+						app: webserver 
+				使用kubectl创建服务：
+					kubectl create -f webserver-svc.yaml
+						service "web-service" created	
+		
+			我们的web-service已经创建好了，他的集群ip是10.0.0.133。在poert(s)部分，
+					我们可以看到80:32636的映射，这意味着在节点上保留了一个静态端口32636。
+					如果我们连接到该端口上的节点，我们的请求将被转发到端口80上的clusterip
+			没有必要先创建Deployment,在创建Service，他们可以任意顺序创建，
+					服务将根据选择器连接到pod
+			
+			获取更详细的service信息，使用kubectl describe命令
+					kubectl describe svc web-service 
+						Name:                 web-service
+						Namespace:            default
+						Labels:               run=web-service
+						Annotations:          <none>
+						Selector:             app=webserver 
+						Type:                 NodePort
+						IP:                   10.0.0.133    
+						Port:                 <unset> 80/TCP  
+						NodePort:             <unset> 32636/TCP
+						Endpoints:            172.17.0.4:80,172.17.0.5:80,172.0.6:80  
+						Session Affinity:     None
+						Events:               <none>
+										
+			web-service使用 app = webserver作为Selector，通过它选择我们的三个Pod，
+				它们被列为端点。因此，无论何时我们向我们的服务发送请求，
+				都将由端点部分中列出的其中一个Pod来提供服务。	
+
+
+
+卷：
+		创建Pod的容器本质上是短暂的。如果容器崩溃，所有存储在容器中的数据都将被删除。
+				但是，kubelet会以一个干净的状态重新启动它，这意味着它不会有任何旧数据。
+		k8s使用卷来存储数据，卷本质上是一个由存储介质支持的目录。
+				存储介质及其内容由卷类型决定。
+		在Kubernetes中，一个卷被连接到一个Pod并在该Pod的容器之间共享。
+				Volume与Pod有相同的生命周期，并且它超出了Pod的容器 - 这允许在容器重启时保存数据。
+
+		在Pod中安装的目录由基础卷类型支持。卷类型决定了目录的属性，如大小，内容等。一些卷类型是：
+				emptyDir：	一旦在工作节点上调度了Pod，就会为该Pod创建
+							一个空的卷。该卷的生命是与Pod紧密结合的。
+							如果Pod死了， emptyDir的内容将被永久删除。  
+				hostPath：	使用 hostPath Volume Type，我们可以从主机共享一个目录到Pod。
+							如果Pod死亡，该卷的内容在主机上仍然可用。
+				gcePersistentDisk：	使用 gcePersistentDisk卷类型，我们可以将 
+									Google计算引擎（GCE）永久磁盘安装  到Pod中。
+				awsElasticBlockStore：使用 awsElasticBlockStore卷类型，
+									我们可以将 AWS EBS卷安装 到Pod中。 
+				nfs：使用 nfs，我们可以将一个NFS共享挂载到一个Pod中。
+				iscsi：使用 iscsi，我们可以将一个iSCSI共享挂载到一个Pod中。	
+				secret：使用secret卷类型，将敏感信息（如密码）传递到Pod。
+				persistentVolumeClaim：我们可以 使用 persistentVolumeClaim将持久性卷附加到Pod。
+
+		Persistent Volumes：
+							Kubernetes用永久卷子系统为用户和管理员提供了管理和使用存储的API。
+								要管理卷，它使用PersistentVolume（PV）API资源类型并使用它，
+								它使用PersistentVolumeClaim（PVC）API资源类型。
+							持久卷是集群中的网络连接存储器，由管理员配置。
+					持久性卷可以由管理员静态调配，或者根据StorageClass资源动态调配。
+							StorageClass包含预定义的置备程序和参数以创建一个持久性卷
+					支持使用持久卷管理存储的一些卷类型是：	
+								GCEPersistentDisk
+								AWSElasticBlockStore
+								AzureFile
+								NFS
+								iSCSI
+								CephFS
+								Cinder
+					例子：							
+								  apiVersion: v1
+								  kind: PersistentVolume
+								  metadata:
+									name: pv0003
+								  spec:
+									capacity:
+									  storage: 5Gi
+									accessModes:
+									  - ReadWriteOnce
+									persistentVolumeReclaimPolicy: Recycle
+									storageClassName: slow
+									mountOptions:
+									  - hard
+									  - nfsvers=4.1
+									nfs:
+									  path: /tmp
+									  server: 172.17.0.2				
+							
+		Persistent Volume Claims：
+				PersistentVolumeClaim（PVC）是用户存储的请求。用户根据大小，
+						访问模式等请求持久性卷资源。一旦找到合适的持久性卷，
+						它将被绑定到Persistent Volume Claims
+								https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS158x+2T2017/courseware/54ede01cfb294cbebc5f69720744727d/c62bc66c97f24fa490cf42b58abc455b/?child=first				
+						成功绑定后，可以在Pod中使用PersistentVolumeClaim资源。
+						用户完成工作后，可以释放附加的持续卷。底层的持久卷可以被回收和回收以备将来使用。 
+				
+		在典型的应用程序中，我们有不同的层次：
+				后端
+				前端
+				缓存等		
+
+				
+				
+				pod详解：
+
+				apiVersion: v1            //版本
+				kind: pod                 //类型，pod
+				metadata:                 //元数据
+				  name: String            //元数据，pod的名字
+				  namespace: String       //元数据，pod的命名空间
+				  labels:                 //元数据，标签列表
+					- name: String        //元数据，标签的名字
+				  annotations:            //元数据,自定义注解列表
+					- name: String        //元数据,自定义注解名字
+				spec:                     //pod中容器的详细定义
+				  containers:             //pod中的容器列表，可以有多个容器
+				  - name: String
+					image: String         //容器中的镜像
+					imagesPullPolicy: [Always|Never|IfNotPresent]//获取镜像的策略
+					command: [String]     //容器的启动命令列表（不配置的话使用镜像内部的命令）
+					args: [String]        //启动参数列表
+					workingDir: String    //容器的工作目录
+					volumeMounts:         //挂载到到容器内部的存储卷设置
+					- name: String
+					  mountPath: String
+					  readOnly: boolean
+					ports:                //容器需要暴露的端口号列表
+					- name: String
+					  containerPort: int  //容器要暴露的端口
+					  hostPort: int       //容器所在主机监听的端口（容器暴露端口映射到宿主机的端口）
+					  protocol: String
+					env:                  //容器运行前要设置的环境列表
+					- name: String
+					  value: String
+					resources:            //资源限制
+					  limits:
+						cpu: Srting
+						memory: String
+					  requeste:
+						cpu: String
+						memory: String
+					livenessProbe:         //pod内容器健康检查的设置
+					  exec:
+						command: [String]
+					  httpGet:             //通过httpget检查健康
+						path: String
+						port: number
+						host: String
+						scheme: Srtring
+						httpHeaders:
+						- name: Stirng
+						  value: String 
+					  tcpSocket:           //通过tcpSocket检查健康
+						port: number
+					  initialDelaySeconds: 0//首次检查时间
+					  timeoutSeconds: 0     //检查超时时间
+					  periodSeconds: 0      //检查间隔时间
+					  successThreshold: 0
+					  failureThreshold: 0
+					  securityContext:      //安全配置
+						privileged: falae
+					restartPolicy: [Always|Never|OnFailure]//重启策略
+					nodeSelector: object    //节点选择
+					imagePullSecrets:
+					- name: String
+					hostNetwork: false      //是否使用主机网络模式，默认否
+				  volumes:                  //在该pod上定义共享存储卷
+				  - name: String
+					meptyDir: {}
+					hostPath:
+					  path: string
+					secret:                 //类型为secret的存储卷
+					  secretName: String
+					  item:
+					  - key: String
+						path: String
+					configMap:             //类型为configMap的存储卷
+					  name: String
+					  items:
+					  - key: String
+						path: String
+		
+		
+		创建一个deployment，它创建了一个ReplicaSet并且创建三个pod
+				
+					apiVersion: apps/v1beta2 
+					kind: Deployment
+					metadata:
+					  name: nginx-deployment
+					  labels:
+						app: nginx
+					spec:
+					  replicas: 3
+					  selector:
+						matchLabels:
+						  app: nginx
+					  template:
+						metadata:
+						  labels:
+							app: nginx
+						spec:
+						  containers:
+						  - name: nginx
+							image: nginx:1.7.9
+							ports:
+							- containerPort: 80
+
+
+			一个名称nginx-deployment的deployment已创建，由该metadata: name字段指示。
+			deployment将创建三个复制的Pod，由该replicas字段指示。
+			该selector字段定义了Deployment如何查找要管理的Pod。在这种情况下，
+					我们只需选择Pod模板（app: nginx）中定义的一个标签。然而，
+					只要Pod模板本身满足规则，更复杂的选择规则也是可能的。
+			Pod模板的规范或template: spec字段表示该Pods运行一个容器nginx，
+					该容器在版本1.7.9上运行nginx Docker Hub映像。
+			部署将打开端口80供Pod使用。
+			注意：matchLabels是{key，value}对的映射。matchLabels映射中的单个
+					{key，value}等同于matchExpressions的一个元素，其键值字段为“key”，
+					运算符为“In”，值数组仅包含“value”。要求是和。
+
+			该template字段包含以下说明：
+					pod被标记 app: nginx
+					创建一个容器并将其命名nginx。
+					nginx在版本上运行图像1.7.9。
+					打开端口，80以便容器可以发送和接受流量。
+
+
+
+
+
+
+
+
+
+				
+				
+项目地址：https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS158x+2T2017/courseware/81853c760a734a57a4ed40fe275dd867/e73ac77422954517b5c522587c154522/?child=first
+				
+		RSVP应用程序：
+				该应用程序由一个后端数据库和一个前端组成。对于后端，我们将使用MongoDB数据库，
+						对于前端，我们有一个基于Python Flask的应用程序。
+				在前端代码（rsvp.py）中，我们将查找数据库端点的MONGODB_HOST环境变量：
+						MONGODB_HOST = os.environ.get（'MONGODB_HOST'，'localhost'）
+						client = MongoCLient（MONGODB_HOST，27017）
+				通过一个后端和一个前端部署应用程序后，我们将扩展前端以探索Kubernetes的缩放功能。 
+		接下来，我们将部署MongoDB数据库 - 为此，我们需要为MongoDB创建一个Deployment和Service。
+
+		创建mongodb数据库：
+			使用以下内容创建一个rsvp-db.yaml文件：
+					apiVersion: extensions/v1beta1
+					kind: Deployment
+					metadata:
+					  name: rsvp-db
+					spec: 
+					  replicas: 1
+					  template:
+						metadata:
+						  labels:
+							appdb: rsvpdb
+						spec: 
+						  containers:
+						  - name: rsvpd-db
+							image: mongo:3.3
+							env:
+							- name: MONGODB_DATABASE
+							  value: rsvpdata
+							ports:
+							- containerPort: 27017
+				
+		并运行以下命令创建rsvp-db Deployment：		
+			kubectl create -f rsvp-db.yaml	
+				
+				
+		要为后端创建mongodb服务，请使用以下内容创建一个rsvp-db-service.yaml 文件：		
+					apiVersion: v1
+					kind: Service
+					metadata:
+					  name: mongodb
+					  labels:
+						app: rsvpdb
+					spec:
+					  ports:
+					  - port: 27017
+						protocol: TCP
+					  selector:
+						appdb: rsvpdb
+		并运行以下命令创建一个名为mongodb的服务来访问后端：		
+			kubectl create -f rsvp-db-service.yaml	
+		
+		由于我们没有指定任何ServiceType，mongodb将具有默认的ClusterIP ServiceType。
+				这意味着MongoDB服务将无法从外部访问。		
+		
+		接下来，我们将检查当前可用的Deployments 和service：		
+				kubectl get deployments
+				kubectl get services
+				
+		部署基于Python Flask的前端:
+				前端是使用基于Python Flask的微框架创建的
+				我们已经创建了一个名为teamcloudyuga/rsvpapp的Docker镜像，
+						我们在这个镜像中导入了应用程序的源代码。应用程序的代码
+						在从该映像创建的容器运行时执行。用于创建teamcloudyuga/rsvpapp
+						映像的Dockerfile		
+			接下来我们将通过以下步骤创建rsvp前端：	
+						要创建rsvp前端，请创建一个rsvp-web.yaml文件，其内容如下：		
+								apiVersion: extensions/v1beta1
+								kind: Deployment
+								metadata:
+								  name: rsvp
+								spec: 
+								  replicas: 1
+								  template:
+									metadata:
+									  labels:
+										app: rsvp
+									spec:
+									  containers:
+									  - name: rsvp-app
+										image: teamcloudyuga/rsvpapp
+										env:
+										- name: MONGODB_HOST
+										  value: mongodb
+										ports:
+										- containerPort: 5000
+										  name: web-port
+						
+						并运行以下命令创建 Deployment：
+								kubectl create -f rsvp-web.yaml
+						
+						在为前端创建Deployment时，我们将MongoDB服务的名称mongodb作为前端预期的环境变量。
+						请注意，在ports部分我们提到了containerPort 5000，并给出了它的web-port名称。
+								我们将在为rsvp应用程序创建服务时使用引用的web-port名称。这很有用，
+								因为我们可以在不更改Service的情况下更改底层的containerPort。
+				
+		为“rsvp”前端创建服务:
+			要为我们的前端创建rsvp服务，请创建一个包含以下内容的rsvp-web-service.yaml文件：
+						apiVersion: v1
+						kind: Service
+						metadata:
+						  name: rsvp
+						  labels:
+							apps: rsvp
+						spec:
+						  type: NodePort
+						  ports:
+						  - port: 80
+							targetPort: web-port
+							protocol: TCP
+						  selector:
+							app: rsvp
+			运行以下命令创建service：
+					kubectl create -f rsvp-web-service.yaml
+			我们刚才提到的TARGETPORT在ports部分，这将在未来端口的所有请求转发80的ClusterIP
+			到引用的web-port端口（5000所连接的pod）。我们可以描述服务并验证它。	
+				
+		接下来，我们将检查当前可用的部署和服务：		
+				kubectl get deployments
+				kubectl get services
+				
+		从Workstation访问RSVP应用程序：
+				在部署前端服务的同时，我们使用了NodePort作为ServiceType，
+						它已经在minikube VM上配置了端口31314来访问应用程序。
+				
+扩展前端：				
+		目前，我们有一个副本运行的前端。要将其缩放到4个副本，我们可以使用以下命令：		
+				kubectl scale --replicas=4 -f /tmp/rsvp-web.yaml		
+		我们可以通过查看部署来验证它是否正确缩放：		
+				kubectl get deployments 
+				
+		如果我们转到浏览器并刷新前端，会看到Serving from Host 文本中的hostname不断更改
+				rsvp-3654889312-b51fn，rsvp-3654889312-s7738等等。
+				这是因为主机名来自底层的Pod，当我们刷新页面时，我们从我们的服务打到不同的端点。
+				
+				
+		在部署应用程序时，我们可能需要传递像配置详细信息，密码等运行时参数。
+				假设我们需要为我们的客户部署10个不同的应用程序，对于每个客户，
+				我们只需要更改UI中公司的名称。然后，我们不必为每个客户创建
+				十个不同的Docker映像，我们可以只使用模板映像并将客户名称作
+				为运行时参数传递。在这种情况下，我们可以使用ConfigMap API资源。
+				同样，当我们想要传递敏感信息时，我们可以使用Secret API资源。
+
+				
+						vi myweb-rc.yaml
+						kind: ReplicationController
+						metadata:
+						  name: myweb
+						spec:
+						  replicas: 5
+						  selector:
+							app: myweb
+						  template:
+							metadata:
+							  labels:
+								app: myweb
+							spec:
+							  containers:
+								- name: myweb
+								  image: kubeguide/tomcat-app:v1
+								  ports:
+								  - containerPort: 8080
+								  env:
+								  - name: MYSQL_SERVICE_HOST
+									value: 'mysql'
+								  - name: MYSQL_SERVICE_PORT
+									value: '3306'
+						
+				
+				
+				
+				
+				
+ConfigMaps：
+		ConfigMaps  允许我们从容器映像中分离配置细节。使用ConfigMaps，
+				我们可以将配置详细信息作为键值对传递，稍后可以使用Pod或任何
+				其他系统组件（如控制器）来使用它们。
+		我们可以通过两种方式创建ConfigMaps：				
+				From literal values
+				From files
+				
+		从Literal Values创建一个ConfigMap并获取其详细信息		
+				ConfigMap可以使用kubectl create命令创建，我们可以使用kubectl get命令获取值。
+			
+		创建ConfigMap：
+				kubectl create configmap my-config --from-literal = key1 = value1 --from-literal = key2 = value2 
+		获取my-config的ConfigMap详细信息：
+				kubectl get configmaps my-config -o yaml 
+
+		使用- o yaml选项，我们请求kubectl命令以yaml格式输出输出。我们可以看到，
+				对象具有ConfigMap类型，并且它在数据字段中有键值对。ConfigMap
+				和其他细节的名称是metadata字段的一部分。
+
+		创建一个配置文件,内容如下：
+				apiVersion: v1
+				kind: ConfigMap
+				metadata:
+				  name: customer1
+				data:
+				  TEXT1: Customer1_Company
+				  TEXT2: Welcomes You
+				  COMPANY: Customer1 Company Technology Pct. Ltd.
+						
+			kind，metadata和data字段，这些字段用于连接API服务器的v1端点	
+		如果我们将上面的配置命名为customer1-configmap.yaml，
+			那么我们可以使用以下命令创建ConfigMap：
+				kubectl create -f customer1-configmap.yaml 
+		
+		在pod内使用configmap：
+				以环境变量方式：
+					我们可以将给定键的值作为Pod内的环境变量，在创建Deployment时，
+								我们正在为customer1 ConfigMap 分配环境变量的值：
+							 ....
+							 containers:
+								  - name: rsvp-app
+									image: teamcloudyuga/rsvpapp
+									env:
+									- name: MONGODB_HOST
+									  value: mongodb
+									- name: TEXT1
+									  valueFrom:
+										configMapKeyRef:
+										  name: customer1
+										  key: TEXT1
+									- name: TEXT2
+									  valueFrom:
+										configMapKeyRef:
+										  name: customer1
+										  key: TEXT2
+									- name: COMPANY
+									  valueFrom:
+										configMapKeyRef:
+										  name: customer1
+										  key: COMPANY
+        					 ....
+				通过以上步骤，我们将把TEXT1环境变量设置为Customer1_Company，
+					将TEXT2环境变量设置为Welcomes You，					
+		
+				以卷的方式：
+					我们可以将一个ConfigMap作为一个Volume装入一个Pod中。对于每个密钥，
+					我们将在安装路径中看到一个文件，并且该文件的内容成为相应密钥的值。
+		
+		
+		secret：
+				假设我们有一个WordPress的博客应用程序，其中我们的wordpress前端使用
+						密码连接到MySQL数据库后端。在创建用于wordpress的部署时，
+						我们可以在部署的YAML文件中放下MySQL密码，但密码不受保护。
+						任何有权访问配置文件的人都可以使用密码。
+		
+				Secret对象可以帮助我们解决这个问题，我们可以以键值对的形式共享诸如密码、
+						令牌或键之类的敏感信息，类似于configmap，通过控制如何使用
+						secret中的信息从而降低风险
+				在Deployments或其他系统组件中，secret对象被引用而不被公开
+				Secret数据在etcd中以纯文本形式存储是非常重要的  。
+						管理员必须限制对API服务器和etcd 的访问  。		
+		
+		
+				创建secret：
+						要使用kubectl create secret命令创建一个Secret ，
+								我们需要先创建一个带有密码的文件，然后将其作为参数传递。
+						创建一个密码文件：
+								echo 'mysqlpassword' > password.txt
+		
+						确保文件中没有尾随换行符，在我们的密码之后。要删除任何换行符，我们可以使用tr命令：
+								tr -Ccsu '\n' < password.txt > .strippedpassword.txt && mv .strippedpassword.txt password.txt
+						创建Secret ：
+								kubectl create secret generic my-password --from-file=password.txt
+		
+		secret的get和describe：
+				分析下面的get和describe的例子，我们可以看到他们没有揭示secret的内容。该类型被列为不透明。
+								kubectl get secret my-password
+								kubectl describe secret my-password
+		
+		手动创建一个secret：
+				生成密码：
+						cat password.txt | base64 
+							bXlzcWxwYXN3b3JkCg ==
+						
+				然后在配置文件中使用它：
+						apiVersion: v1
+						kind: Secret
+						metadata:
+						  name: my-password
+						type: Opaque
+						data:
+						  password: bXlzcWxwYXN3b3JkCg==			
+									
+				请注意，base64编码不做任何加密，任何人都可以轻松解码：
+						echo "bXlzcWxwYXN3b3JkCg==" | base64 --decode
+				因此，请确保您不要在源代码中提交一个Secret的配置文件。
+			
+		在pod内使用secret：
+				我们可以通过将容器安装为数据卷，或者将它们暴露为环境变量，来使容器在容器中使用容器。
+			
+		以环境变量的方式使用secret：
+				如以下示例所示，我们可以引用一个Secret并将其密钥的值分配为一个环境变量（WORDPRESS_DB_PASSWORD）：
+			
+						.....
+							 spec:
+						  containers:
+						  - image: wordpress:4.7.3-apache
+							name: wordpress
+							env:
+							- name: WORDPRESS_DB_HOST
+							  value: wordpress-mysql
+							- name: WORDPRESS_DB_PASSWORD
+							  valueFrom:
+								secretKeyRef:
+								  name: my-password
+								  key: password.txt
+						.....
+			
+		以文件的方式使用secret：https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod
+				们也可以在Pod中安装Secret作为Volume。将为秘密中提到的每个密钥创建一个文件，其内容将是相应的值。
+				创建一个secret或使用现有的secret。多个pods可以引用相同的secret。
+				
+				例如：
+
+						apiVersion: v1
+						kind: Pod
+						metadata:
+						  name: mypod
+						spec:
+						  containers:
+						  - name: mypod
+							image: redis
+							volumeMounts:
+							- name: foo
+							  mountPath: "/etc/foo"
+							  readOnly: true
+						  volumes:
+						  - name: foo
+							secret:
+							  secretName: mysecret
+									
+			
+			
+			
+
+
+https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS158x+2T2017/courseware/386d98d616a44757bbc389012e4c2f6a/f27240d5efe748d286b6155ceadbd450/?child=first
+
+
+
+
+		
