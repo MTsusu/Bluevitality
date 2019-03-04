@@ -1,0 +1,93 @@
+实验环境：
+
+node1:192.168.1.6
+
+node2:192.168.1.8
+
+iscsi server:192.168.1.10
+
+一、ISCSI服务器端：
+
+1、安装程序包：
+
+cd /mnt/ClusterStorage
+
+rpm -ivh perl-Config-General*
+
+rpm -ivh scsi-target-utils*
+
+Service tgtd start /etc/init.d/tgtd start
+
+2、定义ISCSI目标名称：
+
+tgtadm --lld iscsi --op new --mode target --tid=1 --targetname iqn.2012-08.com.example:storage.disk1.amiens.sys1.xyz
+
+3、查看配置需求：
+
+tgtadm --lld iscsi --op show --mode target
+
+4、创建共享存储（两种方式用其一即可）
+
+A、创建文件作块设备
+
+dd if=/dev/zero of=/disk1 bs=1M count=16384
+
+B、将块设备添加到目标
+
+tgtadm --lld iscsi --op new --mode logicalunit --tid 1 --lun 1 -b /disk1
+
+C、用添加的硬盘作共享存储（/dev/sdb）
+
+tgtadm --lld iscsi --op new --mode logicalunit --tid 1 --lun 1 -b /dev/sdb
+
+5、目标接受任何发起者
+
+tgtadm --lld iscsi --op bind --mode target --tid 1 -I ALL
+
+6、再次查看配置
+
+tgtadm --lld iscsi --op show --mode target
+
+7、确保TCP端口3260可以访问的远程主机
+
+# tgt-admin --dump > /etc/tgt/targets.conf
+
+# chkconfig tgtd on
+
+8、对于LINUX5.3之前的版本，必须做如下：
+
+echo >> /etc/rc.local <<EOF
+
+tgtadm --lld iscsi --op new --mode target --tid=1 --targetname iqn.2012-08.com.example:storage.disk1.amiens.sys1.xyz
+
+tgtadm --lld iscsi --op new --mode logicalunit --tid 1 --lun 1 -b /disk1
+
+tgtadm --lld iscsi --op bind --mode target --tid 1 -I ALL
+
+EOF
+
+# chkconfig tgtd on
+
+二、客户端
+
+1、安装程序包：
+
+cd /mnt/Server/
+
+rpm -ivh iscsi-initiator-utils*
+
+2、启动iscsid服务,使它能在系统启动时启动
+
+service iscsid start
+
+chkconfig iscsid on
+
+3、给定的主机（IP地址）获取可用目标的清单
+
+iscsiadm -m discovery -t sendtargets -p 192.168.1.10
+
+4、登录到可用的目标（IP地址）
+
+iscsiadm --mode node --targetname iqn.2012-08.com.example:storage.disk1.amiens.sys1.xyz -l
+
+iscsiadm -m node -T targetname -p ipaddress -l

@@ -1,4 +1,6 @@
-#假设您要限制对nginx服务的访问，以便只有带有标签的pod access: true才能查询它。为此，创建一个NetworkPolicy仅允许来自这些pod的连接：
+#假设限制对nginx服务的访问以便只有带有标签的pod access: true才能查询。
+#为此，创建NetworkPolicy仅允许来自这些pod的连接：
+
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -12,8 +14,10 @@ spec:
     - podSelector:
         matchLabels:
           access: "true"
-  ---
-  apiVersion: networking.k8s.io/v1
+
+---
+
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: test-network-policy

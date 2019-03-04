@@ -1,8 +1,12 @@
 #### Flannel 网络设置
 ```txt
+
+CNI插件是可执行文件，会被kubelet调用:  ( 以下参数在使用kudeadm时是默认设置 )
+kubelet --network-plugin=cni --cni-conf-dir /etc/cni/net.d --cni-bin-dir /opt/cni/bin
+
 备忘：
 Flannel 基于3层网络实现虚拟的2层网络
-Flannel 为每个host分配一个subnet，容器从这个subnet中分配IP，这些IP可以在host间路由，容器间无需使用nat和端口映射即可实现跨主机通信
+Flannel 为每个host分配一个subnet，容器从这个subnet中分配IP，这些IP可以在host间路由，容器间无需使用nat和端口映射即通信
 每个subnet都是从一个更大的IP池中划分的，flannel会在每个主机上运行一个叫flanneld的agent，其职责就是从池子中分配subnet
 Flannel 使用etcd存放网络配置、已分配 的subnet、host的IP等信息
 Flannel 数据包在主机间转发是由backend实现的，目前已经支持 UDP、VxLAN、host-gw、AWS VPC和GCE路由等多种

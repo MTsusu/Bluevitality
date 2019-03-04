@@ -201,7 +201,7 @@ node2     NotReady   8s
 NAME         CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 kubernetes   192.168.0.1   <none>        443/TCP   22m
 ```
-#### 在k8s集群内使用私有的镜像服务器
+#### 设置私有仓库的认证信息
 ```bash
 #创建docker registry secret
 [root@node1 ~]# kubectl create secret docker-registry regsecret \

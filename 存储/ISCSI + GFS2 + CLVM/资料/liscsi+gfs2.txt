@@ -1,0 +1,83 @@
+集群存储lvm+iscsi+gfs2
+
+环境：
+
+集群名称:mycluster
+
+节点数:2
+
+1 server25.example.com
+
+2 host25.example.com
+
+宿主机：desktop25.example.com 192.168.0.25
+
+虚拟机1：server25.example.com 192.168.0.125
+
+虚拟机2:host25.example.com 192.168.0.225
+
+--------------------------------------------------------------------
+
+先停止集群中正在运行的服务，此出为apache
+
+本机创建逻辑卷:
+
+vgs
+
+VG #PV #LV #SN Attr VSize VFree
+
+vol0 1 6 2 wz--n- 27.31g 2.81g
+
+lvceate -n mycluster -L 1G vol
+
+宿主机iscsi:
+
+yum install scsi-target-utils.x86_64 -y
+
+vim /etc/tgt/targets.conf
+
+<target mycluser.example:server.target2>
+
+backing-store /dev/vol0/mycluster
+
+</target>
+
+service tgtd start
+
+虚拟机：
+
+yum install iscsi-initiator-utils y
+
+yum install gfs2-utils.x86_64 -y
+
+iscsiadm -m discovery -t st -p 192.168.0.25
+
+iscsiadm -m node -l
+
+创建分区
+
+fdisk -cu /dev/sda
+
+格式化
+
+mkfs.gfs2 -p lock_dlm -t mycluster:gfs -j 3 /dev/sda1
+
+p 定义为 DLM 锁方式,如果不加此参数,当在两个系统中同时挂载此分区时就会像 EXT3 格式一
+
+样,两个系统的信息不能同步
+
+t apacheha DLM 锁所在的表名字,就是你的集群的名字 gfs 分区的卷标
+
+j GFS 分区中最多支持多少个节点同时挂载,这个可以在使用中动态调整 ,通常设定值为节点数+1
+
+挂载：
+
+[root@server25 ~]# blkid /dev/sda1
+
+/dev/sda1: LABEL="mycluster:gfs" UUID="7dcb5300-08e2-3676-49e2-0b7b37a47ea3" TYPE="gfs2"
+
+[root@server25 ~]# vim /etc/fstab
+
+UUID="7dcb5300-08e2-3676-49e2-0b7b37a47ea3" /var/www/html gfs2 _netdev 0 0
+
+[root@server25 ~]# mount -a

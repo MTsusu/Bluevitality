@@ -12,7 +12,6 @@
 --enable-aggregator-routing=true
 
 
-
 #ApiService通常被extension-apiserver实现，extension-apiserver运行在集群中的一个Pod里。
 #APIService表示特定的GroupVersion的中的server
 
