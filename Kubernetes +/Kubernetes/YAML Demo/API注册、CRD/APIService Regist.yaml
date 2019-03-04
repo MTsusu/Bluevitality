@@ -24,7 +24,7 @@ metadata:
   name: v1alpha1.custom-metrics.metrics.k8s.io    #该API的名字
 spec:
   insecureSkipTLSVerify: true     #当与该服务通信时禁用TLS证书认证
-  group: custom-metrics.metrics.k8s.io
+  group: custom-metrics.metrics.k8s.io  #API组
   groupPriorityMinimum: 1000    #该组API的处理优先级，主要排序是基于groupPriorityMinimum，该数字越大表明优先级越高
   versionPriority: 15   #控制其组内的API版本的顺序。必须大于零
   service:

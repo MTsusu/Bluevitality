@@ -3,7 +3,7 @@
 ```txt
 流程：
 
-  kubernetes、Docker、Rabbitmq、Redis、jenkins、Tomcat、Logstash、Elastic Stack、kibana
+  kubernetes、Docker、Rabbitmq、Redis、sonar、Tomcat、Logstash、Elastic Stack、kibana
   Ansible、Zabbix、Promethues、grafana、kafka
   Python,前端+开发：HTML5/CSS3/Javascript/VUE、Django+Flask
   # 研究：Corosync + Pacemaker + GFS2 + LVM2 + crmsh
