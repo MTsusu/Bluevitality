@@ -121,12 +121,12 @@ etcdctl get /coreos.com/network/subnets/172.22.9.0-24 | python -m json.tool
 #node上的flannel service在启动时会以如下的方式运行：
 #/usr/bin/flanneld -etcd-endpoints=http://192.63.63.1:2379 -etcd-prefix=/coreos.com/network/config
 
-#启动后会从etcd读取flannel的配置信息，获取一个subnet并开始监听etcd数据的变化
+#启动后会从etcd读取flannel的配置信息，获取一个subnet (即属于该Pod的使用的子网信息文件) 并开始监听etcd数据的变化
 #并且还会配置相关backend并将信息写入/run/flannel/subnet.env
 #Docker安装完成后，需修改其启动参数以使其能够使用flannel进行IP分配及网络通讯
 #生成的环境变量文件包含了当前主机要使用flannel通讯的相关参数，如下：
 FLANNEL_NETWORK=172.22.0.0/16
-FLANNEL_SUBNET=172.22.255.0/24
+FLANNEL_SUBNET=172.22.255.0/24    #Docker读取此段来生成在整个集群范围内唯一的本机桥子网段，从而保证Pod地址唯一。
 FLANNEL_MTU=1450
 FLANNEL_IPMASQ=false
 #可使用flannel提供的脚本将subnet.env转写成Docker启动参数，创建好的启动参数默认生成在/run/docker_opts.env中：
@@ -162,15 +162,14 @@ DOCKER_NETWORK_OPTIONS=" --bip=172.22.9.1/24 --ip-masq=true --mtu=1450"
 
 # ip route #基于VXLAN的环境下：
 default via 192.168.166.2 dev ens33 proto static metric 100 
-172.22.0.0/16 dev flannel.1         #flannel
-172.22.9.0/24 dev docker0 proto kernel scope link src 172.22.9.1    #docker0 ---> flannel
+172.22.0.0/16 dev flannel.1         #flannel ( 所有相关网段的路由都经Flannel使用默认的VXLAN协议进行封装 )
+172.22.9.0/24 dev docker0 proto kernel scope link src 172.22.9.1    #docker0 ---> flannel ---> ens33 ---> ...
 192.168.166.0/24 dev ens33 proto kernel scope link src 192.168.166.102 metric 100
 
 
-
-CNI：
-是Container Network Interface的是一个标准的，通用的接口。现在容器平台：docker，kubernetes，mesos，容器网络解决方案。
-flannel，calico，weave。只要提供标准的接口就能为同样满足该协议的所有容器平台提供网络功能，而CNI正是这样的标准接口协议。
+#CNI：
+#是Container Network Interface的是一个标准的，通用的接口。现在容器平台：docker，kubernetes，mesos，容器网络解决方案。
+#flannel，calico，weave。只要提供标准的接口就能为同样满足该协议的所有容器平台提供网络功能，而CNI正是这样的标准接口协议。
 
 
 #Flannel为container提供网络解决方案。
