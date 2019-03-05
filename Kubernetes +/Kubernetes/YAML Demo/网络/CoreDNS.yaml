@@ -69,3 +69,124 @@ data:
 
 #注：以下配置仅针对kube-dns
 stubDomains(可选) :	  使用DNS后缀键（如“acme.local”）的JSON映射，以及由DNS IP的JSON数组组成的值
+
+
+# 部署CoreDNS之后还需要修改Kubelet的启动参数、eg：
+[Unit]
+Description=Kubernetes Kubelet Master
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+Environment=KUBELET_IMAGE_TAG=v1.6.2
+ExecStartPre=/usr/bin/mkdir -p /var/log/containers
+ExecStart=/opt/bin/kubelet \
+  --api-servers=http://127.0.0.1:8080 \
+  --register-schedulable=false \
+  --cni-conf-dir=/etc/kubernetes/cni/net.d \
+  --container-runtime=docker \
+  --allow-privileged=true \
+  --pod-manifest-path=/etc/kubernetes/manifests \
+  --hostname-override=172.16.71.200 \
+  --pod-infra-container-image=172.16.80.94/mir/pause-amd64:3.0 \
+  --v=3 \
+  --cluster-dns=10.3.0.10 \             #指明CoreDNS所在的IP地址
+  --cluster-domain=cluster.local. \     #指明搜索域
+  --resolv-conf=/etc/resolv.conf
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+--- # CoreDNS YAML:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        log stdout
+        health
+        kubernetes cluster.local 10.3.0.0/24
+        proxy . /etc/resolv.conf
+        cache 30
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    k8s-app: coredns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "CoreDNS"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: coredns
+  template:
+    metadata:
+      labels:
+        k8s-app: coredns
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
+    spec:
+      containers:
+      - name: coredns
+        image: coredns/coredns:latest
+        imagePullPolicy: Always
+        args: [ "-conf", "/etc/coredns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+      dnsPolicy: Default
+      volumes:
+        - name: config-volume
+          configMap:
+            name: coredns
+            items:
+            - key: Corefile
+              path: Corefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: coredns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "CoreDNS"
+spec:
+  selector:
+    k8s-app: coredns
+  clusterIP: 10.3.0.10
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP

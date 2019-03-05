@@ -1,0 +1,156 @@
+#配置文件中配置的三个模块：global、rule_files、scrape_configs
+#global：控制Prometheus服务器的全局配置
+#rule_files：指定希望Prometheus服务器加载的任何规则的位置
+#scrape_configs：控制Prometheus监视的资源
+
+#启动普罗米修斯服务器：./prometheus --config.file=prometheus.yml
+
+
+#注：( https://stackoverflow.com/questions/53365191/monitor-custom-kubernetes-pod-metrics-using-prometheus )
+#若Pod需要被监控，需要添加如下注释：
+#metadata:
+#  annotations:
+#    prometheus.io/scrape: 'true'
+#    prometheus.io/path: '/data/metrics'
+#    prometheus.io/port: '80
+
+#配置说明:
+
+global:
+  scrape_interval:     15s    #收集信息的频率
+  evaluation_interval: 15s    #评估规则的频率（使用规则创建新的时间序列并生成警报）
+
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+scrape_configs:
+  #由于Prometheus还将自己的数据公开为HTTP端点，因此它可以抓取并监控自身的健康状况:
+  - job_name: prometheus  #目标所属的已配置作业名称
+    metrics_path: /metrics  #默认
+    scheme: http  #默认
+    static_configs:   #静态方式配置的监控目标，访问：http://localhost:9090/metrics
+      - targets: ['localhost:9090']   
+
+
+#Format: <metric name>{<label name>=<label value>, ...}
+
+#表达式：
+#要使用Prometheus的内置表达式浏览器，到 http://localhost:9090/graph 并在"Graph"选项卡中选择"Console"视图
+#如果我们只对导致HTTP代码的请求感兴趣：promhttp_metric_handler_requests_total{code="200"}
+#要计算返回的时间序列数：count(promhttp_metric_handler_requests_total)
+#参考：https://prometheus.io/docs/prometheus/latest/querying/basics/
+
+#若实例是健康的即可达，若为0则抓取失败：up{job="<job-name>", instance="<instance-id>"}
+#获取数据时的持续时间:  scrape_duration_seconds{job="<job-name>", instance="<instance-id>"}
+#目标暴露的样本数:  scrape_samples_scraped{job="<job-name>", instance="<instance-id>"}
+
+#绘制表达式图表
+#状态代码200的每秒HTTP请求率:   rate(promhttp_metric_handler_requests_total{code="200"}[1m])
+#系统模式下每秒平均花费的CPU时间：  rate(node_cpu_seconds_total{mode="system"}[1m])
+#非root用户可用的文件系统空间： node_filesystem_avail_bytes
+#每秒接收的平均网络流量： rate(node_network_receive_bytes_total[1m])
+
+
+--- #使用预制的规则将表达式的结果记录到时间序列中:
+#记录在5分钟的窗口内测量的rpc_durations_seconds_count所有实例（但保留job和service维度）的平均每秒实例RPC()的速率
+# avg(rate(rpc_durations_seconds_count[5m])) by (job, service)
+
+rule_files:
+  - 'prometheus.rules.yml'    #  cat prometheus.rules.yml
+#    groups:
+#    - name: example
+#      rules:
+#      - record: job_service:rpc_durations_seconds_count:avg_rate5m    #新度量标准名称
+#        expr: avg(rate(rpc_durations_seconds_count[5m])) by (job, service)  #表达式
+
+--- # 将多组端点添加到单个作业中，为每组目标添加额外的标签
+
+scrape_configs:
+  - job_name:  'example-random'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8080', 'localhost:8081']
+        labels:
+          group: 'production'
+      - targets: ['localhost:8082']
+        labels:
+          group: 'canary'
+
+--- #基于DNS的服务发现: ( 定期查询以发现目标列表。从中读取要联系的DNS服务器 )
+#此服务发现方法仅支持基本的DNS A，AAAA和SRV记录查询，但不支持RFC6763中指定的高级DNS-SD方法。
+
+    
+    dns_sd_config:
+      names:
+        " A list of DNS domain names to be queried."
+      [ type: <query_type> | default = 'SRV' ]    # The type of DNS query to perform.
+      [ port: <number>]   # The port number used if the query type is not SRV.
+      [ refresh_interval: <duration> | default = 30s ]  # The time after which the provided names are refreshed.
+
+
+--- #通过Consul动态发现、并Pull指标
+
+global:
+  scrape_interval: 5s
+  scrape_timeout: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: consul_sd
+    metrics_path: /metrics
+    scheme: http
+    consul_sd_configs:
+      - server: consul:8500   #指定了Consul的访问地址
+        scheme: http
+        services:   #注册到Consul中的实例信息
+          - node_exporter
+          - cadvisor 
+
+--- #kubernetes_sd_configs
+
+ # https://github.com/prometheus/prometheus/blob/master/documentation/examples/prometheus-kubernetes.yml#L119
+- job_name: 'kubernetes-services'
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  kubernetes_sd_configs:
+    - role: service
+  relabel_configs:
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe] #监控所有Service声明中有 prometheus.io/probe: "true" 注释的服务!
+      action: keep
+      regex: true
+    - source_labels: [__address__]
+      target_label: __param_target
+    - target_label: __address__
+      replacement: blackbox
+    - source_labels: [__param_target]
+      target_label: instance
+    - action: labelmap
+      regex: __meta_kubernetes_service_label_(.+)
+    - source_labels: [__meta_kubernetes_namespace]
+      target_label: kubernetes_namespace
+    - source_labels: [__meta_kubernetes_service_name]
+      target_label: kubernetes_name
+
+#注：
+在Service、Pod中的注释段增加：
+ prometheus.io/probe: "true"      #?
+ prometheus.io/scrape: "true"     #是否启用普罗米休息监控
+ prometheus.io/path: "/metric"    #指标位置
+ prometheus.io/port: "1234"       #指标HTTP端口
+
+
+--- # Other
+# This scrape config scrapes kubelets
+- job_name: 'kubernetes-nodes'
+  kubernetes_sd_configs:
+    - role: node
+  tls_config:
+    insecure_skip_verify: true
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+  relabel_configs:
+  - target_label: __scheme__
+    replacement: https
+  - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]    #要获取的元数据信息？
+    target_label: instance
