@@ -5,32 +5,131 @@
 
 #启动普罗米修斯服务器：./prometheus --config.file=prometheus.yml
 
-
 #注：( https://stackoverflow.com/questions/53365191/monitor-custom-kubernetes-pod-metrics-using-prometheus )
-#若Pod需要被监控，需要添加如下注释：
+#若K8S的资源需要被监控，需要对该资源添加如下注释：( 例子为Pod使用 )
 #metadata:
 #  annotations:
+#    prometheus.io/probe: "true"
 #    prometheus.io/scrape: 'true'
 #    prometheus.io/path: '/data/metrics'
 #    prometheus.io/port: '80
 
-#配置说明:
+#配置说明: 
+#------------------------------------------------------------------------------------------------------------
 
 global:
   scrape_interval:     15s    #收集信息的频率
   evaluation_interval: 15s    #评估规则的频率（使用规则创建新的时间序列并生成警报）
+  scrape_timeout:      10s    #每次收集数据的超时时间
 
-rule_files:
+external_labels:    #当Prometheus和外部系统 (联邦, 远程存储, Alertmanager) 通信时添加标签到任意的时间序列或者报警
+  monitor: codelab
+  foo: bar
+
+rule_files:   #引入外部的规则文件 ( 可使用通配符 )
   # - "first.rules"
   # - "second.rules"
+  #- "my/*.rules"
+
+remote_write:   #远程写入功能相关的设置
+  - url: http://remote1/push
+    write_relabel_configs:
+    - source_labels: [__name__]
+      regex: expensive.*
+      action: drop
+  - url: http://remote2/push
+
+remote_read:    #远程读取相关功能的设置
+  - url: http://remote1/read
+    read_recent: true
+  - url: http://remote3/read
+    read_recent: false
+    required_matchers:
+      job: special
 
 scrape_configs:
   #由于Prometheus还将自己的数据公开为HTTP端点，因此它可以抓取并监控自身的健康状况:
-  - job_name: prometheus  #目标所属的已配置作业名称
+  - job_name: prometheus  #目标所属的已配置作业名称 ( 自动附加的job labels, 必须唯一 )
+    honor_labels: true   #标签冲突时,若为true以抓取的数据为准并忽略服务器中的, 若为false为通过重命名来解决冲突
     metrics_path: /metrics  #默认
     scheme: http  #默认
     static_configs:   #静态方式配置的监控目标，访问：http://localhost:9090/metrics
       - targets: ['localhost:9090']   
+  
+    file_sd_configs:    #文件服务发现配置 列表
+      - files:  #从这些文件中提取目标
+        - foo/*.slow.json
+        - foo/*.slow.yml
+        - single/file.yml
+        refresh_interval: 10m  #刷新文件的时间间隔
+      - files:
+        - bar/*.yaml
+    
+    static_configs:   #使用job名作为label的静态配置目录的列表
+      - targets: ['localhost:9090', 'localhost:9191']
+        labels:
+          my:   label
+          your: label
+
+    #目标节点重新打标签的配置列表，重新标记是功能强大的工具，可以在抓取目标之前动态重写目标的标签集。 可配置多个，按先后顺序应用
+    relabel_configs:
+      - source_labels: [job, __meta_dns_name]   #从现有的标签中选择源标签, 最后会被替换、保持、丢弃
+        regex:  (.*)some-[regex]   #正则表达式, 将会提取source_labels中匹配的值
+        target_label:  job   #在替换动作中将结果值写入的标签.
+        replacement:   foo-${1}  #如果正则表达匹配, 那么替换值. 可以使用正则表达中的捕获组
+        # action defaults to 'replace'
+      - source_labels: [abc]  # 将abc标签的内容复制到cde标签中
+        target_label:  cde
+      - replacement:   static
+        target_label:  abc
+      - regex:
+        replacement:   static
+        target_label:  abc
+
+  - job_name: service-x
+    basic_auth:   # HTTP basic 认证信息
+      username: admin_name
+      password: "multiline\nmysecret\ntest"
+    scrape_interval: 50s  # 该job多久收集一次
+    scrape_timeout:  5s
+    sample_limit: 1000    #每次收集样本数据的限制. 0为不限制
+    metrics_path: /my_path  #从目标获取数据的 HTTP 路径
+    scheme: https  #配置用于请求的协议方案
+
+    dns_sd_configs:   #DNS服务发现配置列表
+    - refresh_interval: 15s
+      names:  #要查询的DNS域名列表
+      - first.dns.address.domain.com
+      - second.dns.address.domain.com
+    - names:
+      - first.dns.address.domain.com
+
+    metric_relabel_configs:   #metric重新打标签的配置列表
+    - source_labels: [__name__]
+      regex:         expensive_metric.*
+      action:        drop
+
+  - job_name: service-kubernetes  #kubernetes服务发现列表
+    kubernetes_sd_configs:    
+    - role: endpoints   #必须写, 必须是: endpoints、service、pod、node、ingress
+      api_server: 'https://localhost:1234'
+      namespaces:     #可选的命名空间发现, 若省略则所有命名空间都会被使用
+        names:
+          - default
+      basic_auth:   # HTTP basic
+        username: 'myusername'
+        password: 'mysecret'
+
+alerting:   #Alertmanager相关的配置
+  alertmanagers:
+  - scheme: https
+    static_configs:
+    - targets:
+      - "1.2.3.4:9093"
+      - "1.2.3.5:9093"
+
+
+
 
 
 #Format: <metric name>{<label name>=<label value>, ...}
@@ -116,7 +215,7 @@ scrape_configs:
     module: [http_2xx]
   kubernetes_sd_configs:
     - role: service
-  relabel_configs:
+  relabel_configs:        #__开头的应该是普罗米修斯的元数据信息
     - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe] #监控所有Service声明中有 prometheus.io/probe: "true" 注释的服务!
       action: keep
       regex: true
@@ -133,13 +232,12 @@ scrape_configs:
     - source_labels: [__meta_kubernetes_service_name]
       target_label: kubernetes_name
 
-#注：
-在Service、Pod中的注释段增加：
- prometheus.io/probe: "true"      #?
- prometheus.io/scrape: "true"     #是否启用普罗米休息监控
- prometheus.io/path: "/metric"    #指标位置
- prometheus.io/port: "1234"       #指标HTTP端口
+#关于relabel_configs映射
 
+
+
+
+#--------------------------------------------------------------------------------------------------------------------
 
 --- # Other
 # This scrape config scrapes kubelets
@@ -154,3 +252,27 @@ scrape_configs:
     replacement: https
   - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]    #要获取的元数据信息？
     target_label: instance
+
+--- # Example: （ Promethues -->  relabel_configs）
+  selector:
+    matchLabels:
+      app: my-service
+  template:
+    metadata:
+      labels:
+        app: my-service
+      annotations:
+        prometheus: "true"
+        prometheus/port: "8888"
+
+# Promethues relabel_configs:
+- source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_port]  #即：http://10.52.9.79:8080;8888
+    #separator:     ';'               #指定分隔符
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)     #第一组：//10.52.9.79   第二组：具有原始端口的第二个非捕获组（如果存在）  #第三组：带注释的端口
+    replacement: ${1}:${2}            #将正则匹配住的内容替换为第一个分组和第二个分组的内容
+    target_label: __address__         #赋值给__address__字段
+
+
+
+
