@@ -1,0 +1,58 @@
+#Istio 内部会维护一个服务注册表，可以用 ServiceEntry 向其中加入额外的条目。通常这个对象用来启用对 Istio 服务网格之外的服务发出请求。
+#例如下面的 ServiceEntry 可以用来允许外部对 *.foo.com 域名上的服务主机的调用。
+
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: foo-ext-svc
+spec:
+  hosts:
+  - *.foo.com   #字段值可以是一个完全限定名，也可以是个通配符域名。其中包含的白名单，包含一或多个允许网格中服务访问的服务
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  - number: 443
+    name: https
+    protocol: HTTPS
+
+#ServiceEntry 的配置不仅限于外部服务，他可以有两种类型：网格内部和网格外部。
+#网格内的条目和其他的内部服务类似，用于显式的将服务加入网格。
+#可以用来把服务作为服务网格扩展的一部分加入不受管理的基础设置（例如加入到基于 Kubernetes 的服务网格中的虚拟机）中。
+#网格外的条目用于表达网格外的服务。对这种条目来说，双向 TLS 认证是禁止的，策略实现需要在客户端执行，而不像内部服务请求中的服务端执行。
+#只要 ServiceEntry 涉及到了匹配 host 的服务，就可以和 VirtualService 以及 DestinationRule 配合工作。
+#例如下面的规则可以和上面的 ServiceEntry 同时使用，在访问 bar.foo.com 的外部服务时，设置一个 10 秒钟的超时。
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bar-foo-ext-svc
+spec:
+  hosts:
+    - bar.foo.com
+  http:
+  - route:
+    - destination:
+        host: bar.foo.com
+    timeout: 10s
+
+#流量的重定向和转发、定义重试和超时以及错误注入策略都支持外部目标。然而由于外部服务没有多版本的概念，因此权重（基于版本）路由就无法实现了。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

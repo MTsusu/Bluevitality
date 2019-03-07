@@ -1,0 +1,39 @@
+#Gateway 为 HTTP/TCP 流量配置了一个负载均衡，多数情况下在网格边缘进行操作，用于启用一个服务的 Ingress 流量。
+#和 Kubernetes Ingress 不同，Istio Gateway 只配置四层到六层的功能（例如开放端口或者 TLS 配置）。
+#绑定一个 VirtualService 到 Gateway 上，用户就可以使用标准的 Istio 规则来控制进入的 HTTP 和 TCP 流量。
+
+#例如下面提供一个简单的 Gateway 代码，配合一个负载均衡，允许外部针对主机 bookinfo.com 的 https 流量：
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bookinfo-gateway
+spec:
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - bookinfo.com
+    tls:
+      mode: SIMPLE
+      serverCertificate: /tmp/tls.crt
+      privateKey: /tmp/tls.key
+#要为 Gateway 配置对应的路由，必须为定义一个同样 host 定义的 VirtualService，其中用 gateways 字段来绑定到定义好的 Gateway 上：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  hosts:
+    - bookinfo.com
+  gateways:
+  - bookinfo-gateway # <---- 绑定到 Gateway ！！
+  http:
+  - match:
+    - uri:
+        prefix: /reviews
+    route:
+    #...
+
+#虽然主要用于管理 Ingress 流量，Gateway 还可以用在纯粹的内部服务之间或者 egress 场景下使用。不管处于什么位置，所有的网关都可以以同样的方式进行配置和控制。

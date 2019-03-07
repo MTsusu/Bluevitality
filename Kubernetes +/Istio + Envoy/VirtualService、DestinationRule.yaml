@@ -1,0 +1,422 @@
+#Istio 中包含有四种流量管理配置资源，分别是 VirtualService、DestinationRule、ServiceEntry、以及 Gateway
+
+#部署Istio之前需要先修改：/etc/kubernetes/config
+#增加：KUBE_ALLOW_PRIV="--allow-privileged=true" 选项
+
+#使用istioctl对Deploy资源进行注入Sidecar并生成kubectl的执行文件：istioctl kube-inject -f  rc-v1.yaml > rc-v1-istio.yaml
+
+
+#Istio 对 Pod 和服务的要求：
+
+一：
+#需要给端口正确命名：服务端口必须进行命名。
+#端口名称只允许是<协议>[-<后缀>-]模式，其中<协议>部分可选择范围包括 http、http2、grpc、mongo 以及 redis，Istio 可以通过对这些协议的支持来提供路由能力。
+#例如 name: http2-foo 和 name: http 都是有效的端口名，但 name: http2foo 就是无效的。
+#如果没有给端口进行命名，或者命名没有使用指定前缀，那么这一端口的流量就会被视为普通 TCP 流量（除非显式的用 Protocol: UDP 声明 ）
+
+二：
+#关联服务：Pod 必须关联到 Kubernetes 服务，如果一个 Pod 属于多个服务，这些服务不能再同一端口上使用不同协议，例如 HTTP 和 TCP。
+
+三：
+#Deployment 应带有 app 以及 version 标签：在使用 Kubernetes Deployment 进行 Pod 部署的时候，建议显式的为 Deployment 加上 app 以及 version 标签。
+#每个 Deployment 都应该有一个有意义的 app 标签和一个用于标识 Deployment 版本的 version 标签。
+#app 标签在分布式跟踪的过程中会被用来加入上下文信息。Istio 还会用 app 和 version 标签来给遥测指标数据加入上下文信息。
+
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: details
+  #...
+spec:           #将所有访问details服务的HTTP类型流量转到目标服务details的含有"subset: v1"标签的子Pod中
+  hosts:        
+  - details     #FQDN:  details.default.svc.cluster.local
+    http:
+  - route:
+    - destination:
+        host: details
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: productpage
+  #...
+spec:
+  gateways:   #这里是gateways类型的Service
+  - bookinfo-gateway
+  - mesh
+    hosts:
+  - productpage
+    http:
+  - route:
+    - destination:
+        host: productpage
+        subset: v1      #特指服务下的某版本，通过对Server对象的Tag进行细分。
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  #...
+spec:
+  hosts:
+  - ratings
+    http:
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  #...
+spec:
+  hosts:
+  - reviews
+    http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  #...
+spec:
+  hosts:
+  - reviews   #所有访问服务reviews
+    http:     #HTTP类型的流量
+  - match:    #对此类流量进行匹配
+    - headers:
+        end-user:   #精确匹配end-user的值为exact
+          exact: jason    
+    route:    #对匹配住的流量执行的动作
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+
+
+# VirtualService 中的 subset 制定了预定义的子集名称，子集的定义来自于目标规则配置：
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews   #服务名称
+  subsets:
+  - name: v1
+    labels:       #基于服务对应的pod列表中的子标签进行筛选出的子Pod列表
+      version: v1
+  - name: v2
+    labels:       #基于服务对应的pod列表中的子标签进行筛选出的子Pod列表
+      version: v2 
+
+
+
+#根据特定用户进行限定。例如只对来自 reviews 服务的 Pod 生效：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+      sourceLabels:   #sourceLabels 的值依赖于服务的实现。比如说在 Kubernetes 中，跟服务的 Pod 选择标签一致
+        app: reviews
+    #...
+
+#根据调用方的特定版本进行限定。例如下面的规则对前一个例子进行修改，reviews 服务的 v2 版本发出的请求才会生效：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+    - sourceLabels:
+        app: reviews
+        version: v2
+    #...
+
+#根据 HTTP Header 选择规则。下面的规则只会对包含了 end-user 头且值为 jason 的请求生效：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    #...
+
+#可以同时设置多个标准，在这个例子中，还包含了 AND 或 OR 的语义，这要根据具体嵌套情况进行判断。
+#如果多个标准嵌套在同一个 match 中，这些条件就是 AND 关系。例如下面的规则的限制条件要求的是同时符合下面两个条件：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+    - sourceLabels:
+        app: reviews
+        version: v2
+      headers:
+        end-user:
+          exact: jason
+    #...
+#如果这些标准存在于不同的 match 子句中，就会变成 OR 逻辑：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+    - sourceLabels:
+        app: reviews
+        version: v2
+    - headers:
+        end-user:
+          exact: jason
+    #...
+
+
+#每个路由规则都需要对一或多个有权重的后端进行甄别并调用合适的后端。每个后端都对应一个特定版本的目标服务，服务的版本是依靠标签来区分的。
+#如果一个服务版本包含多个注册实例，那么会根据为该服务定义的负载均衡策略进行路由，缺省策略是 round-robin。
+#例如下面的规则会把 25% 的 reviews 服务流量分配给 v2 标签；其余的 75% 流量分配给 v1：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 75
+    - destination:
+        host: reviews
+        subset: v2
+      weight: 25
+
+#缺省情况下，HTTP 请求的超时设置为 15 秒，可以使用路由规则来覆盖这个限制：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+    - ratings
+  http:
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+    timeout: 10s
+#还可以用路由规则来指定某些 http 请求的重试次数。下面的代码可以用来设置最大重试次数，或者在规定时间内一直重试，时间长度同样可以进行覆盖：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+    - ratings
+  http:
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+    retries:
+      attempts: 3     #尝试次数
+      perTryTimeout: 2s   #每次尝试超时
+
+#在目标为 ratings:v1 服务的流量中，对其中的 10% 注入 5 秒钟的延迟。
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        percent: 10 
+        fixedDelay: 5s
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+
+#在目标为 ratings:v1 服务的流量中，对其中的 10% 注入 HTTP 400 错误。
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      abort:
+        percent: 10
+        httpStatus: 400
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+
+#对从 reviews:v2 到 ratings:v1 的流量生效，会让所有的请求延迟 5 秒钟，接下来把其中的 10% 退出：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+    - sourceLabels:
+        app: reviews
+        version: v2
+    fault:
+      delay:
+        fixedDelay: 5s
+      abort:
+        percent: 10
+        httpStatus: 400
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+
+
+#当对某个服务的路由是完全基于权重的时候，他就可以在单一规则中完成。另一方面，如果有多重条件（例如来自特定用户的请求）用来进行路由，就会需要不止一条规则。
+#这样就出现了优先级问题，需要通过优先级来保证根据正确的顺序来执行规则。
+#所有对 reviews 服务发起的请求，如果 Header 包含 Foo=bar，就会被路由到 v2 实例，而其他请求则会发送给 v1 ：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        Foo:
+          exact: bar
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+
+#在请求被 VirtualService 路由之后，DestinationRule 配置的一系列策略就生效了。这些策略由服务属主编写，包含断路器、负载均衡以及 TLS 等的配置内容。
+#DestinationRule 还定义了对应目标主机的可路由 subset（例如有命名的版本）。VirtualService 在向特定服务版本发送请求时会用到这些子集。
+#下面是 reviews 服务的 DestinationRule 配置策略以及子集：
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM      #负载策略为随机
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN   #针对v2的负载策略为轮询
+  - name: v3
+    labels:
+      version: v3
+
+#应用基于权重的路由
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  ...
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 50      #将一定百分比的流量路由到一个或另一个服务
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 50
+      
+#断路器
+#可以用一系列的标准，例如连接数和请求数限制来定义简单的断路器。
+#例如下面的 DestinationRule 给 reviews 服务的 v1 版本设置了 100 连接的限制：
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 100
+#将策略提高一级，对所有Subsets生效：
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  trafficPolicy:      #全局
+    connectionPool:
+      tcp:
+        maxConnections: 100
+  subsets:
+  - name: v1
+    labels:
+      version: v1
