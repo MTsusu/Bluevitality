@@ -1,0 +1,92 @@
+#缺省情况下，Istio 服务网格内的 Pod，由于其 iptables 将所有外发流量都透明的转发给了 Sidecar，所以这些集群内的服务无法访问集群之外的 URL，而只能处理集群内部的目标。
+
+#通过定义 ServiceEntry 来调用外部服务；或者简单的对 Istio 进行配置，要求其直接放行对特定 IP 范围的访问。
+
+#创建一个 ServiceEntry 对象，放行对一个外部 HTTP 服务的访问：
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+  - httpbin.org       #主机域名
+  ports:
+  - number: 80        #端口
+    name: http
+    protocol: HTTP
+  resolution: DNS
+
+
+#创建一个 ServiceEntry 以及 VirtualService，允许访问外部 HTTPS 服务。
+#注意：包括 HTTPS 在内的 TLS 协议，在 ServiceEntry 之外，还需要创建 TLS VirtualService。
+
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google
+spec:
+  hosts:
+  - www.google.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: google
+spec:
+  hosts:
+  - www.google.com
+  tls:
+  - match:
+    - port: 443
+      sni_hosts:
+      - www.google.com
+    route:
+    - destination:
+        host: www.google.com
+        port:
+          number: 443
+      weight: 100
+
+#为外部服务设置路由规则：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+    - httpbin.org
+  http:
+  - timeout: 3s
+    route:
+      - destination:
+          host: httpbin.org
+        weight: 100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

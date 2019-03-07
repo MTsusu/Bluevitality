@@ -1,0 +1,71 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: httpbin-gateway
+spec:
+  selector:
+    istio: ingressgateway # 使用 Istio 的缺省 Gateway
+  servers:
+  - port:
+      number: 443       #
+      name: https       #端口名称
+      protocol: HTTPS   #协议类型
+    tls:
+      mode: SIMPLE
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt    #证书
+      privateKey: /etc/istio/ingressgateway-certs/tls.key           #私钥
+    hosts:
+    - "httpbin.example.com"     #提供服务的域名 ( HTTP中的Host字段 )
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin
+spec:
+  hosts:
+  - "httpbin.example.com"     #提供服务的域名 ( HTTP中的Host字段 )
+  gateways:
+  - httpbin-gateway           #指定Gateway
+  http:
+  - match:      #对HTTP头字段进行匹配
+    - uri:
+        prefix: /status
+    - uri:
+        prefix: /delay
+    route:
+    - destination:      #匹配后处理的目标信息
+        port:
+          number: 8000
+        host: httpbin     #目标Service?
+
+---
+
+#配置 Ingress gateway 的双向 TLS 支持:
+
+#创建一个 Kubernetes secret，用于存储 CA 证书，服务器会使用这一证书来对客户端进行校验。
+#用 kubectl 在 istio-system 命名空间中创建 Secret istio-ingressgateway-ca-certs。Istio gateway 会自动载入这个 Secret。
+#这个 secret 必须 以 istio-ingressgateway-ca-certs 为名并保存在命名空间 istio-system 之中，否则 Istio gateway 无法正确完成加载过程。
+
+#重新定义之前的 Gateway，把其中的 tls 一节的 mode 字段的值修改为 MUTUAL，并给 caCertificates 赋值：
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: httpbin-gateway
+spec:
+  selector:
+    istio: ingressgateway # 是用缺省的 Istio Gateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      caCertificates: /etc/istio/ingressgateway-ca-certs/ca-chain.cert.pem
+    hosts:
+    - "httpbin.example.com"
