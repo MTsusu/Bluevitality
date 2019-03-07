@@ -1,0 +1,43 @@
+#Ingress Gateway描述了在网格边缘操作的负载平衡器，用于接收传入的 HTTP/TCP 连接。
+#它配置暴露的端口，协议等，但与 Kubernetes Ingress Resources 不同，它不包括任何流量路由配置。
+#流入流量的流量路由使用 Istio 路由规则进行配置，与内部服务请求完全相同。
+
+#创建一个 Istio Gateway：
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: httpbin-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation ( 使用Istio的 Ingress Gateway ?  这是一个K8S的Server对象 )
+  servers:
+  - port:
+      number: 80        #提供服务的端口
+      name: http        #端口名称
+      protocol: HTTP    #协议类型
+    hosts:
+    - "httpbin.example.com"   #提供的服务域名 ( 用于对外提供服务主机网址 )
+
+---
+
+#为通过 Gateway 进入的流量配置路由：
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin
+spec:
+  hosts:
+  - "httpbin.example.com"     #提供的服务域名
+    gateways:
+  - httpbin-gateway
+    http:
+  - match:      #对HTTP头进行匹配
+    - uri:
+        prefix: /status
+    - uri:
+        prefix: /delay
+    route:
+    - destination:
+        port:
+          number: 8000    #将匹配的流量转发到目标服务httpbin的8000端口
+        host: httpbin     #虚拟服务配置 "httpbin"

@@ -1,0 +1,53 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  ...
+spec:
+  hosts:
+  - ratings
+    http:
+  - fault:
+      delay:
+        fixedDelay: 7s    #加入7秒延迟
+        percent: 100      #
+    match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  ...
+spec:
+  hosts:
+  - ratings
+    http:
+  - fault:
+      abort:
+        httpStatus: 500   #使用 HTTP Abort 进行故障注入
+        percent: 100
+    match:
+    - headers:            #仅限制用于用户 “jason” 的故障注入
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
